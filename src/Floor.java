@@ -1,8 +1,17 @@
 import processing.core.PApplet;
 
 public class Floor extends PApplet {
+    private final int canvasWidth, canvasHeight;
+
+    public Floor(int w, int h) {
+        this.canvasWidth = w;
+        this.canvasHeight = h;
+    }
+
+    // Must override settings() to set size before setup()
+    @Override
     public void settings() {
-        size(384, 216);
+        size(canvasWidth, canvasHeight);
     }
     public void draw() {
         background(0);

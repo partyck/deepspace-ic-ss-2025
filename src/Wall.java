@@ -1,9 +1,15 @@
 import processing.core.PApplet;
 
 public class Wall extends PApplet {
+    private final int canvasWidth, canvasHeight;
+
+    public Wall(int w, int h) {
+        this.canvasWidth = w;
+        this.canvasHeight = h;
+    }
 
     public void settings() {
-        size(384, 216);
+        size(canvasWidth, canvasHeight);
     }
 
     public void draw() {
