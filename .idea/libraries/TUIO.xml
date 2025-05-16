@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="TUIO">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Documents/Processing/libraries/TUIO/library/TUIO.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libraries/TUIO.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
