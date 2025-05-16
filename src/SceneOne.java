@@ -5,7 +5,7 @@ public class SceneOne extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
 
-    public SceneOne(PApplet p) {
+    public SceneOne(Performance p) {
         super(p);
         this.timeElapsed = 0;
         this.animationTime = 200;
