@@ -51,7 +51,7 @@ public class Performance extends PApplet {
                     nextScene();
                 }
                 else {
-                    currentScene.newString(line);
+                    currentScene.newCommand(line);
                 }
             }
         });

@@ -1,12 +1,11 @@
 import TUIO.*;
-import processing.core.PApplet;
 
 import java.util.ArrayList;
 
 public class SceneFloorTracker extends AbstractScene {
     private final TuioClient client;
 
-    public SceneFloorTracker(PApplet p) {
+    public SceneFloorTracker(Performance p) {
         super(p);
         this.client = new TuioClient();
         this.client.connect();
