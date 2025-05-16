@@ -1,5 +1,4 @@
 import TUIO.*;
-import processing.core.PApplet;
 
 import java.util.ArrayList;
 

@@ -1,5 +1,3 @@
-import processing.core.PApplet;
-
 public class Blackout extends AbstractScene {
 
     public Blackout(Performance p) {
