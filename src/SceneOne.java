@@ -1,17 +1,27 @@
+import processing.core.PApplet;
 import processing.core.PConstants;
 
 public class SceneOne extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
 
-    public SceneOne(Performance p) {
+    public SceneOne(PApplet p) {
         super(p);
         this.timeElapsed = 0;
         this.animationTime = 200;
     }
 
     @Override
-    public void draw() {
+    public void drawWall() {
+        display();
+    }
+
+    @Override
+    public void drawFloor() {
+        display();
+    }
+
+    private void display() {
         background(30);
         noStroke();
         fill(200);

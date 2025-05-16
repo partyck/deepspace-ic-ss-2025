@@ -6,7 +6,7 @@ public class SceneValerioMorning extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
 
-    public SceneValerioMorning(Performance p) {
+    public SceneValerioMorning(PApplet p) {
         super(p);
         color1 = color(239, 179, 83);
         color2 = color(41, 0, 142);
@@ -15,9 +15,20 @@ public class SceneValerioMorning extends AbstractScene {
     }
 
     @Override
-    public void draw() {
+    public void drawWall() {
         float centerX = this.width() * 0.5f;
-        float centerY = this.width() * 0.5f;
+        float centerY = this.height();
+        display(centerX, centerY);
+    }
+
+    @Override
+    public void drawFloor() {
+        float centerX = this.width() * 0.5f;
+        float centerY = 0;
+        display(centerX, centerY);
+    }
+
+    public void display(float centerX, float centerY) {
         float circleWidth = this.width() * 0.75f;
         int segments = 100;
         float distance = PConstants.TWO_PI / segments;

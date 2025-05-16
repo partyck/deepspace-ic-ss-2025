@@ -4,42 +4,41 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class Performance extends PApplet {
-    private final int canvasWidth, canvasHeight;
-    private final LinkedList<AbstractScene> scenes;
-    private AbstractScene currentScene;
+public class Performance {
+    private final Wall wall;
+    private final Floor floor;
+    private final LinkedList<AbstractScene[]> scenes;
+    private AbstractScene[] currentScene;
 
-    public Performance(int width, int height) {
+    public Performance() {
         listenConsole();
-        canvasWidth = width;
-        canvasHeight = height;
+        wall = new Wall();
+        floor = new Floor();
         scenes = new LinkedList<>();
     }
 
     public void settings() {
-        size(canvasWidth, canvasHeight);
-    }
+        String[] argsWall = {"Wall"};
+        PApplet.runSketch(argsWall, wall);
 
-    @Override
-    public void setup() {
+        String[] argsFloor = {"Wall"};
+        PApplet.runSketch(argsFloor, floor);
+
         // Add all the scenes in order
-        scenes.add(new SceneOne(this));
-        scenes.add(new SceneValerioMorning(this));
-        scenes.add(new SceneFloorTracker(this));
+        scenes.add(new AbstractScene[]{new SceneOne(wall), new SceneOne(floor)});
+        scenes.add(new AbstractScene[]{new SceneValerioMorning(wall), new SceneValerioMorning(floor)});
+        scenes.add(new AbstractScene[]{new SceneFloorTracker(wall), new SceneFloorTracker(floor)});
         nextScene();
-    }
-
-    @Override
-    public void draw() {
-        currentScene.draw();
     }
 
     public void nextScene() {
         currentScene = scenes.poll();
         if (currentScene == null) {
-            currentScene = new Blackout(this);
+            currentScene = new AbstractScene[]{new Blackout(wall), new Blackout(floor)};
         }
-        println("Next scene: " + currentScene.getClass().getSimpleName());
+        wall.setScene(currentScene[0]);
+        floor.setScene(currentScene[1]);
+        System.out.println("Next scene: " + currentScene[0].getClass().getSimpleName());
     }
 
     private void listenConsole() {
@@ -51,7 +50,8 @@ public class Performance extends PApplet {
                     nextScene();
                 }
                 else {
-                    currentScene.newCommand(line);
+                    currentScene[0].newCommand(line);
+                    currentScene[1].newCommand(line);
                 }
             }
         });

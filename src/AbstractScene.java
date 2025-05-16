@@ -3,13 +3,25 @@ import processing.core.PFont;
 import processing.core.PImage;
 
 public abstract class AbstractScene {
-    protected final Performance p;
+    protected final PApplet p;
+    protected boolean isWall;
 
-    public AbstractScene(Performance p) {
+    public AbstractScene(PApplet p) {
         this.p = p;
+        isWall = p instanceof Wall;
     }
 
-    public abstract void draw();
+    public abstract void drawFloor();
+    public abstract void drawWall();
+
+    public void draw() {
+        if (isWall) {
+            drawWall();
+        }
+        else {
+            drawFloor();
+        }
+    }
 
     public void newCommand(String command) {
         if (!command.isBlank()) System.out.println("new command! " + command);

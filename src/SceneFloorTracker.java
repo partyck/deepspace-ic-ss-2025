@@ -1,21 +1,30 @@
 import TUIO.*;
+import processing.core.PApplet;
 
 import java.util.ArrayList;
 
 public class SceneFloorTracker extends AbstractScene {
-    private final TuioClient client;
+    private final FloorTracking tracking;
 
-    public SceneFloorTracker(Performance p) {
+    public SceneFloorTracker(PApplet p) {
         super(p);
-        this.client = new TuioClient();
-        this.client.connect();
+        this.tracking = FloorTracking.getInstance();
     }
 
     @Override
-    public void draw() {
+    public void drawWall() {
+        background(0);
+    }
+
+    @Override
+    public void drawFloor() {
+        display();
+    }
+
+    private void display() {
         background(0);
 
-        ArrayList<TuioCursor> tuioCursorList = client.getTuioCursorList();
+        ArrayList<TuioCursor> tuioCursorList = tracking.getCursorList();
         for (TuioCursor tcur : tuioCursorList) {
             ArrayList<TuioPoint> pointList = tcur.getPath();
 
