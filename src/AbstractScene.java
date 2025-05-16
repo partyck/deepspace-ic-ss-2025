@@ -25,7 +25,7 @@ public abstract class AbstractScene {
     public void fill(float r, float g, float b) { p.fill(r, g, b); }
     public int height() { return p.height; }
     public float lerp(float a, float b, float t) { return PApplet.lerp(a, b, t); }
-    public int lerpColor(int c1, int c2, float atm) {return p.lerpColor(c1, c2, atm); };
+    public int lerpColor(int c1, int c2, float atm) {return p.lerpColor(c1, c2, atm); }
     public void line(float x1, float y1, float x2, float y2) {p.line(x1, y1, x2, y2); }
     public void noStroke() { p.noStroke(); }
     public void popMatrix() { p.popMatrix(); }

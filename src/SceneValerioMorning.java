@@ -2,8 +2,8 @@ import processing.core.PApplet;
 import processing.core.*;
 
 public class SceneValerioMorning extends AbstractScene {
-    private int color1;
-    private int color2;
+    private final int color1;
+    private final int color2;
     private int timeElapsed;
     private final int animationTime;
 
