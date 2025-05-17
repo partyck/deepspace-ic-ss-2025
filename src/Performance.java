@@ -23,9 +23,11 @@ public class Performance extends PApplet {
     @Override
     public void setup() {
         // Add all the scenes in order
-        scenes.add(new SceneOne(this));
-        scenes.add(new SceneValerioMorning(this));
-        scenes.add(new SceneFloorTracker(this));
+//        scenes.add(new SceneOne(this));
+//        scenes.add(new SceneValerioMorning(this));
+//        scenes.add(new SceneFloorTracker(this));
+        scenes.add(new hanifTest(this));
+//        scenes.add(new hanifTest2(this));
         nextScene();
     }
 

@@ -11,21 +11,21 @@ public class Main {
         String[] argsPerformance = {"Performance"};
         Performance performance = new Performance(deepSpaceWidth, deepSpaceHeight);
         PApplet.runSketch(argsPerformance, performance);
-
-        String[] argsF = {"Floor"};
-        Floor floor = new Floor(canvasWidth, canvasHeight);
-        PApplet.runSketch(argsF, floor);
-
-        String[] argsW = {"Wall"};
-        Wall wall = new Wall(canvasWidth, canvasHeight);
-        PApplet.runSketch(argsW, wall);
-
-        String[] argsP = {"Preview"};
-        ScenePreview preview = new ScenePreview(canvasWidth, canvasHeight);
-        PApplet.runSketch(argsP, preview);
-
-        String[] argsT = {"tuio"};
-        TuioDemo tuioDemo = new TuioDemo();
-        PApplet.runSketch(argsT, tuioDemo);
+//
+//        String[] argsF = {"Floor"};
+//        Floor floor = new Floor(canvasWidth, canvasHeight);
+//        PApplet.runSketch(argsF, floor);
+//
+//        String[] argsW = {"Wall"};
+//        Wall wall = new Wall(canvasWidth, canvasHeight);
+//        PApplet.runSketch(argsW, wall);
+//
+//        String[] argsP = {"Preview"};
+//        ScenePreview preview = new ScenePreview(canvasWidth, canvasHeight);
+//        PApplet.runSketch(argsP, preview);
+//
+//        String[] argsT = {"tuio"};
+//        TuioDemo tuioDemo = new TuioDemo();
+//        PApplet.runSketch(argsT, tuioDemo);
     }
 }
