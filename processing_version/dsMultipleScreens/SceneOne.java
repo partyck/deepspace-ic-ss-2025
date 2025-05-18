@@ -7,20 +7,17 @@ public class SceneOne extends AbstractScene {
 
     public SceneOne(PApplet p) {
         super(p);
-        System.out.println("SceneOne C");
         this.timeElapsed = 0;
         this.animationTime = 200;
     }
 
     @Override
     public void drawWall() {
-        System.out.println("SceneOne drawWall");
         display();
     }
 
     @Override
     public void drawFloor() {
-        System.out.println("SceneOne drawFloor");
         display();
     }
 

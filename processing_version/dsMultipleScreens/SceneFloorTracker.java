@@ -1,13 +1,14 @@
 import processing.core.PApplet;
+import TUIO.*;
 
 import java.util.ArrayList;
 
 public class SceneFloorTracker extends AbstractScene {
-    private final FloorTracking tracking;
+    TuioClient tracker;
 
-    public SceneFloorTracker(PApplet p) {
+    public SceneFloorTracker(PApplet p, TuioClient tracker) {
         super(p);
-        this.tracking = FloorTracking.getInstance();
+        this.tracker  = tracker;
     }
 
     @Override
@@ -23,13 +24,14 @@ public class SceneFloorTracker extends AbstractScene {
     private void display() {
         background(0);
 
-        ArrayList<TuioCursor> tuioCursorList = tracking.getCursorList();
+        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
         for (TuioCursor tcur : tuioCursorList) {
             ArrayList<TuioPoint> pointList = tcur.getPath();
+            System.out.println(tcur.getSessionID());
 
             if (!pointList.isEmpty()) {
                 stroke(color(0, 0, 255));
-                TuioPoint startPoint = pointList.getFirst();
+                TuioPoint startPoint = pointList.get(0);
                 for (TuioPoint end_point : pointList) {
                     line(startPoint.getScreenX(this.width()), startPoint.getScreenY(this.height()), end_point.getScreenX(this.width()), end_point.getScreenY(this.height()));
                     startPoint = end_point;
