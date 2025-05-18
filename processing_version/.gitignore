@@ -2,3 +2,5 @@
 /deepspace/windows-amd64
 /deepspace/*.zip
 /dsMultipleScreens/libraries/video
+/dsMultipleScreens/libraries/oscP5
+/dsMultipleScreens/libraries/peasycam
