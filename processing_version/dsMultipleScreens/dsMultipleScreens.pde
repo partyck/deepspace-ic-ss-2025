@@ -1,6 +1,7 @@
 import processing.core.PApplet;
 import processing.video.*;
 import TUIO.*;
+import oscP5.*;
 
 import java.util.LinkedList;
 import java.util.Objects;
@@ -8,6 +9,8 @@ import java.util.Scanner;
 
 TuioClient tracker;
 Capture cam;
+OscP5 oscP5;
+
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
 AbstractScene currentScene = null;                                                                          
@@ -26,6 +29,10 @@ public void settings() {
 }
 
 void setup() {
+    // setup osc client
+    oscP5 = new OscP5(this, 10000);
+
+    // setup camera capture
     String[] cameras = Capture.list();
     if (cameras.length == 0) {
         println("There are no cameras available for capture.");
@@ -39,6 +46,8 @@ void setup() {
     }
 
     // Add all the scenes in order
+    scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
+    scenes.add(new AbstractScene[]{new Scene01Intro(this), new Scene01Intro(floor)});
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     scenes.add(new AbstractScene[]{new Scene00_Curtain(this), new Scene00_Curtain(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
@@ -48,12 +57,25 @@ void setup() {
     scenes.add(new AbstractScene[]{new SceneCamera(this, cam), new SceneCamera(floor, cam)});
     scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
+    scenes.add(new AbstractScene[]{new HanifTest2(this), new HanifTest2(floor)});
     nextScene();
 }
 
 public void draw() {
     currentScene.draw();
 }
+
+/* incoming osc message are forwarded to the oscEvent method. */
+void oscEvent(OscMessage oscMessage) {
+  println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
+  if (oscMessage.addrPattern().equals("/nextScene")) {
+    nextScene();
+  }
+  else {
+    currentScene.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+  }
+}
+
 
 void mousePressed() {
   nextScene();
