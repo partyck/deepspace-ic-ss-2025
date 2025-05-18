@@ -57,7 +57,7 @@ public class Scene01_Intro extends AbstractScene {
 
             // carve out just this layer’s slice for whichever window we’re in
             float x = centerX - halfW + xM;
-            float y = centerY - totalH * 0.5f + yM;
+            float y = centerY - totalH * 0.5f + yM - 50;
             float w = rectW - 2 * xM;
             float h = totalH - 2 * yM;
 
