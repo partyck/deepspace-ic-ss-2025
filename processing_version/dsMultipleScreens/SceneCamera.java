@@ -19,7 +19,6 @@ public class SceneCamera extends AbstractScene {
         background(30);
         if (cam.available() == true) {
             cam.read();
-            // System.out.println("scene cam drawWall");
         }
         background(0);
         PImage frame = cam.get();
@@ -36,7 +35,7 @@ public class SceneCamera extends AbstractScene {
 
     @Override
     public void drawFloor() {
-        background(30);
+        background(0);
     }
 
 }

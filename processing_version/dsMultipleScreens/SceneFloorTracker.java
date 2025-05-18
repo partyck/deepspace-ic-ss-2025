@@ -27,7 +27,7 @@ public class SceneFloorTracker extends AbstractScene {
         ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
         for (TuioCursor tcur : tuioCursorList) {
             ArrayList<TuioPoint> pointList = tcur.getPath();
-            System.out.println(tcur.getSessionID());
+            // System.out.println(tcur.getSessionID());
 
             if (!pointList.isEmpty()) {
                 stroke(color(0, 0, 255));

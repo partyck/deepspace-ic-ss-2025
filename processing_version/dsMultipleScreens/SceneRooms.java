@@ -27,7 +27,7 @@ public class SceneRooms extends AbstractScene {
             room.show();
             if (tuioCursorList.size() >= index + 1) {
                 TuioCursor cursor = tuioCursorList.get(index);
-                System.out.println(cursor.getCursorID());
+                // System.out.println(cursor.getCursorID());
                 room.update(cursor.getScreenX(this.width()), cursor.getScreenY(Constants.FLOOR_HEIGHT));
             }
         }
@@ -42,7 +42,7 @@ public class SceneRooms extends AbstractScene {
             room.show();
             if (tuioCursorList.size() >= index + 1) {
                 TuioCursor cursor = tuioCursorList.get(index);
-                System.out.println(cursor.getCursorID());
+                // System.out.println(cursor.getCursorID());
                 room.update(cursor.getScreenX(this.width()), cursor.getScreenY(Constants.FLOOR_HEIGHT));
             }
         }
