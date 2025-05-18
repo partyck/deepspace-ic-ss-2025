@@ -1,4 +1,5 @@
 import processing.core.PApplet;
+import processing.video.*;
 import TUIO.*;
 
 import java.util.LinkedList;
@@ -6,6 +7,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 TuioClient tracker;
+Capture cam;
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
 AbstractScene currentScene = null;
@@ -21,17 +23,31 @@ public void settings() {
 
     tracker = new TuioClient();
     tracker.connect();
+}
+
+void setup() {
+    String[] cameras = Capture.list();
+    if (cameras.length == 0) {
+        println("There are no cameras available for capture.");
+    } else {
+        println("Available cameras:");
+        for (int i = 0; i < cameras.length; i++) {
+            println(cameras[i]);
+        }
+        cam = new Capture(this, cameras[0]);
+        cam.start();
+    }
 
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     scenes.add(new AbstractScene[]{new SceneValerioMorning(this), new SceneValerioMorning(floor)});
+    scenes.add(new AbstractScene[]{new SceneCamera(this, cam), new SceneCamera(floor, cam)});
     scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
     nextScene();
 }
 
 public void draw() {
-    // System.out.println("Main draw : " + currentScene.getClass().getSimpleName());
     currentScene.draw();
 }
 
