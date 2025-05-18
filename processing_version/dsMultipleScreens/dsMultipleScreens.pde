@@ -10,7 +10,7 @@ TuioClient tracker;
 Capture cam;
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
-AbstractScene currentScene = null;
+AbstractScene currentScene = null;                                                                          
 
 
 public void settings() {
@@ -44,6 +44,7 @@ void setup() {
     scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro_v1(this), new Scene01_Intro_v1(floor)});
     scenes.add(new AbstractScene[]{new SceneValerioMorning(this), new SceneValerioMorning(floor)});
+    scenes.add(new AbstractScene[]{new Scene07_DifferentSpeeds(this), new Scene07_DifferentSpeeds(floor)});
     scenes.add(new AbstractScene[]{new SceneCamera(this, cam), new SceneCamera(floor, cam)});
     scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
