@@ -88,6 +88,7 @@ public abstract class AbstractScene {
     public int width() { return p.width; }
     public int height() { return p.height; }
     public void frameRate(float fps) { p.frameRate(fps); }
+    public void translate(int x, int y) { p.translate(x, y); }
 
     // ---- Utility ----
     public float lerp(float a, float b, float t) { return PApplet.lerp(a, b, t); }
