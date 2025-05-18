@@ -24,6 +24,8 @@ public void settings() {
 
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
+    scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
+    scenes.add(new AbstractScene[]{new Scene01_Intro_v1(this), new Scene01_Intro_v1(floor)});
     scenes.add(new AbstractScene[]{new SceneValerioMorning(this), new SceneValerioMorning(floor)});
     scenes.add(new AbstractScene[]{new SceneFloorTracker(this, client), new SceneFloorTracker(floor, client)});
     nextScene();
