@@ -46,7 +46,7 @@ public class SceneValerioMorning extends AbstractScene {
         }
 
         fill(0);
-        circle(centerX, centerY, this.width() * 0.5f);
+        circle(centerX, centerY, this.width() * 0.3f);
         arc(centerX, centerY, circleWidth + 10, circleWidth + 10, offSet, offSet + PConstants.TWO_PI * 0.1f);
 
         this.update();
