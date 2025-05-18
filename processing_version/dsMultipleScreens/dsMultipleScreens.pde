@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Scanner;
 
-TuioClient client;
+TuioClient tracker;
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
 AbstractScene currentScene = null;
@@ -19,13 +19,14 @@ public void settings() {
     PApplet.runSketch(argsFloor, floor);
     scenes = new LinkedList<>();
 
-    client = new TuioClient();
-    client.connect();
+    tracker = new TuioClient();
+    tracker.connect();
 
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     scenes.add(new AbstractScene[]{new SceneValerioMorning(this), new SceneValerioMorning(floor)});
-    scenes.add(new AbstractScene[]{new SceneFloorTracker(this, client), new SceneFloorTracker(floor, client)});
+    scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
+    scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
     nextScene();
 }
 
