@@ -48,7 +48,7 @@ void setup() {
 
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
-    scenes.add(new AbstractScene[]{new Scene01Intro(this), new Scene01Intro(floor)});
+    scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene00_Curtain(this), new Scene00_Curtain(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro_v1(this), new Scene01_Intro_v1(floor)});
