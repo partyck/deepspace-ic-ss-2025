@@ -79,7 +79,7 @@ public abstract class AbstractScene {
     public int millis() { return p.millis(); }
 
     // ---- Math and vectors ----
-    public int floor(float n) { return p.floor(n); }
+    public int floor(float n) { return PApplet.floor(n); }
     public float random(float high) { return p.random(high); }
     public float random(float low, float high) { return p.random(low, high); }
     public float dist(float x1, float y1, float x2, float y2) { return PApplet.dist(x1, y1, x2, y2); }
