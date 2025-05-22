@@ -1,4 +1,5 @@
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PFont;
 import processing.core.PImage;
 
@@ -71,6 +72,8 @@ public abstract class AbstractScene {
     public void image(PImage img, float x, float y) { p.image(img, x, y); }
     public void image(PImage img, float x, float y, float w, float h) {p.image(img, x, y, w, h);}
     public void set(int x, int y, PImage img) { p.set(x, y, img); }
+    public PGraphics createGraphics(int x, int y) { return p.createGraphics(x, y); }
+
 
     // ---- Input and time ----
     public float mouseX() { return p.mouseX; }
@@ -79,7 +82,7 @@ public abstract class AbstractScene {
     public int millis() { return p.millis(); }
 
     // ---- Math and vectors ----
-    public int floor(float n) { return p.floor(n); }
+    public int floor(float n) { return PApplet.floor(n); }
     public float random(float high) { return p.random(high); }
     public float random(float low, float high) { return p.random(low, high); }
     public float dist(float x1, float y1, float x2, float y2) { return PApplet.dist(x1, y1, x2, y2); }

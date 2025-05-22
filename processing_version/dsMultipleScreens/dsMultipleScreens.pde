@@ -13,7 +13,8 @@ OscP5 oscP5;
 
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
-AbstractScene currentScene = null;                                                                          
+AbstractScene currentSceneWall = null;
+AbstractScene currentSceneFloor = null;
 
 
 public void settings() {
@@ -47,11 +48,11 @@ void setup() {
 
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
-    scenes.add(new AbstractScene[]{new Scene01Intro(this), new Scene01Intro(floor)});
+    scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene00_Curtain(this), new Scene00_Curtain(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro_v1(this), new Scene01_Intro_v1(floor)});
-    scenes.add(new AbstractScene[]{new SceneValerioMorning(this), new SceneValerioMorning(floor)});
+    scenes.add(new AbstractScene[]{new Scene02ValerioMorning(this), new Scene02ValerioMorning(floor)});
     scenes.add(new AbstractScene[]{new Scene05_Sophie(this), new Scene05_Sophie(floor)});
     scenes.add(new AbstractScene[]{new Scene07_DifferentSpeeds(this), new Scene07_DifferentSpeeds(floor)});
     scenes.add(new AbstractScene[]{new SceneCamera(this, cam), new SceneCamera(floor, cam)});
@@ -63,23 +64,24 @@ void setup() {
 }
 
 public void draw() {
-    currentScene.draw();
+    currentSceneWall.draw();
 }
 
 /* incoming osc message are forwarded to the oscEvent method. */
 void oscEvent(OscMessage oscMessage) {
-  println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
-  if (oscMessage.addrPattern().equals("/nextScene")) {
-    nextScene();
-  }
-  else {
-    currentScene.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
-  }
+    println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
+    if (oscMessage.addrPattern().equals("/nextScene")) {
+        nextScene();
+    }
+    else {
+        currentSceneWall.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+        currentSceneFloor.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+    }
 }
 
 
 void mousePressed() {
-  nextScene();
+    nextScene();
 }
 
 void nextScene() {
@@ -87,7 +89,8 @@ void nextScene() {
     if (currentScenes == null) {
         currentScenes = new AbstractScene[]{new Blackout(this), new Blackout(floor)};
     }
-    currentScene = currentScenes[0];
+    currentSceneWall = currentScenes[0];
+    currentSceneFloor = currentScenes[1];
     floor.setScene(currentScenes[1]);
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
 }

@@ -1,17 +1,19 @@
 import processing.core.*;
 
-public class SceneValerioMorning extends AbstractScene {
+public class Scene02ValerioMorning extends AbstractScene {
     private final int color1;
     private final int color2;
     private int timeElapsed;
-    private final int animationTime;
+    private int speed;
+    private int animationTime;
 
-    public SceneValerioMorning(PApplet p) {
+    public Scene02ValerioMorning(PApplet p) {
         super(p);
         color1 = color(239, 179, 83);
         color2 = color(41, 0, 142);
         timeElapsed = 0;
-        animationTime = 10000;
+        speed = 10;
+        animationTime = 100000;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class SceneValerioMorning extends AbstractScene {
 
         fill(0);
         circle(centerX, centerY, this.width() * 0.3f);
-        arc(centerX, centerY, circleWidth + 10, circleWidth + 10, offSet, offSet + PConstants.TWO_PI * 0.1f);
+        arc(centerX, centerY, circleWidth + 10, circleWidth + 10, offSet, offSet + PConstants.TWO_PI * 0.05f);
 
         this.update();
     }
@@ -57,7 +59,22 @@ public class SceneValerioMorning extends AbstractScene {
     }
 
     private void update() {
-        this.timeElapsed++;
+        timeElapsed += speed;
         if (this.timeElapsed >= this.animationTime) this.timeElapsed = 0;
     }
+
+    @Override
+    public void oscEvent(String path, float value) {
+        switch(path) {
+            case "/Valerio/fader9":
+                speed = floor(map(value, 0, 1, 1, 100));
+                System.out.println("    speed: "+speed);
+                break;
+            case "/Valerio/fader10":
+              
+            default:
+                // code block
+        }
+    }
+
 }
