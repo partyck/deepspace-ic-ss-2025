@@ -9,7 +9,6 @@ public class SceneCamera extends AbstractScene {
     private final int cropTop = 200;
     private final int cropBottom = 200;
     private PGraphics buffer, maskedBuffer, maskImage;
-    private int circleDiameter;
     private int blurAmount = 6;
     private int aphaTint = 20;
 
@@ -19,22 +18,22 @@ public class SceneCamera extends AbstractScene {
         p.imageMode(PConstants.CENTER);
         PImage frame = cam.get();
 
-        buffer = createGraphics(frame.height, frame.height);
+        buffer = createGraphics(frame.width, frame.height);
         buffer.beginDraw();
         buffer.background(0);
         buffer.endDraw();
 
         // Masked output buffer
         maskedBuffer = createGraphics(width(), height());
+        maskedBuffer.imageMode(PConstants.CENTER);
 
         // Create circular mask
-        circleDiameter = (int) (width() * 0.4);
         maskImage = createGraphics(width(), height());
         maskImage.beginDraw();
         maskImage.background(0);
         maskImage.noStroke();
         maskImage.fill(255);
-        maskImage.circle(width()/2, height()/2, circleDiameter);
+        maskImage.circle(width()/2, height()/2, height());
         maskImage.endDraw();
     }
 
@@ -61,14 +60,15 @@ public class SceneCamera extends AbstractScene {
 
         // Apply circular mask
         maskedBuffer.beginDraw();
-        maskedBuffer.imageMode(PConstants.CENTER);
-        maskedBuffer.image(buffer, width() / 2, height() / 2);
+        maskedBuffer.image(buffer, width() / 2, height() / 2, width(), width() * aspectRatioB);
         maskedBuffer.endDraw();
         maskedBuffer.mask(maskImage);
 
         float aspectRatio = (float) maskedBuffer.height / (float) maskedBuffer.width;
 
-        image(maskedBuffer, width() / 2, height() / 2, width(), width() * aspectRatio);
+        image(maskedBuffer, width() * 0.5f, height() * 0.7f, width() * 0.5f, width() * 0.5f * aspectRatio);
+        // image(maskedBuffer, width() * 0.4f, height() * 0.7f, width() * 0.4f, width() * 0.4f * aspectRatio);
+        // image(maskedBuffer, width() * 0.6f, height() * 0.7f, width() * 0.4f, width() * 0.4f * aspectRatio);
     }
 
     @Override

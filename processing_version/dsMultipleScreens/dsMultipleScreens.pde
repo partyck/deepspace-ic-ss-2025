@@ -69,19 +69,19 @@ public void draw() {
 
 /* incoming osc message are forwarded to the oscEvent method. */
 void oscEvent(OscMessage oscMessage) {
-  println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
-  if (oscMessage.addrPattern().equals("/nextScene")) {
-    nextScene();
-  }
-  else {
-    currentSceneWall.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
-    currentSceneFloor.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
-  }
+    println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
+    if (oscMessage.addrPattern().equals("/nextScene")) {
+        nextScene();
+    }
+    else {
+        currentSceneWall.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+        currentSceneFloor.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+    }
 }
 
 
 void mousePressed() {
-  nextScene();
+    nextScene();
 }
 
 void nextScene() {
