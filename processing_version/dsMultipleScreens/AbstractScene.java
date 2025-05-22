@@ -1,4 +1,5 @@
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PFont;
 import processing.core.PImage;
 
@@ -71,6 +72,8 @@ public abstract class AbstractScene {
     public void image(PImage img, float x, float y) { p.image(img, x, y); }
     public void image(PImage img, float x, float y, float w, float h) {p.image(img, x, y, w, h);}
     public void set(int x, int y, PImage img) { p.set(x, y, img); }
+    public PGraphics createGraphics(int x, int y) { return p.createGraphics(x, y); }
+
 
     // ---- Input and time ----
     public float mouseX() { return p.mouseX; }
