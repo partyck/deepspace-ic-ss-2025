@@ -68,7 +68,7 @@ public class Scene02ValerioMorning extends AbstractScene {
         switch(path) {
             case "/Valerio/fader9":
                 speed = floor(map(value, 0, 1, 1, 100));
-                System.out.println("speed: "+speed);
+                System.out.println("    speed: "+speed);
                 break;
             case "/Valerio/fader10":
               
