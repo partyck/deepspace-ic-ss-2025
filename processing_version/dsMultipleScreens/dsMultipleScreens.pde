@@ -18,7 +18,12 @@ AbstractScene currentSceneFloor = null;
 
 
 public void settings() {
-    size(Constants.WIDTH, Constants.WALL_HEIGHT);
+    if (Constants.DEV) {
+        size(Constants.WIDTH, Constants.WALL_HEIGHT);
+    }
+    else {
+        fullScreen(1);
+    }
     
     floor = new Floor();
     String[] argsFloor = {"floor"};
@@ -30,6 +35,9 @@ public void settings() {
 }
 
 void setup() {
+    if (Constants.DEV) {
+        windowMove(0, 50);
+    }
     // setup osc client
     oscP5 = new OscP5(this, 10000);
 

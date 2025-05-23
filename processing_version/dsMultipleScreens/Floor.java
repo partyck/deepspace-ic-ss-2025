@@ -8,10 +8,18 @@ public class Floor extends PApplet {
     }
 
     public void settings() {
-        size(Constants.WIDTH, Constants.FLOOR_HEIGHT);
+        if (Constants.DEV) {
+            size(Constants.WIDTH, Constants.FLOOR_HEIGHT);
+        }
+        else {
+            fullScreen(2);
+        }
     }
 
     public void setup() {
+        if (Constants.DEV) {
+            windowMove(0, Constants.WALL_HEIGHT + 50);
+        }
     }
 
     @Override

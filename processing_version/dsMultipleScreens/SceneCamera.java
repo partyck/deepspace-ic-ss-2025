@@ -9,7 +9,6 @@ public class SceneCamera extends AbstractScene {
     private final int cropTop = 200;
     private final int cropBottom = 200;
     private PGraphics buffer, maskedBuffer, maskImage;
-    private int blurAmount = 6;
     private int aphaTint = 20;
 
     public SceneCamera(PApplet p, Capture cam) {
@@ -53,7 +52,6 @@ public class SceneCamera extends AbstractScene {
         buffer.beginDraw();
         buffer.tint(255, aphaTint);
         buffer.image(frame, offsetX, offsetY);
-        buffer.filter(PConstants.BLUR, blurAmount);
         buffer.endDraw();
 
         float aspectRatioB = (float) buffer.height / (float) buffer.width;
@@ -79,10 +77,6 @@ public class SceneCamera extends AbstractScene {
     @Override
     public void oscEvent(String path, float value) {
         switch(path) {
-            case "/cam/blur":
-                blurAmount = floor(map(value, 0, 1, 0, 10));
-                System.out.println("    blurAmount: "+blurAmount);
-                break;
             case "/cam/fader1":
                 aphaTint = floor(map(value, 0, 1, 0, 50));
                 System.out.println("    aphaTint: "+aphaTint);

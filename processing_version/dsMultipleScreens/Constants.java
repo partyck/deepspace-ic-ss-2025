@@ -1,4 +1,5 @@
 public class Constants {
+    public static final boolean DEV = true;
     public static final float SCALE = 0.2f;
     public static final int WIDTH = (int) (3840 * SCALE);
     public static final int WALL_HEIGHT = (int) (2160 * SCALE);
