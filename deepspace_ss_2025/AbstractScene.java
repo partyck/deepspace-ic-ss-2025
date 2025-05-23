@@ -25,10 +25,6 @@ public abstract class AbstractScene {
         }
     }
 
-    public void newCommand(String command) {
-        if (!command.isBlank()) System.out.println("new command! " + command);
-    }
-
     /**
      * Here we have all  processing methods we need
      * Feel free to all one if you need it

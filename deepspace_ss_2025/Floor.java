@@ -12,7 +12,7 @@ public class Floor extends PApplet {
             size(Constants.WIDTH, Constants.FLOOR_HEIGHT);
         }
         else {
-            fullScreen(2);
+            fullScreen(1);
         }
     }
 
