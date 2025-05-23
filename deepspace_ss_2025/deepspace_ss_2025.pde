@@ -22,7 +22,7 @@ public void settings() {
         size(Constants.WIDTH, Constants.WALL_HEIGHT);
     }
     else {
-        fullScreen(1);
+        fullScreen(2);
     }
     
     floor = new Floor();
@@ -37,22 +37,15 @@ public void settings() {
 void setup() {
     if (Constants.DEV) {
         windowMove(0, 50);
+        surface.setLocation(0, 50);
+        surface.setResizable(true);
     }
+    surface.setTitle("Wall");
+    
     // setup osc client
     oscP5 = new OscP5(this, 10000);
 
-    // setup camera capture
-    String[] cameras = Capture.list();
-    if (cameras.length == 0) {
-        println("There are no cameras available for capture.");
-    } else {
-        println("Available cameras:");
-        for (int i = 0; i < cameras.length; i++) {
-            println(cameras[i]);
-        }
-        cam = new Capture(this, cameras[0]);
-        cam.start();
-    }
+    loadCamera();
 
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
@@ -75,7 +68,7 @@ public void draw() {
     currentSceneWall.draw();
 }
 
-/* incoming osc message are forwarded to the oscEvent method. */
+// incoming osc message are forwarded to the oscEvent method.
 void oscEvent(OscMessage oscMessage) {
     println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
     if (oscMessage.addrPattern().equals("/nextScene")) {
@@ -101,4 +94,21 @@ void nextScene() {
     currentSceneFloor = currentScenes[1];
     floor.setScene(currentScenes[1]);
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
+}
+
+void loadCamera() {
+    String[] cameras = Capture.list();
+    if (cameras.length == 0) {
+        println("There are no cameras available for capture.");
+    } else {
+        println("Available cameras:");
+        String cameraName = cameras[0];
+        for (int i = 0; i < cameras.length; i++) {
+            println(cameras[i]);
+            cameraName = cameras[i].equals(Constants.CAMERA_NAME) ? Constants.CAMERA_NAME : cameraName;
+        }
+        println("Camera in use: " + cameraName);
+        cam = new Capture(this, Constants.CAMERA_WIDTH, Constants.CAMERA_HEIGHT, cameraName, Constants.CAMERA_FPS);
+        cam.start();
+    }
 }
