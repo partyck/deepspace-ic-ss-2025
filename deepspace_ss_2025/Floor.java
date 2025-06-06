@@ -18,7 +18,7 @@ public class Floor extends PApplet {
 
     public void setup() {
         if (Constants.DEV) {
-            windowMove(0, Constants.WALL_HEIGHT + 50);
+            windowMove(0, Constants.WALL_HEIGHT + 75);
         }
     }
 

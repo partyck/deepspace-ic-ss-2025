@@ -92,7 +92,9 @@ void nextScene() {
     }
     currentSceneWall = currentScenes[0];
     currentSceneFloor = currentScenes[1];
-    floor.setScene(currentScenes[1]);
+    currentSceneWall.init();
+    currentSceneFloor.init();
+    floor.setScene(currentSceneFloor);
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
 }
 
