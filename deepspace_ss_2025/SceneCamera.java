@@ -22,7 +22,7 @@ public class SceneCamera extends AbstractScene {
     private ArrayList<Dancer> dancers;
     private ArrayList<Dancer> hull;
 
-    private Grid grid;
+    private NoiseGrid grid;
     
     private static float timeOffset = 0f;
     private static float speed = 0.001f;
@@ -30,15 +30,18 @@ public class SceneCamera extends AbstractScene {
     public SceneCamera(PApplet p, Capture cam, TuioClient tracker) {
         super(p);
         this.tracker  = tracker;
-        grid =  new Grid();
+        grid = NoiseGrid.getInstance();
         dancers = new ArrayList<>();
-        grid.isWall = !(p instanceof Floor);
-        if (!(p instanceof Floor)) {
+        if (p instanceof Floor) {
+            grid.setFloor(this);
+        } else {
+            grid.setWall(this);
             this.cam = cam;
             PImage frame = cam.get();
             buffer = createGraphics(frame.width, frame.height);
             circleMask = loadImage("circle_mask.jpg");
         }
+        grid.init();
     }
 
     @Override
@@ -50,6 +53,7 @@ public class SceneCamera extends AbstractScene {
     @Override
     public void drawWall() {
         background(0);
+        grid.displayWall();
 
         if (cam.available()) {
             cam.read();
@@ -70,7 +74,6 @@ public class SceneCamera extends AbstractScene {
         float aspectRatio = (float) buffer.height / (float) buffer.width;
         image(buffer, width() * 0.5f, height() * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
         System.out.println("wall frameRate: "+frameRate());
-        timeOffset += speed;
     }
 
     @Override
@@ -84,16 +87,13 @@ public class SceneCamera extends AbstractScene {
         }
         
         grid.update();
-        noStroke();
-        fill(255);   
-        grid.display();
+        grid.displayFloor();
 
         stroke(255, 0, 0);
         strokeWeight(6);
         for (Dancer p : dancers) {
             point(p.x, p.y);
         }
-
         System.out.println("floor frameRate: "+frameRate());
     }
 
@@ -106,21 +106,20 @@ public class SceneCamera extends AbstractScene {
                 System.out.println("    aphaTint: "+aphaTint);
                 break;
             case "/cam/fader2":
-                speed = value;
-                System.out.println("    grid.speed: "+speed);
+                NoiseGrid.speed = value;
+                System.out.println("    grid.speed: "+NoiseGrid.speed);
                 break;
             case "/cam/fader3":
-                // grid.noiseScale = map(value, 0, 1, 0.00001f, 1f);
-                grid.noiseScale = value;
-                System.out.println("    grid.noiseScale: "+grid.noiseScale);
+                NoiseGrid.noiseScale = value;
+                System.out.println("    grid.noiseScale: "+NoiseGrid.noiseScale);
                 break;
             case "/cam/fader4":
-                grid.speedFill = map(value, 0, 1, 0.000001f, 0.1f);
-                System.out.println("    grid.speedFill: "+grid.speedFill);
+                NoiseGrid.speedFill = map(value, 0, 1, 0.000001f, 0.1f);
+                System.out.println("    grid.speedFill: "+NoiseGrid.speedFill);
                 break;
             case "/cam/fader5":
-                grid.noiseScaleFill = map(value, 0, 1, 0.00000001f, 0.1f);
-                System.out.println("    grid.noiseScaleFill: "+grid.noiseScaleFill);
+                NoiseGrid.noiseScaleFill = value;
+                System.out.println("    grid.noiseScaleFill: "+NoiseGrid.noiseScaleFill);
                 break;
             case "/cam/fader6":
                 noiseDetail = floor(map(value, 0, 1, 1, 8));
@@ -128,8 +127,8 @@ public class SceneCamera extends AbstractScene {
                 System.out.println("    noiseDetail: "+noiseDetail);
                 break;
             case "/cam/fader7":
-                grid.noiseLinesForceStrength = value;
-                System.out.println("    grid.noiseLinesForceStrength: "+grid.noiseLinesForceStrength);
+                NoiseGrid.noiseLinesForceStrength = value;
+                System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
                 break;
             default:
                 System.out.println("    default: "+value);
@@ -255,142 +254,6 @@ public class SceneCamera extends AbstractScene {
             // y = cursor.getScreenY(Constants.FLOOR_HEIGHT) - height() / 2f;
             x = cursor.getScreenX(Constants.WIDTH);
             y = cursor.getScreenY(Constants.FLOOR_HEIGHT);
-        }
-    }
-
-    private class Grid {
-        int xLines;
-        int yLines;
-        ArrayList<Integer> xs;
-        ArrayList<Integer> ys;
-        
-        // float timeOffset;
-        // float speed;
-        float noiseScale;
-        
-        float timeOffsetFill;
-        float speedFill;
-        float noiseScaleFill;
-
-        float affectDistance;
-        float noiseLinesForceStrength;
-        boolean isWall = true;
-
-        private Grid() {
-            xLines = width() / 40;
-            yLines = height() / 40;
-            xs = new ArrayList();
-            ys = new ArrayList();
-
-            for(int i = 0; i < xLines; i++) {
-                xs.add(floor((i + 1) * width() / (float) xLines));
-            }
-            for(int j = 0; j < yLines; j++) {
-                ys.add(floor((j + 1) * height() / (float) yLines));
-            }
-            
-            // timeOffset = 0f;
-            // speed = 0.001f;
-            noiseScale = 0.0001f;
-            
-            timeOffsetFill = 0f;
-            speedFill = 0.001f;
-            noiseScaleFill = 0.000001f;
-
-            affectDistance = width() * 0.2f;
-
-            noiseLinesForceStrength = 0.1f;
-            
-            updateNoiseDistances();
-        }
-
-        void affect(float targetX, float targetY) {
-            println("Affecting  : " + targetX + ", X: " + xs.size() );
-            for(int i = 0; i < xs.size(); i++) {
-                int currentX = xs.get(i);
-                if (Math.abs(targetX - currentX) < affectDistance) {
-                    xs.remove(i);
-                    float forceX = targetX - currentX;
-                    float distance = abs(forceX);
-                    float strength = pow(map(affectDistance - distance, 0, affectDistance, 0, 1), 2);
-                    xs.add(i, floor(currentX + forceX * strength));
-                }
-            }
-            for(int j = 0; j < ys.size(); j++) {
-                int currentY = ys.get(j);
-                if (Math.abs(targetY - currentY) < affectDistance) {
-                    ys.remove(j);
-                    float forceY = targetY - currentY;
-                    float distance = abs(forceY);
-                    float strength = pow(map(affectDistance - distance, 0, affectDistance, 0, 1), 2);
-                    ys.add(j, floor(currentY + forceY * strength));
-                }
-            }
-        }
-
-        void update() {
-            updateNoiseDistances();
-        }
-
-        void display() {
-            // ----------GREEN LINES
-            stroke(0, 255, 0);
-            strokeWeight(1);
-            for(int i = 0; i < xs.size() -1; i++ ) {
-                line(xs.get(i), 0, xs.get(i), height());
-            }
-            for(int i = 0; i < ys.size() -1; i++ ) {
-                line(0, ys.get(i), width(), ys.get(i));
-            }
-
-            // float prevX = 0;
-            // float fx0 = (xs.size() - xs.size() * noiseScaleFill) / 2f;
-            // float fy0 = (ys.size() - ys.size() * noiseScaleFill) / 2f;
-            // for(int i = 0; i < xs.size(); i++) {
-            //     int x = xs.get(i);
-            //     float prevY = 0;
-            //     for(int j = 0; j < ys.size(); j++) {
-            //         int y = ys.get(j);
-            //         float n = noise(fx0 + i * noiseScaleFill, fy0 + j * noiseScaleFill, timeOffsetFill);
-            //         if (n > 0.5) {
-            //             fill(map(n, 0.5f, 1, 150, 260));
-            //             rect(prevX, prevY, x - prevX, y - prevY);
-            //         }
-            //         prevY = y;
-            //     }
-            //     prevX = x;
-            // }
-        }
-
-        private void updateNoiseDistances() {
-            updateDistances(xs, xLines, width(), 1000);
-            // updateDistances(ys, yLines, height(), 2000);
-            // timeOffset += speed;
-            timeOffsetFill += speedFill;
-        }
-
-        private void updateDistances(ArrayList<Integer> lines, int nLines, int totalDistance, int noiseOffset) {
-            float[] hns = new float[nLines];
-            float total = 0;
-            for(int i = 0; i < nLines; i++ ) {
-                System.out.println("i: " + i + ", noiseOffset: " + noiseOffset + i * noiseScale + ", timeOffset: " + timeOffset);
-                hns[i] = noise(noiseOffset + i * noiseScale, timeOffset);
-                total += hns[i];
-            }
-            
-            int accumulation = 0;
-            for(int i = 0; i < nLines; i++ ) {
-                accumulation += (int) totalDistance * (hns[i] / total);
-                int value = (i == nLines - 1) ? totalDistance : accumulation;
-                int currentV = lines.remove(i);
-                lines.add(i, currentV + floor((value - currentV) * noiseLinesForceStrength));
-            }
-        }
-
-        private float signum(float n) {
-            if (n > 0) return 1;
-            if (n < 0) return -1;
-            return 0;
         }
     }
 
