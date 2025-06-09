@@ -15,7 +15,7 @@ public class SceneCamera extends AbstractScene {
     private TuioClient tracker;
 
     private PGraphics buffer;
-    private int aphaTint = 20;
+    private int aphaTint = 10;
     private int noiseDetail = 2;
     private PImage circleMask;
 
@@ -23,9 +23,8 @@ public class SceneCamera extends AbstractScene {
     private ArrayList<Dancer> hull;
 
     private NoiseGrid grid;
-    
-    private static float timeOffset = 0f;
-    private static float speed = 0.001f;
+    private float alphaFade = 3.0f;
+
 
     public SceneCamera(PApplet p, Capture cam, TuioClient tracker) {
         super(p);
@@ -52,7 +51,9 @@ public class SceneCamera extends AbstractScene {
 
     @Override
     public void drawWall() {
-        background(0);
+        fill(0, alphaFade);
+        noStroke();
+        rect(0, 0, width(), height());
         grid.displayWall();
 
         if (cam.available()) {
@@ -73,12 +74,14 @@ public class SceneCamera extends AbstractScene {
 
         float aspectRatio = (float) buffer.height / (float) buffer.width;
         image(buffer, width() * 0.5f, height() * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
-        System.out.println("wall frameRate: "+frameRate());
+        // System.out.println("wall frameRate: "+frameRate());
     }
 
     @Override
     public void drawFloor() {
-        background(0);
+        fill(0, alphaFade);
+        noStroke();
+        rect(0, 0, width(), height());
         updateDancers();
         calculateConvexHull();
         
@@ -94,7 +97,7 @@ public class SceneCamera extends AbstractScene {
         for (Dancer p : dancers) {
             point(p.x, p.y);
         }
-        System.out.println("floor frameRate: "+frameRate());
+        // System.out.println("floor frameRate: "+frameRate());
     }
 
     @Override
@@ -129,6 +132,18 @@ public class SceneCamera extends AbstractScene {
             case "/cam/fader7":
                 NoiseGrid.noiseLinesForceStrength = value;
                 System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
+                break;
+            case "/cam/fader8":
+                alphaFade = map(value, 0, 1, 0, 50);
+                System.out.println("    alphaFade: "+alphaFade);
+                break;
+            case "/cam/toggle1":
+                grid.linesOn = value == 1.0f;
+                System.out.println("    linesOn: "+grid.linesOn + " value: "+value);
+                break;
+            case "/cam/toggle2":
+                grid.tilesOn = value == 1.0f;
+                System.out.println("    tilesOn: "+grid.tilesOn + " value: "+value);
                 break;
             default:
                 System.out.println("    default: "+value);

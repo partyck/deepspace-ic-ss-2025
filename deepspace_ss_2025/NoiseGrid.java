@@ -6,25 +6,28 @@ import java.util.Comparator;
 import processing.core.PApplet;
     
 public class NoiseGrid {
-    int xLines;
-    int yLines;
-    int yWallLines;
-    int yFloorLines;
-    ArrayList<Integer> xs;
-    ArrayList<Integer> ys;
+    int[] xs;
+    int[] ys;
 
     AbstractScene wall;
     AbstractScene floor;
 
-    static float speed = 0.001f;
+    ArrayList<Tile> tiles;
+
+    boolean linesOn = false;
+    boolean tilesOn = true;
+
+    static float speed = 0.005f;
     static float timeOffset = 0f;
-    static float noiseScale = 0.0001f;
+    static float noiseScale = 0f;
 
-    static float speedFill = 0.001f;
+    static float speedFill = 0.005f;
     static float timeOffsetFill = 0f;
-    static float noiseScaleFill = 0.000001f;
+    static float noiseScaleFill = 0.05f;
 
-    static float noiseLinesForceStrength = 0.1f;
+    int tileTimer;
+
+    static float noiseLinesForceStrength = 0.8f;
     float affectDistance;
 
     int width;
@@ -42,10 +45,7 @@ public class NoiseGrid {
         return INSTANCE;
     }
 
-    public NoiseGrid() {
-        xs = new ArrayList();
-        ys = new ArrayList();
-    }
+    public NoiseGrid() {}
 
     public void setWall(AbstractScene wall) { this.wall = wall; }
     public void setFloor(AbstractScene floor) { this.floor = floor; }
@@ -60,111 +60,115 @@ public class NoiseGrid {
         floorHeight = floor.height();
         height = wallHeight + floorHeight;
 
-        xLines = width / 40;
-        yWallLines = wallHeight / 40;
-        yFloorLines = floorHeight / 40;
-        yLines = yWallLines + yFloorLines;
         affectDistance = width * 0.2f;
+        tileTimer = (int) wall.frameRate() * 5;
 
+        int xLines = 20;
+        int yLines = 20;
+        xs =  new int[xLines];
+        ys =  new int[yLines];
         for(int i = 0; i < xLines; i++) {
-            xs.add((int) Math.floor((i + 1) * width / (float) xLines));
+            xs[i] = (int) Math.floor((i + 1) * width / (float) xLines);
         }
-        for(int j = 0; j < yLines + 1; j++) {
-            ys.add((int) Math.floor((j + 1) * height / (float) yLines));
+        for(int j = 0; j < yLines; j++) {
+            ys[j] = (int) Math.floor((j + 1) * height / (float) yLines);
+        }
+
+        tiles = new ArrayList<>();
+        int prevX = 0;
+        for(int i = 0; i < xs.length; i++) {
+            int prevY = 0;
+            for(int j = 0; j < ys.length; j++) {
+                tiles.add(new Tile(prevX, prevY, xs[i] - prevX, ys[j] - prevY));
+                prevY = ys[j];
+            }
+            prevX = xs[i];
         }
 
         updateNoiseDistances();
     }
 
     void affect(float targetX, float targetY) {
-        System.out.println("Affecting  : " + targetX + ", X: " + xs.size() );
-        for(int i = 0; i < xs.size(); i++) {
-            int currentX = xs.get(i);
+        for(int i = 0; i < xs.length; i++) {
+            int currentX = xs[i];
             if (Math.abs(targetX - currentX) < affectDistance) {
-                xs.remove(i);
                 float forceX = targetX - currentX;
                 float distance = Math.abs(forceX);
                 float strength = (float) Math.pow(PApplet.map(affectDistance - distance, 0, affectDistance, 0, 1), 2);
-                xs.add(i, (int) Math.floor(currentX + forceX * strength));
+                xs[i] = (int) Math.floor(currentX + forceX * strength);
             }
         }
-        for(int j = 0; j < ys.size(); j++) {
-            int currentY = ys.get(j);
+        for(int j = 0; j < ys.length; j++) {
+            int currentY = ys[j];
             if (Math.abs(targetY - currentY + wallHeight) < affectDistance) {
-                ys.remove(j);
                 float forceY = targetY - currentY + wallHeight;
                 float distance = Math.abs(forceY);
                 float strength = (float) Math.pow(PApplet.map(affectDistance - distance, 0, affectDistance, 0, 1), 2);
-                ys.add(j, (int) Math.floor(currentY + forceY * strength));
+                ys[j] = (int) Math.floor(currentY + forceY * strength);
             }
+        }
+
+        for(Tile tile : tiles) {
+            tile.inside((int) targetX, (int) targetY);
         }
     }
 
     void update() {
         updateNoiseDistances();
+        updateTiles();
         timeOffset += speed;
         timeOffsetFill += speedFill;
     }
 
     void displayWall() {
-        // ----------GREEN LINES
-        wall.stroke(0, 255, 0);
-        wall.strokeWeight(1);
-        // for(int i = 0; i < xs.size() -1; i++ ) {
-        //     wall.line(xs.get(i), 0, xs.get(i), wallHeight);
-        // }
-        // for(int i = 0; i < ys.size() -1; i++ ) {
-        //     wall.line(0, ys.get(i), width, ys.get(i));
-        // }
-
-
-        // wall.noStroke();
-        float prevX = 0;
-        float fx0 = (xs.size() - xs.size() * noiseScaleFill) / 2f;
-        float fy0 = (ys.size() - ys.size() * noiseScaleFill) / 2f;
-        for(int i = 0; i < xs.size(); i++) {
-            int x = xs.get(i);
-            float prevY = 0;
-            for(int j = 0; j < ys.size() - 1; j++) {
-                int y = ys.get(j);
-                float n = wall.noise(fx0 + i * noiseScaleFill, fy0 + j * noiseScaleFill, timeOffsetFill);
-                if (n > 0.5) {
-                    wall.fill(PApplet.map(n, 0.5f, 1, 150, 260));
-                    wall.rect(prevX, prevY, x - prevX, y - prevY);
-                }
-                prevY = y;
+        if (linesOn) {
+            wall.stroke(255);
+            wall.strokeWeight(1);
+            for(int i = 0; i < xs.length -1; i++ ) {
+                wall.line(xs[i], 0, xs[i], wallHeight);
             }
-            prevX = x;
+            for(int i = 0; i < ys.length -1; i++ ) {
+                wall.line(0, ys[i], width, ys[i]);
+            }
+        }
+        if (tilesOn) {
+            for (int i = 0; i < tiles.size(); i++) {
+                tiles.get(i).display(true);
+            }
         }
     }
 
     void displayFloor() {
-        // ----------GREEN LINES
-        // List<Integer> floorYs = ys.subList(yWallLines , ys.size());
-        ArrayList<Integer> floorYs = floorYLines();
-        floor.stroke(0, 255, 0);
-        floor.strokeWeight(1);
-        // for(int i = 0; i < xs.size() -1; i++ ) {
-        //     floor.line(xs.get(i), 0, xs.get(i), floorHeight);
-        // }
-        // for(int i = 0; i < floorYs.size(); i++ ) {
-        //     floor.line(0, floorYs.get(i), width, floorYs.get(i));
-        // }
+        if (linesOn) {
+            ArrayList<Integer> floorYs = floorYLines();
+            floor.stroke(255);
+            floor.strokeWeight(1);
+            for(int i = 0; i < xs.length -1; i++ ) {
+                floor.line(xs[i], 0, xs[i], floorHeight);
+            }
+            for(int i = 0; i < floorYs.size(); i++ ) {
+                floor.line(0, floorYs.get(i), width, floorYs.get(i));
+            }
+        }
+        if (tilesOn) {
+            for (int i = 0; i < tiles.size(); i++) {
+                tiles.get(i).display(false);
+            }
+        }
+    }
 
-        // floor.noStroke();
-        float prevX = 0;
-        float fx0 = (xs.size() - xs.size() * noiseScaleFill) / 2f;
-        float fy0 = ys.size() / 2f;
-        for(int i = 0; i < xs.size(); i++) {
-            int x = xs.get(i);
-            float prevY = 0;
-            for(int j = 0; j < floorYs.size(); j++) {
-                int y = floorYs.get(j);
+    private void updateTiles() {
+        float fx0 = (xs.length - xs.length * noiseScaleFill) / 2f;
+        float fy0 = (ys.length - ys.length * noiseScaleFill) / 2f;
+        int prevX = 0;
+        for(int i = 0; i < xs.length; i++) {
+            int prevY = 0;
+            int x = xs[i];
+            for(int j = 0; j < ys.length; j++) {
+                int y = ys[j];
                 float n = wall.noise(fx0 + i * noiseScaleFill, fy0 + j * noiseScaleFill, timeOffsetFill);
-                if (n > 0.5) {
-                    floor.fill(PApplet.map(n, 0.5f, 1, 150, 260));
-                    floor.rect(prevX, prevY, x - prevX, y - prevY);
-                }
+                Tile tile = tiles.get(i * ys.length + j);
+                tile.update(prevX, prevY, x - prevX, y - prevY, n);
                 prevY = y;
             }
             prevX = x;
@@ -172,36 +176,103 @@ public class NoiseGrid {
     }
 
     private void updateNoiseDistances() {
-        updateDistances(xs, xLines, width, 1000);
-        updateDistances(ys, yLines, height, 2000);
+        updateDistances(xs, width, 1000);
+        updateDistances(ys, height, 2000);
     }
 
-    private void updateDistances(ArrayList<Integer> lines, int nLines, int totalDistance, int noiseOffset) {
-        float[] hns = new float[nLines];
+    private void updateDistances(int[] lines, int totalDistance, int noiseOffset) {
+        float[] hns = new float[lines.length];
         float total = 0;
-        for(int i = 0; i < nLines; i++ ) {
+        for(int i = 0; i < lines.length; i++ ) {
             hns[i] = wall.noise(noiseOffset + i * noiseScale, timeOffset);
             total += hns[i];
         }
         
         int accumulation = 0;
-        for(int i = 0; i < nLines; i++ ) {
+        for(int i = 0; i < lines.length; i++ ) {
             accumulation += (int) totalDistance * (hns[i] / total);
-            int value = (i == nLines - 1) ? totalDistance : accumulation;
-            int currentV = lines.remove(i);
-            lines.add(i, currentV + (int) Math.floor((value - currentV) * noiseLinesForceStrength));
+            if (i == lines.length - 1) {
+                lines[i] = totalDistance;
+            }else {
+                int currentV = lines[i];
+                int value = currentV + (int) Math.floor((accumulation - currentV) * noiseLinesForceStrength);
+                lines[i] = value;
+            }
         }
     }
 
     private ArrayList<Integer> floorYLines() {
         ArrayList<Integer> floorYs = new ArrayList<>();
-        for(int i = 0; i < ys.size() -1; i++ ) {
-            if (ys.get(i) > wallHeight) {
-                floorYs.add(ys.get(i) - wallHeight);
+        for(int i = 0; i < ys.length -1; i++ ) {
+            if (ys[i] > wallHeight) {
+                floorYs.add(ys[i] - wallHeight);
             }
         }
-        yWallLines = ys.size() - floorYs.size();
-        yFloorLines = floorYs.size();
         return floorYs;
+    }
+
+    class Tile {
+        int x;
+        int y;
+        int w;
+        int h;
+        float n;
+        int timer = 0;
+
+        Tile(int x, int y, int w, int h) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+            this.n = 0;
+        }
+
+        void display(boolean isWall) {
+            if (isWall && y > wallHeight) return;
+            if (!isWall && y + h < wallHeight) return;
+            AbstractScene scene = getScene(isWall);
+            int currentY = isWall ? y : y - wallHeight;
+            if (timer > 1) {
+                scene.fill(255);
+                scene.rect(x, currentY, w, h);
+                return;
+            }
+            if (n > 0.5f) {
+                scene.fill((int) (255 * Math.sqrt(n)));
+                scene.rect(x, currentY, w, h);
+                return;
+            }
+        }
+
+        void update(int prevX, int prevY, int w, int h, float noise) {
+            this.x = prevX;
+            this.y = prevY;
+            this.w = w;
+            this.h = h;
+            this.n = noise;
+            if (timer > 0) {
+                timer--;
+            }
+        }
+
+        void affect(int timer) {
+            this.timer = timer;
+        }
+
+        void inside(int targetX, int targetY) {
+            if (targetX >= x && targetX <= x + w && targetY + wallHeight >= y && targetY + wallHeight <= y + h) {
+                affect(tileTimer);
+            }
+        }
+
+        AbstractScene getScene(boolean isWall) {
+            if (isWall) {
+                return wall;
+            }
+            else {
+                return floor;
+            }
+        }
+
     }
 }
