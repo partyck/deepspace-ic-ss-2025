@@ -134,7 +134,7 @@ public class SceneCamera extends AbstractScene {
                 System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
                 break;
             case "/cam/fader8":
-                alphaFade = map(value, 0, 1, 0, 50);
+                alphaFade = 255 * value;
                 System.out.println("    alphaFade: "+alphaFade);
                 break;
             case "/cam/fader9":
