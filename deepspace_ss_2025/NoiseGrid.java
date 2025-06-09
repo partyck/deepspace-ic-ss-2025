@@ -25,6 +25,8 @@ public class NoiseGrid {
     static float timeOffsetFill = 0f;
     static float noiseScaleFill = 0.05f;
 
+    float displayTreshold = 0.5f;
+
     int tileTimer;
 
     static float noiseLinesForceStrength = 0.8f;
@@ -109,7 +111,7 @@ public class NoiseGrid {
         }
 
         for(Tile tile : tiles) {
-            tile.inside((int) targetX, (int) targetY);
+            tile.affect((int) targetX, (int) targetY);
         }
     }
 
@@ -232,13 +234,14 @@ public class NoiseGrid {
             if (!isWall && y + h < wallHeight) return;
             AbstractScene scene = getScene(isWall);
             int currentY = isWall ? y : y - wallHeight;
-            if (timer > 1) {
+            if (timer > 0) {
                 scene.fill(255);
                 scene.rect(x, currentY, w, h);
                 return;
             }
-            if (n > 0.5f) {
-                scene.fill((int) (255 * Math.sqrt(n)));
+            if (n > displayTreshold) {
+                int fill = (int) (255 * Math.pow(n, 1f / 3f));
+                scene.fill(fill);
                 scene.rect(x, currentY, w, h);
                 return;
             }
@@ -255,13 +258,9 @@ public class NoiseGrid {
             }
         }
 
-        void affect(int timer) {
-            this.timer = timer;
-        }
-
-        void inside(int targetX, int targetY) {
+        void affect(int targetX, int targetY) {
             if (targetX >= x && targetX <= x + w && targetY + wallHeight >= y && targetY + wallHeight <= y + h) {
-                affect(tileTimer);
+                timer = tileTimer;
             }
         }
 

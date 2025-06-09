@@ -137,6 +137,10 @@ public class SceneCamera extends AbstractScene {
                 alphaFade = map(value, 0, 1, 0, 50);
                 System.out.println("    alphaFade: "+alphaFade);
                 break;
+            case "/cam/fader9":
+                grid.displayTreshold = 1 - value;
+                System.out.println("    displayTreshold: "+grid.displayTreshold);
+                break;
             case "/cam/toggle1":
                 grid.linesOn = value == 1.0f;
                 System.out.println("    linesOn: "+grid.linesOn + " value: "+value);
