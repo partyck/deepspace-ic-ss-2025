@@ -50,6 +50,7 @@ void setup() {
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
+    scenes.add(new AbstractScene[]{new Scene02Rectangles(this, tracker), new Scene02Rectangles(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene00_Curtain(this), new Scene00_Curtain(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro_v1(this), new Scene01_Intro_v1(floor)});
@@ -60,7 +61,7 @@ void setup() {
     scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
     scenes.add(new AbstractScene[]{new HanifTest2(this), new HanifTest2(floor)});
-    // scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
+    scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     nextScene();
 }
 
