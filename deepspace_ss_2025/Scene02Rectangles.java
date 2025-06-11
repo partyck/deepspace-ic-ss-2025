@@ -6,6 +6,13 @@ import java.util.HashMap;
 
 // Buttons to press 'q' to start animation, 'w' to fix position of all rectangles
 // slider to controll 'x' and 'y' position of all rectangles
+// implement midi control to size the rectangles
+
+// first rectangle comes from the curtain
+// then resize it slowly with midi control (KORG nanoKONTROL2)
+// then fix the position
+// size of each rectangle should cahnge
+// stepping just with really fast movement, otherwise the dancers can expand the the size of the rectangle
 
 public class Scene02Rectangles extends AbstractScene {
     TuioClient tracker;
@@ -114,7 +121,7 @@ public class Scene02Rectangles extends AbstractScene {
         text(text, width() - textWidth - 20, 20 + textHeight);
 
         // Save the current transformation state
-        p.pushMatrix();
+        p.pushMatrix(); 
         // Translate to the bottom of the wall
         p.translate(0, height());
         // Call display with the translated coordinates
@@ -177,6 +184,7 @@ public class Scene02Rectangles extends AbstractScene {
         }
 
         // Draw cursor paths just for debugging
+        /*
         p.stroke(p.color(0, 0, 255));
         for (TuioCursor tcur : tuioCursorList) {
             ArrayList<TuioPoint> pointList = tcur.getPath();
@@ -189,5 +197,6 @@ public class Scene02Rectangles extends AbstractScene {
                 }
             }
         }
+        */
     }
 }
