@@ -12,8 +12,8 @@ public class Scene01Intro extends AbstractScene{
     float baseNoiseAmount = 80;
     float lerpAmount = 0.01f;
     float alphaFade = 1.0f;
-    int personHeight = 10;
-    int floorHeightInteraction = 10;
+    int personHeight = 50;
+    int floorHeightInteraction = 100;
     //NEW variable
     // curtain
     boolean foldCurtain = false;
@@ -34,6 +34,7 @@ public class Scene01Intro extends AbstractScene{
     void keyPressed() {
       if (p.key == 'w' || p.key == 'W') {
         waveMode = !waveMode;
+        System.out.println("w!!!!");
       } 
 
       if (p.key == 'f' || p.key == 'F') {
@@ -67,19 +68,13 @@ public class Scene01Intro extends AbstractScene{
       }
     }
 
-    // -------------------------
-
-
-
-
-
     TuioClient tracker;
 
     public Scene01Intro(PApplet p, TuioClient tracker) {
         super(p);
         this.tracker = tracker;
-        p.noiseDetail(4);
-        p.smooth(4);
+        noiseDetail(4);
+        // p.smooth(4);
         updateGrid();
 
         PFont font = createFont("Arial", 16);
@@ -89,8 +84,6 @@ public class Scene01Intro extends AbstractScene{
         int x = 30;
         int y = 30;
         int gap = 50;
-        
-       
 
         stroke(255);
         noFill();
@@ -119,6 +112,7 @@ public class Scene01Intro extends AbstractScene{
 
         stroke(255);
         noFill();
+        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
 
         float zoff = p.frameCount * 0.01f;
          //---------------------------------------
@@ -127,65 +121,61 @@ public class Scene01Intro extends AbstractScene{
         ArrayList<PVector> shapePoints = new ArrayList<PVector>();
 
         for (int x = 0; x < cols; x++) {
-
             beginShape();
-               for (int y = 0; y < rows; y++) 
-    {
-      float foldOffset = 0;
-      if (foldCurtain) 
-      {
-        float foldFactor = constrain((float)x / cols, 0, 1);
-        float wave = sin((y + p.frameCount * 0.3f) * 0.2f + x * 0.05f) * 20;
-        foldOffset = curtainProgress * 200 * foldFactor + wave * foldFactor;
-      }
+               for (int y = 0; y < rows; y++) {
+                    float foldOffset = 0;
+                    if (foldCurtain) {
+                        float foldFactor = constrain((float)x / cols, 0, 1);
+                        float wave = sin((y + p.frameCount * 0.3f) * 0.2f + x * 0.05f) * 20;
+                        foldOffset = curtainProgress * 200 * foldFactor + wave * foldFactor;
+                    }
 
-      float xpos = x * spacing;
-      float ypos = y * spacing;
+                    float xpos = x * spacing;
+                    float ypos = y * spacing;
 
-      float n = noise(x * noiseScale, y * noiseScale, zoff);
-      float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
+                    float n = noise(x * noiseScale, y * noiseScale, zoff);
+                    float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
+                    float influence = 0;
 
-      float dx = xpos - p.mouseX;
-      float dy = ypos - p.mouseY;
-      float d = dist(xpos, ypos, p.mouseX, p.mouseY);
-      float influence = 0;
+                    for(TuioCursor cursor: tuioCursorList) {
+                        if (cursor.getScreenY(height()) < floorHeightInteraction) {
+                            float dx = xpos - cursor.getScreenX(width());
+                            float d = dist(xpos, ypos, dx, height() - personHeight);
 
-      if (d < influenceRadius) 
-      {
-        float strength = 1 - (d / influenceRadius);
-        strength *= strength;
-        float direction = dx > 0 ? 1 : -1;
-        float direction2 = direction * sin(n);
+                            if (d < influenceRadius) {
+                                float strength = 1 - (d / influenceRadius);
+                                strength *= strength;
+                                float direction = dx > 0 ? 1 : -1;
+                                float direction2 = direction * sin(n);
 
-        if (waveMode) 
-        {
-          float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
-          direction2 += wave * 0.75;
-        }
+                                if (waveMode) {
+                                    float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
+                                    direction2 += wave * 0.75;
+                                }
 
-        influence = direction2 * strength * maxPush;
-      }
+                                influence = direction2 * strength * maxPush;
+                            }
+                        }
+                    }
 
-      float target = baseWave + influence;
-      offsets[x][y] = lerp(offsets[x][y], target, lerpAmount);
+                    float target = baseWave + influence;
+                    offsets[x][y] = lerp(offsets[x][y], target, lerpAmount);
 
-      float px = xpos + offsets[x][y] + foldOffset;
-      float py = ypos;
+                    float px = xpos + offsets[x][y] + foldOffset;
+                    float py = ypos;
 
-      curveVertex(px, py);
-      shapePoints.add(new PVector(px, py));
-    }
-            endShape();
-            if (cloneMirrored) 
-    {
-      beginShape();
-      for (PVector p : shapePoints) 
-      {
-        float mirroredX = width() - p.x;
-        curveVertex(mirroredX, p.y);
-      }
-      endShape();
-    }
+                    curveVertex(px, py);
+                    shapePoints.add(new PVector(px, py));
+                }
+                endShape();
+                if (cloneMirrored) {
+                    beginShape();
+                    for (PVector p : shapePoints) {
+                        float mirroredX = width() - p.x;
+                        curveVertex(mirroredX, p.y);
+                    }
+                    endShape();
+                }
         }
     }
 
