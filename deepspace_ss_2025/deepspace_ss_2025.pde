@@ -49,6 +49,8 @@ void setup() {
 
     // Add all the scenes in order
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
+    scenes.add(new AbstractScene[]{new Haunting_Thoughts(this, tracker), new Haunting_Thoughts(floor, tracker)});
+    scenes.add(new AbstractScene[]{new Staring_Eyes(this, tracker), new Staring_Eyes(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene02Rectangles(this, tracker), new Scene02Rectangles(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene00_Curtain(this), new Scene00_Curtain(floor)});
