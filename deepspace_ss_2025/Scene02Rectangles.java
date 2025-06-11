@@ -15,11 +15,11 @@ public class Scene02Rectangles extends AbstractScene {
 
     private class Rectangle {
         float x, y;
-        float width = 50;
-        float height = 100;
+        float width = Float.valueOf(width() / 10) ; // 50;
+        float height = Float.valueOf(height() / 10);
         boolean isFixed = false;
         float maxHeight = 0;
-        int animationType;  // Different animation types
+        int animationType;
         float animationProgress = 0;
         float targetWidth;
         float targetHeight;
@@ -32,28 +32,28 @@ public class Scene02Rectangles extends AbstractScene {
             // Set target sizes based on animation type
             switch(animationType) {
                 case 0: // Tall and thin
-                    targetWidth = 30;
-                    targetHeight = 450;
+                    targetWidth = Float.valueOf((width() / 10) /2); 
+                    targetHeight = Float.valueOf((height() / 10) * 8);
                     break;
                 case 1: // Wide and short
-                    targetWidth = 50;
-                    targetHeight = 600;
+                    targetWidth = Float.valueOf((width() / 10) * 1);
+                    targetHeight = Float.valueOf((height() / 10) * 2);
                     break;
                 case 2: // Square but large
-                    targetWidth = 80;
-                    targetHeight = 50;
+                    targetWidth = Float.valueOf((width() / 10) / 2);
+                    targetHeight = Float.valueOf((height() / 10) * 5);
                     break;
                 case 3: // Tall and medium width
-                    targetWidth = 50;
-                    targetHeight = 750;
+                    targetWidth = Float.valueOf((width() / 10) / 2);
+                    targetHeight = Float.valueOf((height() / 10) * 9);
                     break;
                 case 4: // Medium square
-                    targetWidth = 20;
-                    targetHeight = 450;
+                    targetWidth = Float.valueOf((width() / 10 )* 1);
+                    targetHeight = Float.valueOf((height() / 10) * 1);
                     break;
                 case 5: // Wide and medium height
-                    targetWidth = 60;
-                    targetHeight = 60;
+                    targetWidth = Float.valueOf((width() / 10) * 1);
+                    targetHeight = Float.valueOf((height() / 10) * 6);
                     break;
             }
         }
@@ -90,8 +90,8 @@ public class Scene02Rectangles extends AbstractScene {
                         easedProgress = animationProgress;
                 }
                 
-                width = p.lerp(50, targetWidth, easedProgress);
-                height = p.lerp(50, targetHeight, easedProgress);
+                width = p.lerp(width, targetWidth, easedProgress);
+                height = p.lerp(height, targetHeight, easedProgress);
                 maxHeight = Math.max(maxHeight, height);
             }
         }
