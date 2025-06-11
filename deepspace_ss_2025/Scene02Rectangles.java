@@ -16,7 +16,7 @@ public class Scene02Rectangles extends AbstractScene {
     private class Rectangle {
         float x, y;
         float width = 50;
-        float height = 50;
+        float height = 100;
         boolean isFixed = false;
         float maxHeight = 0;
         int animationType;  // Different animation types
@@ -33,27 +33,27 @@ public class Scene02Rectangles extends AbstractScene {
             switch(animationType) {
                 case 0: // Tall and thin
                     targetWidth = 30;
-                    targetHeight = 200;
+                    targetHeight = 450;
                     break;
                 case 1: // Wide and short
-                    targetWidth = 200;
-                    targetHeight = 250;
+                    targetWidth = 50;
+                    targetHeight = 600;
                     break;
                 case 2: // Square but large
-                    targetWidth = 150;
-                    targetHeight = 150;
+                    targetWidth = 80;
+                    targetHeight = 50;
                     break;
                 case 3: // Tall and medium width
-                    targetWidth = 80;
-                    targetHeight = 250;
+                    targetWidth = 50;
+                    targetHeight = 750;
                     break;
                 case 4: // Medium square
-                    targetWidth = 100;
-                    targetHeight = 100;
+                    targetWidth = 20;
+                    targetHeight = 450;
                     break;
                 case 5: // Wide and medium height
-                    targetWidth = 80;
-                    targetHeight = 300;
+                    targetWidth = 60;
+                    targetHeight = 60;
                     break;
             }
         }
