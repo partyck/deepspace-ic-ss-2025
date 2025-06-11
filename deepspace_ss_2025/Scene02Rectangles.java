@@ -30,6 +30,7 @@ public class Scene02Rectangles extends AbstractScene {
         float animationProgress = 0;
         float targetWidth;
         float targetHeight;
+        float expansionSpeed = 2.0f; // Speed at which rectangle expands
         
         Rectangle(float x, float y) {
             this.x = x;
@@ -102,6 +103,33 @@ public class Scene02Rectangles extends AbstractScene {
                 maxHeight = Math.max(maxHeight, height);
             }
         }
+
+        void updateWithCursor(float cursorX, float cursorY) {
+            if (isFixed) {
+                // Calculate distances from cursor to rectangle edges
+                float distToLeft = Math.abs(cursorX - (x - width/2));
+                float distToRight = Math.abs(cursorX - (x + width/2));
+                float distToTop = Math.abs(cursorY - (y - height/2));
+                float distToBottom = Math.abs(cursorY - (y + height/2));
+                
+                // If cursor is outside the rectangle, expand in that direction
+                if (cursorX < x - width/2) {
+                    width += expansionSpeed;
+                    x -= expansionSpeed/2; // Keep center point stable
+                } else if (cursorX > x + width/2) {
+                    width += expansionSpeed;
+                    x += expansionSpeed/2; // Keep center point stable
+                }
+                
+                if (cursorY < y - height/2) {
+                    height += expansionSpeed;
+                    y -= expansionSpeed/2; // Keep center point stable
+                } else if (cursorY > y + height/2) {
+                    height += expansionSpeed;
+                    y += expansionSpeed/2; // Keep center point stable
+                }
+            }
+        }
     }
 
     public Scene02Rectangles(PApplet p, TuioClient tracker) {
@@ -172,6 +200,12 @@ public class Scene02Rectangles extends AbstractScene {
             if (!rect.isFixed) {
                 rect.x = tcur.getScreenX(this.width());
                 rect.y = tcur.getScreenY(this.height());
+            } else {
+                // Update rectangle with cursor position for expansion
+                rect.updateWithCursor(
+                    tcur.getScreenX(this.width()),
+                    tcur.getScreenY(this.height())
+                );
             }
             rect.updateAnimation();
         }
