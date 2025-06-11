@@ -1,4 +1,6 @@
+
 import processing.core.PApplet;
+import TUIO.*;
 
 public class Staring_Eyes extends AbstractScene {
 
@@ -7,17 +9,21 @@ public class Staring_Eyes extends AbstractScene {
     private float totalDuration;
     private boolean isBlinking; // Whether the eyes are blinking
     private float blue, red, green, pupilWidth;
+    private TuioClient tracker;
 
-    public Staring_Eyes(PApplet p) {
+    public Staring_Eyes(PApplet p, TuioClient tracker) {
         super(p);
+        this.tracker = tracker;
         totalDuration = blinkDuration + displayDuration;
     }
 
+    // TOP HALF (wall)
     @Override
     public void drawWall() {
         updateAndDisplay();
     }
 
+    // BOTTOM HALF (floor)
     @Override
     public void drawFloor() {
         updateAndDisplay();
@@ -46,22 +52,35 @@ public class Staring_Eyes extends AbstractScene {
     }
 
     private void drawEyes() {
+        // Get the list of active cursors from the tracker
+        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
+
+        float targetX = p.width / 2.0f;  // Default target X (center)
+        float targetY = p.height / 2.0f; // Default target Y (center)
+
+        // If there's at least one cursor, use its position as the target
+        if (!tuioCursorList.isEmpty()) {
+            TuioCursor firstCursor = tuioCursorList.get(0);
+            targetX = firstCursor.getScreenX(p.width);
+            targetY = firstCursor.getScreenY(p.height);
+        }
+
         // Set the fill color for the eyeballs
         p.fill(red, green, blue);
-        p.stroke(255); // Set the outline color to white
-        p.strokeWeight(3); // Set the outline weight
+        p.stroke(255);
+        p.strokeWeight(3);
 
         // Draw the eyeballs with outline
         p.ellipse(1300, 450, 320, 320);
         p.ellipse(500, 450, 320, 320);
 
-        // Draw the pupils with eye tracking
-        float pupilX = p.map(p.mouseX, 0, p.width, 1265, 1335);
-        float pupilY = p.map(p.mouseY, 0, p.height, 415, 485);
-        float pupilA = p.map(p.mouseX, 0, p.width, 465, 535);
+        // Draw the pupils with eye tracking based on the target
+        float pupilX = p.map(targetX, 0, p.width, 1265, 1335);
+        float pupilY = p.map(targetY, 0, p.height, 415, 485);
+        float pupilA = p.map(targetX, 0, p.width, 465, 535);
 
         p.fill(0);
-        p.noStroke(); // No outline for the pupils
+        p.noStroke();
         p.ellipse(pupilX, pupilY, pupilWidth, 290);
         p.ellipse(pupilA, pupilY, pupilWidth, 290);
 

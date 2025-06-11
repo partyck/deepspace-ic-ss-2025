@@ -1,47 +1,92 @@
+
 import processing.core.PApplet;
+import TUIO.*;
+import processing.core.PVector;
+import processing.core.PConstants;
+import processing.event.KeyEvent;
 import java.util.ArrayList;
 
 public class Haunting_Thoughts extends AbstractScene {
 
+    private TuioClient tracker;
     private Ptc[] ptcs;
-    private float gMag = 1, gVelMax = 10, gUnity, gUnityT, gBgAlpha = 255, gBgAlphaT = 255;
-    private ArrayList<Slider> slidersList;
-    private Slider sliderHaunt, sliderUnity, sliderForce;
-    private boolean onPressed;
 
-    public Haunting_Thoughts(PApplet p) {
+    // Values formerly controlled by sliders, now controlled by keyboard
+    private float gMag = 1.0f;    // "Force"
+    private float gUnity = 100.0f;  // "Unity"
+    private float gBgAlpha = 255.0f;// "Haunt"
+
+    // Constructor
+    public Haunting_Thoughts(PApplet p, TuioClient tracker) {
         super(p);
+        this.tracker = tracker;
         initPtcs(60);
-        initSliders();
+
+        // Register this class to receive keyboard events
+        p.registerMethod("keyEvent", this);
     }
 
+    // Main draw loops
     @Override
     public void drawWall() {
-        p.background(0);
         updateAndDisplay();
     }
 
     @Override
     public void drawFloor() {
-        p.background(0);
         updateAndDisplay();
     }
 
-    private void updateAndDisplay() {
-        gUnity = p.lerp(gUnity, gUnityT, 0.02f);
-        gBgAlpha = p.lerp(gBgAlpha, gBgAlphaT, 0.02f);
-        gMag = sliderForce.value;
+    // Keyboard event handler
+    public void keyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.PRESS) {
+            char key = p.key;
 
+            // --- "Haunt" Controls ---
+            if (key == 'g' || key == 'G') {
+                gBgAlpha -= 10;
+            } else if (key == 'h' || key == 'H') {
+                gBgAlpha += 10;
+            }
+
+            // --- "Unity" Controls ---
+            if (key == 'y' || key == 'Y') {
+                gUnity -= 10;
+            } else if (key == 'u' || key == 'U') {
+                gUnity += 10;
+            }
+
+            // --- "Force" Controls ---
+            if (key == 'd' || key == 'D') {
+                gMag -= 0.1f;
+            } else if (key == 'f' || key == 'F') {
+                gMag += 0.1f;
+            }
+
+            // Constrain values to their original ranges
+            gBgAlpha = p.constrain(gBgAlpha, 6, 255);
+            gUnity = p.constrain(gUnity, 0, 240);
+            gMag = p.constrain(gMag, -1, 1);
+        }
+    }
+
+    private void updateAndDisplay() {
         updatePtcs();
-        updateSliders();
 
         p.noStroke();
-        p.fill(255, gBgAlpha);
+        p.fill(0, gBgAlpha); // Use gBgAlpha for background fade
         p.rect(0, 0, p.width, p.height);
 
         drawPtcs();
         drawCnts();
-        drawSliders();
+
+        // Display current values on screen for feedback
+        p.fill(255);
+        p.textSize(14);
+        p.textAlign(PApplet.LEFT, PApplet.TOP);
+        p.text("Haunt (G/H): " + p.nf(gBgAlpha, 0, 0), 10, 10);
+        p.text("Unity (Y/U): " + p.nf(gUnity, 0, 0), 10, 30);
+        p.text("Force (D/F): " + p.nf(gMag, 0, 2), 10, 50);
     }
 
     private void initPtcs(int amt) {
@@ -52,11 +97,19 @@ public class Haunting_Thoughts extends AbstractScene {
     }
 
     private void updatePtcs() {
-        if (onPressed) {
-            for (Ptc ptc : ptcs) {
-                ptc.update(p.mouseX, p.mouseY);
+        // Use TUIO tracker for particle interaction
+        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
+
+        if (!tuioCursorList.isEmpty()) {
+            for (TuioCursor tcur : tuioCursorList) {
+                float cursorX = tcur.getScreenX(p.width);
+                float cursorY = tcur.getScreenY(p.height);
+                for (Ptc ptc : ptcs) {
+                    ptc.update(cursorX, cursorY);
+                }
             }
         } else {
+            // If no cursors, let particles drift
             for (Ptc ptc : ptcs) {
                 ptc.update();
             }
@@ -81,9 +134,12 @@ public class Haunting_Thoughts extends AbstractScene {
         }
     }
 
+    // Inner class for Particles (Ptc)
     private class Ptc {
+
         PVector pos, pPos, vel, acc;
         float decay, weight, magScalar;
+        final float gVelMax = 10; // moved from outer class
 
         Ptc(PApplet p) {
             pos = new PVector(p.random(p.width), p.random(p.height));
@@ -119,8 +175,12 @@ public class Haunting_Thoughts extends AbstractScene {
         void drawPtc() {
             p.strokeWeight(weight);
             p.stroke(0, 255);
-            if (onPressed) p.line(pos.x, pos.y, pPos.x, pPos.y);
-            else p.point(pos.x, pos.y);
+            // Draw lines if there are active TUIO cursors
+            if (!tracker.getTuioCursorList().isEmpty()) {
+                p.line(pos.x, pos.y, pPos.x, pPos.y);
+            } else {
+                p.point(pos.x, pos.y);
+            }
         }
 
         void drawCnt(Ptc coPtc, float scalar) {
@@ -145,112 +205,5 @@ public class Haunting_Thoughts extends AbstractScene {
                 vel.y *= -1;
             }
         }
-    }
-
-    private void initSliders() {
-        slidersList = new ArrayList<>();
-        sliderHaunt = new Slider(p, 100, 30, 120, 20);
-        sliderHaunt.setTag("Haunt");
-        sliderHaunt.setValue(32, 6, 255);
-        sliderUnity = new Slider(p, 100, 55, 120, 20);
-        sliderUnity.setTag("Unity");
-        sliderUnity.setValue(100, 0, 240);
-        sliderForce = new Slider(p, 100, 80, 120, 20);
-        sliderForce.setTag("Force");
-        sliderForce.setValue(1, -1, 1);
-
-        slidersList.add(sliderHaunt);
-        slidersList.add(sliderUnity);
-        slidersList.add(sliderForce);
-    }
-
-    private void updateSliders() {
-        for (Slider slider : slidersList) {
-            if (slider.active) {
-                slider.update();
-                break;
-            }
-        }
-    }
-
-    private void drawSliders() {
-        for (Slider slider : slidersList) {
-            slider.display();
-        }
-    }
-
-    private class Slider {
-        PVector pos, nameTagPos, valueTagPos;
-        float w, h, innerW, value, valueMin, valueMax;
-        boolean active;
-        String nameTag, valueTag;
-
-        Slider(PApplet p, float x, float y, float w, float h) {
-            pos = new PVector(x, y);
-            nameTagPos = new PVector(x - 10, y);
-            valueTagPos = new PVector(x + w * 0.5f, y);
-            this.w = w;
-            this.h = h;
-        }
-
-        void setTag(String nameTag) {
-            this.nameTag = nameTag;
-        }
-
-        void setValue(float value, float valueMin, float valueMax) {
-            this.value = value;
-            this.valueMin = valueMin;
-            this.valueMax = valueMax;
-            valueTag = p.nf(value, 0, 2);
-            innerW = p.map(value, valueMin, valueMax, 0, w);
-        }
-
-        void update() {
-            innerW = PApplet.constrain(p.mouseX - pos.x, 0, w);
-            value = p.map(innerW, 0, w, valueMin, valueMax);
-            valueTag = p.nf(value, 0, 2);
-        }
-
-        void display() {
-            p.noStroke();
-            p.fill(0);
-            p.rect(pos.x, pos.y, w, h);
-            p.fill(255, 0, 0);
-            p.rect(pos.x, pos.y, innerW, h);
-
-            p.fill(255);
-            p.rect(pos.x - 10 - p.textWidth(nameTag), pos.y, 10 + p.textWidth(nameTag), h);
-
-            p.fill(0);
-            p.textAlign(PApplet.LEFT, PApplet.CENTER);
-            p.text(nameTag, pos.x - 15 - p.textWidth(nameTag), pos.y + h / 2);
-
-            p.fill(255);
-            p.textAlign(PApplet.CENTER, PApplet.CENTER);
-            p.text(valueTag, pos.x + w / 2, pos.y + h / 2);
-        }
-    }
-
-    @Override
-    public void mousePressed() {
-        for (Slider slider : slidersList) {
-            if (p.mouseX > slider.pos.x && p.mouseX < slider.pos.x + slider.w && p.mouseY > slider.pos.y && p.mouseY < slider.pos.y + slider.h) {
-                slider.active = true;
-                return;
-            }
-        }
-        onPressed = true;
-        gUnityT = sliderUnity.value;
-        gBgAlphaT = sliderHaunt.value;
-    }
-
-    @Override
-    public void mouseReleased() {
-        for (Slider slider : slidersList) {
-            slider.active = false;
-        }
-        onPressed = false;
-        gUnityT = 0;
-        gBgAlphaT = 255;
     }
 }
