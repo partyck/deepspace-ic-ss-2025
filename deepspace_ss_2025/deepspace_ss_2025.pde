@@ -60,7 +60,6 @@ void setup() {
     scenes.add(new AbstractScene[]{new SceneCamera(this, cam, tracker), new SceneCamera(floor, cam, tracker)});
     scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
-    scenes.add(new AbstractScene[]{new HanifTest2(this), new HanifTest2(floor)});
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     nextScene();
 }

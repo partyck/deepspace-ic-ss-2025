@@ -18,7 +18,7 @@ public class Scene01Intro extends AbstractScene{
     public Scene01Intro(PApplet p, TuioClient tracker) {
         super(p);
         this.tracker = tracker;
-        p.noiseDetail(4);
+        noiseDetail(4);
 
         PFont font = createFont("Arial", 16);
 
@@ -35,8 +35,8 @@ public class Scene01Intro extends AbstractScene{
     }
 
     void updateGrid() {
-        cols = p.floor(width() / (float) spacing) + 4;
-        rows = p.floor(height() / (float) spacing) + 4;
+        cols = floor(width() / (float) spacing) + 4;
+        rows = floor(height() / (float) spacing) + 4;
 
         offsets = new float[cols][rows];
         for (int x = 0; x < cols; x++) {
@@ -48,25 +48,25 @@ public class Scene01Intro extends AbstractScene{
 
     @Override
     public void drawWall() {
-        p.fill(0, alphaFade);
-        p.noStroke();
+        fill(0, alphaFade);
+        noStroke();
         rect(0, 0, width(), height());
 
         stroke(255);
         noFill();
 
-        float zoff = p.frameCount * 0.01f;
+        float zoff = frameCount * 0.01f;
 
         ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
 
         for (int x = 0; x < cols; x++) {
             beginShape();
             float xpos = x * spacing;
-            p.curveVertex(xpos, 0);
+            curveVertex(xpos, 0);
             for (int y = 0; y < rows; y++) {
                 float ypos = y * spacing;
 
-                float n = p.noise(x * 0.05f, y * 0.05f, zoff);
+                float n = noise(x * 0.05f, y * 0.05f, zoff);
                 float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
                 
                 float influence = 0;
@@ -80,7 +80,7 @@ public class Scene01Intro extends AbstractScene{
                             float strength = 1 - (d / influenceRadius);
                             strength *= strength;
                             float direction = dx > 0 ? 1 : -1;
-                            float direction2 = direction * p.sin(n);
+                            float direction2 = direction * sin(n);
                             influence = direction2 * strength * maxPush;
                         }
                     }
@@ -90,7 +90,7 @@ public class Scene01Intro extends AbstractScene{
                 float target = baseWave + influence;
                 offsets[x][y] = lerp(offsets[x][y], target, lerpAmount);
 
-                p.curveVertex(xpos + offsets[x][y], ypos);
+                curveVertex(xpos + offsets[x][y], ypos);
             }
             endShape();
         }

@@ -36,7 +36,7 @@ public class Scene02Rectangles extends AbstractScene {
             this.x = x;
             this.y = y;
             // Assign random animation type (0-5)
-            this.animationType = (int)p.random(6);
+            this.animationType = (int) random(6);
             // Set target sizes based on animation type
             switch(animationType) {
                 case 0: // Tall and thin
@@ -98,8 +98,8 @@ public class Scene02Rectangles extends AbstractScene {
                         easedProgress = animationProgress;
                 }
                 
-                width = p.lerp(width, targetWidth, easedProgress);
-                height = p.lerp(height, targetHeight, easedProgress);
+                width = lerp(width, targetWidth, easedProgress);
+                height = lerp(height, targetHeight, easedProgress);
                 maxHeight = Math.max(maxHeight, height);
             }
         }
