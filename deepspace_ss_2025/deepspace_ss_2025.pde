@@ -19,10 +19,10 @@ AbstractScene currentSceneFloor = null;
 
 public void settings() {
     if (Constants.DEV) {
-        size(Constants.WIDTH, Constants.WALL_HEIGHT);
+        size(Constants.WIDTH, Constants.WALL_HEIGHT, P2D);
     }
     else {
-        fullScreen(2);
+        fullScreen(P2D, 2);
     }
     
     floor = new Floor();
@@ -60,7 +60,6 @@ void setup() {
     scenes.add(new AbstractScene[]{new SceneCamera(this, cam, tracker), new SceneCamera(floor, cam, tracker)});
     scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
-    scenes.add(new AbstractScene[]{new HanifTest2(this), new HanifTest2(floor)});
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     nextScene();
 }
@@ -83,7 +82,14 @@ void oscEvent(OscMessage oscMessage) {
 
 
 void mousePressed() {
-    nextScene();
+    // nextScene();
+}
+
+void keyPressed() {
+    String value = key == CODED ? "KeyCode" : key + "";
+    System.out.println("key pressed: " + value);
+    currentSceneWall.keyPressed(key, keyCode);
+    currentSceneFloor.keyPressed(key, keyCode);
 }
 
 void nextScene() {
