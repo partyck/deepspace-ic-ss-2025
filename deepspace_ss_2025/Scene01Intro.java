@@ -108,10 +108,11 @@ public class Scene01Intro extends AbstractScene{
                     if (cursor.getScreenY(height()) < floorHeightInteraction) {
                         int px = cursor.getScreenX(this.width());
                         // float dx = xpos - px;
-                        // float d = dist(xpos, ypos, px, height() - personHeight);
+                        // float d = dist(xpos, ypos, px, height() - personHeight);//
                         float effectiveX = xpos + foldOffset;
                         float dx = effectiveX - px;
                         float d = dist(effectiveX, ypos, px, height() - personHeight);
+                        
 
 
                         if (d < influenceRadius) {
