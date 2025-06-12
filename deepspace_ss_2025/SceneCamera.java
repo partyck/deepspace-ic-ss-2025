@@ -349,8 +349,8 @@ public class SceneCamera extends AbstractScene {
         void update(TuioCursor cursor) {
             // x = cursor.getScreenX(Constants.WIDTH) - width() / 2f;
             // y = cursor.getScreenY(Constants.FLOOR_HEIGHT) - height() / 2f;
-            x = cursor.getScreenX(Constants.WIDTH);
-            y = cursor.getScreenY(Constants.FLOOR_HEIGHT);
+            x = cursor.getScreenX(width());
+            y = cursor.getScreenY(height());
         }
     }
 }
