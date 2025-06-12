@@ -107,8 +107,12 @@ public class Scene01Intro extends AbstractScene{
                 for(TuioCursor cursor: tuioCursorList) {
                     if (cursor.getScreenY(height()) < floorHeightInteraction) {
                         int px = cursor.getScreenX(this.width());
-                        float dx = xpos - px;
-                        float d = dist(xpos, ypos, px, height() - personHeight);
+                        // float dx = xpos - px;
+                        // float d = dist(xpos, ypos, px, height() - personHeight);
+                        float effectiveX = xpos + foldOffset;
+                        float dx = effectiveX - px;
+                        float d = dist(effectiveX, ypos, px, height() - personHeight);
+
 
                         if (d < influenceRadius) {
                             float strength = 1 - (d / influenceRadius);

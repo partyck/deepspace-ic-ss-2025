@@ -82,7 +82,7 @@ void oscEvent(OscMessage oscMessage) {
 
 
 void mousePressed() {
-    // nextScene();
+     nextScene();
 }
 
 void keyPressed() {
