@@ -86,6 +86,11 @@ void mousePressed() {
     nextScene();
 }
 
+void keyPressed() {
+    currentSceneWall.keyPressed(key);
+    currentSceneFloor.keyPressed(key);
+}
+
 void nextScene() {
     AbstractScene[] currentScenes = scenes.poll();
     if (currentScenes == null) {

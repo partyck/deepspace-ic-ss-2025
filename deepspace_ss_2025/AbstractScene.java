@@ -16,6 +16,7 @@ public abstract class AbstractScene {
     public abstract void drawWall();
     public void oscEvent(String path, float value) {}
     public void init() {}
+    public void keyPressed(char key) {}
 
     public void draw() {
         if (isWall) {
