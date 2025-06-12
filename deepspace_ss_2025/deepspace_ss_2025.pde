@@ -19,10 +19,10 @@ AbstractScene currentSceneFloor = null;
 
 public void settings() {
     if (Constants.DEV) {
-        size(Constants.WIDTH, Constants.WALL_HEIGHT);
+        size(Constants.WIDTH, Constants.WALL_HEIGHT, P2D);
     }
     else {
-        fullScreen(2);
+        fullScreen(P2D, 2);
     }
     
     floor = new Floor();

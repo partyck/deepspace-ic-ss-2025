@@ -76,6 +76,7 @@ public abstract class AbstractScene {
     public void image(PImage img, float x, float y, float w, float h) {p.image(img, x, y, w, h);}
     public void set(int x, int y, PImage img) { p.set(x, y, img); }
     public PGraphics createGraphics(int x, int y) { return p.createGraphics(x, y); }
+    public PGraphics createGraphics(int x, int y, String render) { return p.createGraphics(x, y, render); }
 
 
     // ---- Input and time ----
@@ -105,6 +106,7 @@ public abstract class AbstractScene {
     // ---- Canvas info ----
     public int width() { return p.width; }
     public int height() { return p.height; }
+    public float frameCount() { return p.frameCount; }
     public float frameRate() { return p.frameRate; }
     public void frameRate(float fps) { p.frameRate(fps); }
     public void translate(int x, int y) { p.translate(x, y); }

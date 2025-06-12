@@ -13,11 +13,7 @@ import TUIO.*;
 public class SceneCamera extends AbstractScene {
     private Capture cam;
     private TuioClient tracker;
-
-    private PGraphics buffer;
-    private int aphaTint = 10;
     private int noiseDetail = 2;
-    private PImage circleMask;
 
     private ArrayList<Dancer> dancers;
     private ArrayList<Dancer> hull;
@@ -31,14 +27,12 @@ public class SceneCamera extends AbstractScene {
         this.tracker  = tracker;
         grid = NoiseGrid.getInstance();
         dancers = new ArrayList<>();
+        hull = new ArrayList<>();
         if (p instanceof Floor) {
             grid.setFloor(this);
         } else {
             grid.setWall(this);
             this.cam = cam;
-            PImage frame = cam.get();
-            buffer = createGraphics(frame.width, frame.height);
-            circleMask = loadImage("circle_mask.jpg");
         }
         grid.init();
     }
@@ -54,26 +48,23 @@ public class SceneCamera extends AbstractScene {
         fill(0, alphaFade);
         noStroke();
         rect(0, 0, width(), height());
-        grid.displayWall();
+
+        if (showWallGrid) {
+            grid.displayWall();
+        }
 
         if (cam.available()) {
             cam.read();
+            cam.filter(12);
+            cam.loadPixels();
+            cam.updatePixels();
         }
         PImage frame = cam.get();
         frame.filter(12);
 
-        int offsetD = (int) map(aphaTint, 0, 100, 0, 2);
-        float offsetX = random(-1 * offsetD, offsetD);
-        float offsetY = random(-1 * offsetD, offsetD);
-
-        buffer.beginDraw();
-        buffer.tint(255, aphaTint);
-        buffer.image(frame, offsetX, offsetY);
-        buffer.endDraw();
-        buffer.mask(circleMask);
-
-        float aspectRatio = (float) buffer.height / (float) buffer.width;
-        image(buffer, width() * 0.5f, height() * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
+        float aspectRatio = (float) frame.height / (float) frame.width;
+        image(cam, 0, 0, 0, 0);
+        image(frame, width() * 0.5f, height() * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
         // System.out.println("wall frameRate: "+frameRate());
     }
 
@@ -104,10 +95,6 @@ public class SceneCamera extends AbstractScene {
     public void oscEvent(String path, float value) {
         System.out.println("oscEvent camera");
         switch(path) {
-            case "/cam/fader1":
-                aphaTint = floor(map(value, 0, 1, 0, 50));
-                System.out.println("    aphaTint: "+aphaTint);
-                break;
             case "/cam/fader2":
                 NoiseGrid.speed = value;
                 System.out.println("    grid.speed: "+NoiseGrid.speed);
@@ -273,20 +260,6 @@ public class SceneCamera extends AbstractScene {
             // y = cursor.getScreenY(Constants.FLOOR_HEIGHT) - height() / 2f;
             x = cursor.getScreenX(Constants.WIDTH);
             y = cursor.getScreenY(Constants.FLOOR_HEIGHT);
-        }
-    }
-
-    class Tile {
-        int x;
-        int y;
-        int w;
-        int h;
-
-        Tile(int x, int y, int w, int h) {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            this.h = h;
         }
     }
 }
