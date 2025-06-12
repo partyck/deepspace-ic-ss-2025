@@ -2,6 +2,7 @@ import processing.core.PApplet;
 import processing.video.*;
 import TUIO.*;
 import oscP5.*;
+import themidibus.*;
 
 import java.util.LinkedList;
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.Scanner;
 TuioClient tracker;
 Capture cam;
 OscP5 oscP5;
+MidiBus midiSound, midiController;
 
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
@@ -44,6 +46,10 @@ void setup() {
     
     // setup osc client
     oscP5 = new OscP5(this, 10000);
+    
+    MidiBus.list();
+    midiSound = new MidiBus(this, 2, 3);
+    midiController = new MidiBus(this, 1, 2);
 
     loadCamera();
 
@@ -82,7 +88,7 @@ void oscEvent(OscMessage oscMessage) {
 
 
 void mousePressed() {
-    // nextScene();
+    nextScene();
 }
 
 void keyPressed() {
@@ -90,6 +96,13 @@ void keyPressed() {
     System.out.println("key pressed: " + value);
     currentSceneWall.keyPressed(key, keyCode);
     currentSceneFloor.keyPressed(key, keyCode);
+}
+
+
+void controllerChange(int channel, int number, int value) {
+    println("MIDI in: Channel: " + channel + " Number: " + number + " Value: " + value);
+    currentSceneWall.midiIn(number, value);
+    currentSceneFloor.midiIn(number, value);
 }
 
 void nextScene() {
@@ -102,6 +115,7 @@ void nextScene() {
     currentSceneWall.init();
     currentSceneFloor.init();
     floor.setScene(currentSceneFloor);
+    midiSound.sendMessage(0xB0, 0, 1, 1);
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
 }
 
