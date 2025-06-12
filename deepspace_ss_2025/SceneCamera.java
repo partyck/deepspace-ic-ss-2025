@@ -53,6 +53,7 @@ public class SceneCamera extends AbstractScene {
     public void init() {
         p.imageMode(PConstants.CENTER);
         noiseDetail(noiseDetail);
+        background(0);
     }
 
     @Override
@@ -77,7 +78,7 @@ public class SceneCamera extends AbstractScene {
         float aspectRatio = (float) frame.height / (float) frame.width;
         image(cam, 0, 0, 0, 0);
         image(frame, width() * 0.5f, height() * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
-        // System.out.println("wall frameRate: "+frameRate());
+        System.out.println("wall frameRate: "+frameRate());
     }
 
     @Override
@@ -106,7 +107,7 @@ public class SceneCamera extends AbstractScene {
         // for (Dancer p : dancers) {
         //     point(p.x, p.y);
         // }
-        // System.out.println("floor frameRate: "+frameRate());
+        System.out.println("floor frameRate: "+frameRate());
     }
 
     private void drawCircles() {
