@@ -23,6 +23,16 @@ public class SceneCamera extends AbstractScene {
 
     boolean showWallGrid = false;
 
+    float baseNoiseAmount = 80;
+    float influenceRadius = 400;
+    float maxPush = 300;
+    float lerpAmount = 0.05f;
+    float[][] offsets;
+    int cols, rows;
+    int circles = 10;
+    int points = 32;
+    int separation = 50;
+
     public SceneCamera(PApplet p, Capture cam, TuioClient tracker) {
         super(p);
         this.tracker  = tracker;
@@ -36,6 +46,7 @@ public class SceneCamera extends AbstractScene {
             this.cam = cam;
         }
         grid.init();
+        updateGrid();
     }
 
     @Override
@@ -80,16 +91,90 @@ public class SceneCamera extends AbstractScene {
         for (Dancer dancer : dancers) {
             grid.affect(dancer.x, dancer.y);
         }
-        
-        grid.update();
-        grid.displayFloor();
 
-        stroke(255, 0, 0);
-        strokeWeight(6);
-        for (Dancer p : dancers) {
-            point(p.x, p.y);
-        }
+        translate(width() / 2, height() / 2);
+        stroke(255);
+        strokeWeight(1);
+        noFill();
+        drawCircles();
+        
+        // grid.update();
+        // grid.displayFloor();
+
+        // stroke(255, 0, 0);
+        // strokeWeight(6);
+        // for (Dancer p : dancers) {
+        //     point(p.x, p.y);
+        // }
         // System.out.println("floor frameRate: "+frameRate());
+    }
+
+    private void drawCircles() {
+
+        float zoff = frameCount() * 0.01f;
+        for (int circleI = 0 ; circleI < circles ; circleI++) {
+            int radius = circleI * separation;
+            beginShape();
+            for (int point = 0; point < points; point++) {
+                float angle = map(point, 0, points, 0, PConstants.TWO_PI);
+                int x = (int) cos(angle) * radius;
+                int y = (int) sin(angle) * radius;
+
+                float n = noise(circleI * 0.05f, angle * 0.05f, zoff);
+                float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
+                
+                float dx = x - mouseX();
+                float dy = x - mouseY();
+                float d = dist(x, y, mouseX(), mouseY());
+                float influence = 0;
+
+                if (d < influenceRadius) {
+                    float strength = 1 - (d / influenceRadius);
+                    strength *= strength;
+
+                    float direction = dx > 0 ? 1 : -1;
+                    float direction2 = direction * sin(n);
+                    influence = direction2 * strength * maxPush;
+                }
+
+                float target = radius + baseWave + influence;
+                offsets[circleI][point] = lerp(offsets[circleI][point], target, lerpAmount);
+
+                x = (int) (cos(angle) * offsets[circleI][point]);
+                y = (int) (sin(angle) * offsets[circleI][point]);
+                curveVertex(x, y);
+            }
+
+            for (int point = 0; point < 3; point++) {
+                float angle = map(point, 0, points, 0, PConstants.TWO_PI);
+                int x = (int) (cos(angle) * offsets[circleI][point]);
+                int y = (int) (sin(angle) * offsets[circleI][point]);
+                curveVertex(x, y);
+            }
+            endShape(PConstants.CLOSE);
+        }
+
+        // for (int r = 0 ; r < circles ; r++) {
+        //     int radius = r * 100;
+        //     for (int i = 0; i < points; i++) {
+        //         float angle = map(i, 0, points, 0, PConstants.TWO_PI);
+        //         float x = cos(angle) * radius;
+        //         float y = sin(angle) * radius;
+        //         stroke(255, 0, 0);
+        //         strokeWeight(i + 1 * 2);
+        //         point(x, y);
+        //     }
+        // }
+    }
+
+    void updateGrid() {
+        offsets = new float[circles][points];
+        for (int r = 0; r < circles; r++) {
+            int radius = r * separation;
+            for (int i = 0; i < points; i++) {
+                offsets[r][i] = radius;
+            }
+        }
     }
 
     @Override
@@ -136,6 +221,10 @@ public class SceneCamera extends AbstractScene {
             case "/cam/toggle2":
                 grid.tilesOn = value == 1.0f;
                 System.out.println("    tilesOn: "+grid.tilesOn + " value: "+value);
+                break;
+            case "/cam/toggle3":
+                showWallGrid = value == 1.0f;
+                System.out.println("    showWallGrid: "+showWallGrid);
                 break;
             default:
                 System.out.println("    default: "+value);
