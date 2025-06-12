@@ -48,7 +48,7 @@ public class Scene01Intro extends AbstractScene{
         int x = 30;
         int y = 30;
         int gap = 50;
-        floorHeightInteraction = height() * 0.2f;
+        floorHeightInteraction = (int) height() * 0.2f;
     }
 
    
