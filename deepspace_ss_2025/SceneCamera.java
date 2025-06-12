@@ -21,6 +21,7 @@ public class SceneCamera extends AbstractScene {
     private NoiseGrid grid;
     private float alphaFade = 3.0f;
 
+    boolean showWallGrid = false;
 
     public SceneCamera(PApplet p, Capture cam, TuioClient tracker) {
         super(p);
