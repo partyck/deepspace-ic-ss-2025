@@ -82,12 +82,14 @@ void oscEvent(OscMessage oscMessage) {
 
 
 void mousePressed() {
-    nextScene();
+    // nextScene();
 }
 
 void keyPressed() {
-    currentSceneWall.keyPressed(key);
-    currentSceneFloor.keyPressed(key);
+    String value = key == CODED ? "KeyCode" : key + "";
+    System.out.println("key pressed: " + value);
+    currentSceneWall.keyPressed(key, keyCode);
+    currentSceneFloor.keyPressed(key, keyCode);
 }
 
 void nextScene() {

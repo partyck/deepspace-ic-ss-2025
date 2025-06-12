@@ -20,6 +20,9 @@ public class Scene01Intro extends AbstractScene{
     float curtainProgress = 0;
     float curtainSpeed = 0.003f;
     float targetCurtainProgress = 0;
+    float incDecNoiseAmount = 0.01;
+    float incDecInfluenceAmount = 30;
+    float incDecBaseNoiseAmount = 10;
 
     // mirroring
     boolean cloneMirrored = false;
@@ -28,45 +31,6 @@ public class Scene01Intro extends AbstractScene{
     float noiseScale = 0.05f; // Lower = larger shapes, higher = finer detail
 
     boolean waveMode = false;
-    // -------------------------
-    //keyboard control key
-    // -------------------------
-    void keyPressed() {
-      if (p.key == 'w' || p.key == 'W') {
-        waveMode = !waveMode;
-        System.out.println("w!!!!");
-      } 
-
-      if (p.key == 'f' || p.key == 'F') {
-        foldCurtain = !foldCurtain;
-        targetCurtainProgress = foldCurtain ? 1 : 0;
-      } 
-
-        if (p.key == 'c' || p.key == 'C') {
-          cloneMirrored = !cloneMirrored;
-        } 
-
-      //baseNoiseAmount
-      //if (keyCode == UP) {
-      //  baseNoiseAmount += 5;
-      //} else if (keyCode == DOWN) {
-      //  baseNoiseAmount = max(0, baseNoiseAmount - 5);
-      //} 
-
-      //influenceRadius
-      //if (keyCode == RIGHT) {
-      //  influenceRadius += 20;
-      //} else if (keyCode == LEFT) {
-      //  influenceRadius = max(0, influenceRadius - 20);
-      //} 
-
-      //noise frequency
-      if (p.key == 'z' || p.key == 'Z') {
-        //noiseScale = p.max(0.001, noiseScale - 0.005);  // decrease frequency (more stretched)
-      } else if (p.key == 'x' || p.key == 'X') {
-        noiseScale += 0.005; // increase frequency (more detailed)
-      }
-    }
 
     TuioClient tracker;
 
@@ -102,7 +66,6 @@ public class Scene01Intro extends AbstractScene{
         }
     }
 
-//--------------------------------------------------
      // Draw
     @Override
     public void drawWall() {
@@ -118,64 +81,71 @@ public class Scene01Intro extends AbstractScene{
          //---------------------------------------
          curtainProgress = lerp(curtainProgress, targetCurtainProgress, curtainSpeed);
          //---------------------------------------
-        ArrayList<PVector> shapePoints = new ArrayList<PVector>();
 
         for (int x = 0; x < cols; x++) {
+            if (foldCurtain) {
+                curtainProgress += curtainSpeed;
+            }
+
+            ArrayList<PVector> shapePoints = new ArrayList<PVector>();
             beginShape();
-               for (int y = 0; y < rows; y++) {
-                    float foldOffset = 0;
-                    if (foldCurtain) {
-                        float foldFactor = constrain((float)x / cols, 0, 1);
-                        float wave = sin((y + p.frameCount * 0.3f) * 0.2f + x * 0.05f) * 20;
-                        foldOffset = curtainProgress * 200 * foldFactor + wave * foldFactor;
-                    }
+            float xpos = x * spacing;
+            p.curveVertex(xpos, 0);
 
-                    float xpos = x * spacing;
-                    float ypos = y * spacing;
+            for (int y = 0; y < rows; y++) {
+                float foldOffset = 0;
+                if (foldCurtain) {
+                    float foldFactor = constrain((float)x / cols, 0, 1);
+                    float wave = sin((y + frameCount() * 0.3f) * 0.2f + x * 0.05f) * 20;
+                    foldOffset = curtainProgress * 200 * foldFactor + wave * foldFactor;
+                }
 
-                    float n = noise(x * noiseScale, y * noiseScale, zoff);
-                    float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
-                    float influence = 0;
+                float ypos = y * spacing;
 
-                    for(TuioCursor cursor: tuioCursorList) {
-                        if (cursor.getScreenY(height()) < floorHeightInteraction) {
-                            float dx = xpos - cursor.getScreenX(width());
-                            float d = dist(xpos, ypos, dx, height() - personHeight);
+                float n = noise(x * noiseScale, y * noiseScale, zoff);
+                float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
+                float influence = 0;
 
-                            if (d < influenceRadius) {
-                                float strength = 1 - (d / influenceRadius);
-                                strength *= strength;
-                                float direction = dx > 0 ? 1 : -1;
-                                float direction2 = direction * sin(n);
+                for(TuioCursor cursor: tuioCursorList) {
+                    if (cursor.getScreenY(height()) < floorHeightInteraction) {
+                        int px = cursor.getScreenX(this.width());
+                        float dx = xpos - px;
+                        float d = dist(xpos, ypos, px, height() - personHeight);
 
-                                if (waveMode) {
-                                    float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
-                                    direction2 += wave * 0.75;
-                                }
+                        if (d < influenceRadius) {
+                            float strength = 1 - (d / influenceRadius);
+                            strength *= strength;
+                            float direction = dx > 0 ? 1 : -1;
+                            float direction2 = direction * sin(n);
 
-                                influence = direction2 * strength * maxPush;
+                            if (waveMode) {
+                                float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
+                                direction2 += wave * 0.75;
                             }
+
+                            influence = direction2 * strength * maxPush;
                         }
                     }
+                }
 
-                    float target = baseWave + influence;
-                    offsets[x][y] = lerp(offsets[x][y], target, lerpAmount);
+                float target = baseWave + influence;
+                offsets[x][y] = lerp(offsets[x][y], target, lerpAmount);
 
-                    float px = xpos + offsets[x][y] + foldOffset;
-                    float py = ypos;
+                float px = xpos + offsets[x][y] + foldOffset;
+                float py = ypos;
 
-                    curveVertex(px, py);
-                    shapePoints.add(new PVector(px, py));
+                curveVertex(px, py);
+                shapePoints.add(new PVector(px, py));
+            }
+            endShape();
+            if (cloneMirrored) {
+                beginShape();
+                for (PVector p : shapePoints) {
+                    float mirroredX = width() - p.x;
+                    curveVertex(mirroredX, p.y);
                 }
                 endShape();
-                if (cloneMirrored) {
-                    beginShape();
-                    for (PVector p : shapePoints) {
-                        float mirroredX = width() - p.x;
-                        curveVertex(mirroredX, p.y);
-                    }
-                    endShape();
-                }
+            }
         }
     }
 
@@ -185,6 +155,46 @@ public class Scene01Intro extends AbstractScene{
         fill(255);
         noStroke();
         rect(0, 0, width(), floorHeightInteraction);
+    }
+
+    public void keyPressed(char key, int keyCode) {
+        if (key == 'w' || key == 'W') {
+            waveMode = !waveMode;
+            
+        } 
+
+        if (key == 'f' || key == 'F') {
+            foldCurtain = !foldCurtain;
+            targetCurtainProgress = foldCurtain ? 1 : 0;
+        } 
+
+        if (key == 'c' || key == 'C') {
+            cloneMirrored = !cloneMirrored;
+        } 
+
+        //baseNoiseAmount
+        if (key == PConstants.UP) {
+            baseNoiseAmount += incDecBaseNoiseAmount;
+        }
+        
+        if (keyCode == PConstants.DOWN) {
+            baseNoiseAmount = Math.max(0, baseNoiseAmount - incDecBaseNoiseAmount);
+        } 
+
+      //influenceRadius
+        if (keyCode == PConstants.RIGHT) {
+            influenceRadius += incDecInfluenceAmount;
+        }
+        if (keyCode == PConstants.LEFT) {
+            influenceRadius = Math.max(0, influenceRadius - incDecInfluenceAmount);
+        } 
+
+        //noise frequency
+        if (p.key == 'z' || p.key == 'Z') {
+            noiseScale = Math.max(0.001, noiseScale - incDecNoiseAmount);  // decrease frequency (more stretched)
+        } else if (p.key == 'x' || p.key == 'X') {
+            noiseScale += incDecNoiseAmount; // increase frequency 
+        }
     }
 
     @Override
