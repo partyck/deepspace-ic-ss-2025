@@ -20,7 +20,7 @@ public class Scene01Intro extends AbstractScene{
     float curtainProgress = 0;
     float curtainSpeed = 0.003f;
     float targetCurtainProgress = 0;
-    float incDecNoiseAmount = 0.01;
+    float incDecNoiseAmount = 0.01f;
     float incDecInfluenceAmount = 30;
     float incDecBaseNoiseAmount = 10;
 
@@ -191,7 +191,7 @@ public class Scene01Intro extends AbstractScene{
 
         //noise frequency
         if (p.key == 'z' || p.key == 'Z') {
-            noiseScale = Math.max(0.001, noiseScale - incDecNoiseAmount);  // decrease frequency (more stretched)
+            noiseScale = (float) Math.max(0.001, noiseScale - incDecNoiseAmount);  // decrease frequency (more stretched)
         } else if (p.key == 'x' || p.key == 'X') {
             noiseScale += incDecNoiseAmount; // increase frequency 
         }
