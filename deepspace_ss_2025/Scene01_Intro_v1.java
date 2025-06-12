@@ -36,33 +36,33 @@ public class Scene01_Intro_v1 extends AbstractScene {
 
     private void display(float centerX, float centerY) {
         // clear
-        p.background(30);
-        p.noStroke();
+        background(30);
+        noStroke();
 
         // advance the little wiggle
         animOff += speed;
 
         // build a “height” that spans both windows
-        float totalH   = p.height * 2f;
+        float totalH   = height() * 2f;
         float progress = timeElapsed / (float)animationTime;
-        float rectH    = p.lerp(totalH, 0, progress);
+        float rectH    = lerp(totalH, 0, progress);
         float halfH    = rectH * 0.5f;
 
         // draw your concentric layers around that big center
         for (int i = 0; i < layers; i++) {
-            float t = p.map(i, 0, layers - 1, 0, 1);
-            p.fill( p.lerpColor(startCol, endCol, t) );
+            float t = map(i, 0, layers - 1, 0, 1);
+            fill( lerpColor(startCol, endCol, t) );
 
             // Y-margins shrink from halfH down
-            float yM = p.map(i + p.sin(animOff + i * 0.2f), 0, layers, 0, halfH);
+            float yM = map(i + sin(animOff + i * 0.2f), 0, layers, 0, halfH);
             // X-margins just center in each window’s width
-            float xM = p.map(i + p.cos(animOff + i * 0.2f), 0, layers, 0, p.width * 0.5f);
+            float xM = map(i + cos(animOff + i * 0.2f), 0, layers, 0, width() * 0.5f);
 
             // carve out the slice for this window:
-            p.rect(
-                centerX - p.width * 0.5f + xM,    // left
+            rect(
+                centerX - width() * 0.5f + xM,    // left
                 centerY - halfH + yM,            // top
-                p.width  - 2 * xM,               // w
+                width()  - 2 * xM,               // w
                 rectH    - 2 * yM                // h
             );
         }

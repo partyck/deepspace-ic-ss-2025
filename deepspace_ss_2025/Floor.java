@@ -1,4 +1,4 @@
-import processing.core.PApplet;
+import processing.core.*;
 
 public class Floor extends PApplet {
     private AbstractScene scene;
@@ -9,10 +9,10 @@ public class Floor extends PApplet {
 
     public void settings() {
         if (Constants.DEV) {
-            size(Constants.WIDTH, Constants.FLOOR_HEIGHT);
+            size(Constants.WIDTH, Constants.FLOOR_HEIGHT, PConstants.P2D);
         }
         else {
-            fullScreen(1);
+            fullScreen(PConstants.P2D, 1);
         }
     }
 

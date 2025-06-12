@@ -6,6 +6,13 @@ import java.util.HashMap;
 
 // Buttons to press 'q' to start animation, 'w' to fix position of all rectangles
 // slider to controll 'x' and 'y' position of all rectangles
+// implement midi control to size the rectangles
+
+// first rectangle comes from the curtain
+// then resize it slowly with midi control (KORG nanoKONTROL2)
+// then fix the position
+// size of each rectangle should cahnge
+// stepping just with really fast movement, otherwise the dancers can expand the the size of the rectangle
 
 public class Scene02Rectangles extends AbstractScene {
     TuioClient tracker;
@@ -15,45 +22,46 @@ public class Scene02Rectangles extends AbstractScene {
 
     private class Rectangle {
         float x, y;
-        float width = 50;
-        float height = 50;
+        float width = Float.valueOf(width() / 10) ; // 50;
+        float height = Float.valueOf(height() / 10);
         boolean isFixed = false;
         float maxHeight = 0;
-        int animationType;  // Different animation types
+        int animationType;
         float animationProgress = 0;
         float targetWidth;
         float targetHeight;
+        float expansionSpeed = 2.0f; // Speed at which rectangle expands
         
         Rectangle(float x, float y) {
             this.x = x;
             this.y = y;
             // Assign random animation type (0-5)
-            this.animationType = (int)p.random(6);
+            this.animationType = (int) random(6);
             // Set target sizes based on animation type
             switch(animationType) {
                 case 0: // Tall and thin
-                    targetWidth = 30;
-                    targetHeight = 200;
+                    targetWidth = Float.valueOf((width() / 10) /2); 
+                    targetHeight = Float.valueOf((height() / 10) * 8);
                     break;
                 case 1: // Wide and short
-                    targetWidth = 200;
-                    targetHeight = 250;
+                    targetWidth = Float.valueOf((width() / 10) * 1);
+                    targetHeight = Float.valueOf((height() / 10) * 2);
                     break;
                 case 2: // Square but large
-                    targetWidth = 150;
-                    targetHeight = 150;
+                    targetWidth = Float.valueOf((width() / 10) / 2);
+                    targetHeight = Float.valueOf((height() / 10) * 5);
                     break;
                 case 3: // Tall and medium width
-                    targetWidth = 80;
-                    targetHeight = 250;
+                    targetWidth = Float.valueOf((width() / 10) / 2);
+                    targetHeight = Float.valueOf((height() / 10) * 9);
                     break;
                 case 4: // Medium square
-                    targetWidth = 100;
-                    targetHeight = 100;
+                    targetWidth = Float.valueOf((width() / 10 )* 1);
+                    targetHeight = Float.valueOf((height() / 10) * 1);
                     break;
                 case 5: // Wide and medium height
-                    targetWidth = 80;
-                    targetHeight = 300;
+                    targetWidth = Float.valueOf((width() / 10) * 1);
+                    targetHeight = Float.valueOf((height() / 10) * 6);
                     break;
             }
         }
@@ -90,9 +98,36 @@ public class Scene02Rectangles extends AbstractScene {
                         easedProgress = animationProgress;
                 }
                 
-                width = p.lerp(50, targetWidth, easedProgress);
-                height = p.lerp(50, targetHeight, easedProgress);
+                width = lerp(width, targetWidth, easedProgress);
+                height = lerp(height, targetHeight, easedProgress);
                 maxHeight = Math.max(maxHeight, height);
+            }
+        }
+
+        void updateWithCursor(float cursorX, float cursorY) {
+            if (isFixed) {
+                // Calculate distances from cursor to rectangle edges
+                float distToLeft = Math.abs(cursorX - (x - width/2));
+                float distToRight = Math.abs(cursorX - (x + width/2));
+                float distToTop = Math.abs(cursorY - (y - height/2));
+                float distToBottom = Math.abs(cursorY - (y + height/2));
+                
+                // If cursor is outside the rectangle, expand in that direction
+                if (cursorX < x - width/2) {
+                    width += expansionSpeed;
+                    x -= expansionSpeed/2; // Keep center point stable
+                } else if (cursorX > x + width/2) {
+                    width += expansionSpeed;
+                    x += expansionSpeed/2; // Keep center point stable
+                }
+                
+                if (cursorY < y - height/2) {
+                    height += expansionSpeed;
+                    y -= expansionSpeed/2; // Keep center point stable
+                } else if (cursorY > y + height/2) {
+                    height += expansionSpeed;
+                    y += expansionSpeed/2; // Keep center point stable
+                }
             }
         }
     }
@@ -114,7 +149,7 @@ public class Scene02Rectangles extends AbstractScene {
         text(text, width() - textWidth - 20, 20 + textHeight);
 
         // Save the current transformation state
-        p.pushMatrix();
+        p.pushMatrix(); 
         // Translate to the bottom of the wall
         p.translate(0, height());
         // Call display with the translated coordinates
@@ -165,6 +200,12 @@ public class Scene02Rectangles extends AbstractScene {
             if (!rect.isFixed) {
                 rect.x = tcur.getScreenX(this.width());
                 rect.y = tcur.getScreenY(this.height());
+            } else {
+                // Update rectangle with cursor position for expansion
+                rect.updateWithCursor(
+                    tcur.getScreenX(this.width()),
+                    tcur.getScreenY(this.height())
+                );
             }
             rect.updateAnimation();
         }
@@ -177,6 +218,7 @@ public class Scene02Rectangles extends AbstractScene {
         }
 
         // Draw cursor paths just for debugging
+        /*
         p.stroke(p.color(0, 0, 255));
         for (TuioCursor tcur : tuioCursorList) {
             ArrayList<TuioPoint> pointList = tcur.getPath();
@@ -189,5 +231,6 @@ public class Scene02Rectangles extends AbstractScene {
                 }
             }
         }
+        */
     }
 }
