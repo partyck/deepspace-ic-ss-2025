@@ -48,8 +48,8 @@ void setup() {
     oscP5 = new OscP5(this, 10000);
     
     MidiBus.list();
-    midiSound = new MidiBus(this, 2, 3);
-    midiController = new MidiBus(this, 1, 2);
+    midiSound = new MidiBus(this, Constants.MIDI_SOUND_IN, Constants.MIDI_SOUND_OUT);
+    midiController = new MidiBus(this, Constants.MIDI_CONTROL_IN, Constants.MIDI_CONTROL_OUT);
 
     loadCamera();
 

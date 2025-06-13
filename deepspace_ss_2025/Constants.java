@@ -7,8 +7,13 @@ public class Constants {
     public static final int CAMERA_WIDTH = 640;
     public static final int CAMERA_HEIGHT = 480;
     public static final float CAMERA_FPS = 20f;
+    public static final String MIDI_SOUND_IN = "sound-in";
+    public static final String MIDI_SOUND_OUT = "sound-out";
+    public static final String MIDI_CONTROL_IN = "KNOB";
+    public static final String MIDI_CONTROL_OUT = "SLIDER";
+
     
-    // Screen configuration
+    // Screen configuration for Development
     public static final float SCALE = 0.2f;
     public static final int WIDTH = (int) (3840 * SCALE);
     public static final int WALL_HEIGHT = (int) (2160 * SCALE);
