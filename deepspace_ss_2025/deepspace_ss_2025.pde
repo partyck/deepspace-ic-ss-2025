@@ -2,6 +2,7 @@ import processing.core.PApplet;
 import processing.video.*;
 import TUIO.*;
 import oscP5.*;
+import themidibus.*;
 
 import java.util.LinkedList;
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.Scanner;
 TuioClient tracker;
 Capture cam;
 OscP5 oscP5;
+MidiBus midiSound, midiController;
 
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
@@ -44,6 +46,10 @@ void setup() {
     
     // setup osc client
     oscP5 = new OscP5(this, 10000);
+    
+    MidiBus.list();
+    midiSound = new MidiBus(this, Constants.MIDI_SOUND_IN, Constants.MIDI_SOUND_OUT);
+    midiController = new MidiBus(this, Constants.MIDI_CONTROL_IN, Constants.MIDI_CONTROL_OUT);
 
     loadCamera();
 
@@ -52,15 +58,14 @@ void setup() {
     scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene02Rectangles(this, tracker), new Scene02Rectangles(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene07_DifferentSpeeds(this), new Scene07_DifferentSpeeds(floor)});
+    scenes.add(new AbstractScene[]{new SceneCamera(this, cam, tracker), new SceneCamera(floor, cam, tracker)});
     scenes.add(new AbstractScene[]{new Scene00_Curtain(this), new Scene00_Curtain(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro_v1(this), new Scene01_Intro_v1(floor)});
     scenes.add(new AbstractScene[]{new Scene02ValerioMorning(this), new Scene02ValerioMorning(floor)});
     scenes.add(new AbstractScene[]{new Scene05_Sophie(this), new Scene05_Sophie(floor)});
-    scenes.add(new AbstractScene[]{new SceneCamera(this, cam, tracker), new SceneCamera(floor, cam, tracker)});
-    scenes.add(new AbstractScene[]{new SceneRooms(this, tracker), new SceneRooms(floor, tracker)});
-    scenes.add(new AbstractScene[]{new SceneFloorTracker(this, tracker), new SceneFloorTracker(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
+    scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     nextScene();
 }
 
@@ -82,26 +87,40 @@ void oscEvent(OscMessage oscMessage) {
 
 
 void mousePressed() {
-     nextScene();
+    nextScene();
 }
 
 void keyPressed() {
-    String value = key == CODED ? "KeyCode" : key + "";
-    System.out.println("key pressed: " + value);
-    currentSceneWall.keyPressed(key, keyCode);
-    currentSceneFloor.keyPressed(key, keyCode);
+    if (key == ' ') {
+        nextScene();
+    }
+    else {
+        String value = key == CODED ? "KeyCode" : key + "";
+        System.out.println("key pressed: " + value);
+        currentSceneWall.keyPressed(key, keyCode);
+        currentSceneFloor.keyPressed(key, keyCode);
+    }
+}
+
+
+void controllerChange(int channel, int number, int value) {
+    println("MIDI in: Channel: " + channel + " Number: " + number + " Value: " + value);
+    currentSceneWall.midiIn(number, value);
+    currentSceneFloor.midiIn(number, value);
 }
 
 void nextScene() {
     AbstractScene[] currentScenes = scenes.poll();
     if (currentScenes == null) {
-        currentScenes = new AbstractScene[]{new Blackout(this), new Blackout(floor)};
+        exit();
+        return;
     }
     currentSceneWall = currentScenes[0];
     currentSceneFloor = currentScenes[1];
     currentSceneWall.init();
     currentSceneFloor.init();
     floor.setScene(currentSceneFloor);
+    midiSound.sendMessage(0xB0, 0, 1, 1);
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
 }
 
