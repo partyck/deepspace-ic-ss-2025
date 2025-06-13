@@ -1,4 +1,6 @@
-import processing.core.PApplet;
+import processing.core.*;
+import TUIO.*;
+import java.util.ArrayList;
 
 /**
  * CONTROLS : 
@@ -35,7 +37,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     public void keyEvent(processing.event.KeyEvent event) {
         if (event.getAction() == processing.event.KeyEvent.PRESS) {
-            System.out.println("Key pressed: " + event.getKeyCode());
+            System.out.println("Key pressed: TTTTTTTTTTTTTTTTTTT" + event.getKeyCode());
             if (event.getKeyCode() == 38) { // UP arrow
                 speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
                 System.out.println("Speed increased to: " + speedTop);
@@ -51,7 +53,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         background(0);
         noStroke();
         timeElapsed = (timeElapsed + 1) % animationTime;
-        noiseOffset += 0.01;
+        noiseOffset += 0.005 * speedTop;
 
         // Draw the black background and stripes first
         p.pushMatrix();
@@ -78,7 +80,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         noStroke();
         
         timeElapsed = (timeElapsed + 1) % animationTime;
-        noiseOffset += 0.01; // Increment noise offset for smooth variation
+        noiseOffset += 0.005 * speedTop;
         
         p.pushMatrix();
         p.translate(0, p.height/2f - 50);
