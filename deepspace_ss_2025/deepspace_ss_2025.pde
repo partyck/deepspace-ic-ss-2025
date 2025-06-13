@@ -59,6 +59,7 @@ void setup() {
     scenes.add(new AbstractScene[]{new Scene02Rectangles(this, tracker), new Scene02Rectangles(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene07_DifferentSpeeds(this), new Scene07_DifferentSpeeds(floor)});
     scenes.add(new AbstractScene[]{new SceneCamera(this, cam, tracker), new SceneCamera(floor, cam, tracker)});
+    scenes.add(new AbstractScene[]{new SceneRave(this, tracker), new SceneRave(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene00_Curtain(this), new Scene00_Curtain(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro(this), new Scene01_Intro(floor)});
     scenes.add(new AbstractScene[]{new Scene01_Intro_v1(this), new Scene01_Intro_v1(floor)});
