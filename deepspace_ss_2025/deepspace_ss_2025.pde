@@ -5,8 +5,6 @@ import oscP5.*;
 import themidibus.*;
 
 import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Scanner;
 
 TuioClient tracker;
 Capture cam;
@@ -17,16 +15,15 @@ Floor floor;
 LinkedList<AbstractScene[]> scenes;
 AbstractScene currentSceneWall = null;
 AbstractScene currentSceneFloor = null;
-
+boolean initialized = false;
 
 public void settings() {
     if (Constants.DEV) {
         size(Constants.WIDTH, Constants.WALL_HEIGHT, P2D);
-    }
-    else {
+    } else {
         fullScreen(P2D, 2);
     }
-    
+
     floor = new Floor();
     String[] argsFloor = {"floor"};
     PApplet.runSketch(argsFloor, floor);
@@ -43,17 +40,35 @@ void setup() {
         surface.setResizable(true);
     }
     surface.setTitle("Wall");
-    
-    // setup osc client
+
     oscP5 = new OscP5(this, 10000);
-    
+
     MidiBus.list();
-    midiSound = new MidiBus(this, Constants.MIDI_SOUND_IN, Constants.MIDI_SOUND_OUT);
-    midiController = new MidiBus(this, Constants.MIDI_CONTROL_IN, Constants.MIDI_CONTROL_OUT);
+    try {
+        if (MidiBus.availableInputs() != null && MidiBus.availableOutputs() != null) {
+            midiSound = new MidiBus(this, Constants.MIDI_SOUND_IN, Constants.MIDI_SOUND_OUT);
+            println("midiSound loaded.");
+        } else {
+            println("midiSound not available — inputs/outputs are null");
+        }
+    } catch (Exception e) {
+        println("Couldn't load midiSound: " + e);
+    }
+
+    try {
+        if (MidiBus.availableInputs() != null && MidiBus.availableOutputs() != null) {
+            midiController = new MidiBus(this, Constants.MIDI_CONTROL_IN, Constants.MIDI_CONTROL_OUT);
+            println("midiController loaded.");
+        } else {
+            println("midiController not available — inputs/outputs are null");
+        }
+    } catch (Exception e) {
+        println("Couldn't load midiController: " + e);
+    }
 
     loadCamera();
 
-    // Add all the scenes in order
+    // Add scenes
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene02Rectangles(this, tracker), new Scene02Rectangles(floor, tracker)});
@@ -67,47 +82,16 @@ void setup() {
     scenes.add(new AbstractScene[]{new Scene05_Sophie(this), new Scene05_Sophie(floor)});
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
-    nextScene();
 }
 
 public void draw() {
-    currentSceneWall.draw();
-}
-
-// incoming osc message are forwarded to the oscEvent method.
-void oscEvent(OscMessage oscMessage) {
-    println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
-    if (oscMessage.addrPattern().equals("/nextScene")) {
+    if (!initialized) {
         nextScene();
+        initialized = true;
     }
-    else {
-        currentSceneWall.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
-        currentSceneFloor.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+    if (currentSceneWall != null) {
+        currentSceneWall.draw();
     }
-}
-
-
-void mousePressed() {
-    nextScene();
-}
-
-void keyPressed() {
-    if (key == ' ') {
-        nextScene();
-    }
-    else {
-        String value = key == CODED ? "KeyCode" : key + "";
-        System.out.println("key pressed: " + value);
-        currentSceneWall.keyPressed(key, keyCode);
-        currentSceneFloor.keyPressed(key, keyCode);
-    }
-}
-
-
-void controllerChange(int channel, int number, int value) {
-    println("MIDI in: Channel: " + channel + " Number: " + number + " Value: " + value);
-    currentSceneWall.midiIn(number, value);
-    currentSceneFloor.midiIn(number, value);
 }
 
 void nextScene() {
@@ -121,8 +105,45 @@ void nextScene() {
     currentSceneWall.init();
     currentSceneFloor.init();
     floor.setScene(currentSceneFloor);
-    midiSound.sendMessage(0xB0, 0, 1, 1);
+
+    if (midiSound != null) {
+        midiSound.sendMessage(0xB0, 0, 1, 1);
+    } else {
+        println("🎛️ midiSound not available, skipping MIDI trigger.");
+    }
+
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
+}
+
+void oscEvent(OscMessage oscMessage) {
+    println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
+    if (oscMessage.addrPattern().equals("/nextScene")) {
+        nextScene();
+    } else {
+        if (currentSceneWall != null) currentSceneWall.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+        if (currentSceneFloor != null) currentSceneFloor.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+    }
+}
+
+void controllerChange(int channel, int number, int value) {
+    println("MIDI in: Channel: " + channel + " Number: " + number + " Value: " + value);
+    if (currentSceneWall != null) currentSceneWall.midiIn(number, value);
+    if (currentSceneFloor != null) currentSceneFloor.midiIn(number, value);
+}
+
+void mousePressed() {
+    nextScene();
+}
+
+void keyPressed() {
+    if (key == ' ') {
+        nextScene();
+    } else {
+        String value = key == CODED ? "KeyCode" : key + "";
+        System.out.println("key pressed: " + value);
+        if (currentSceneWall != null) currentSceneWall.keyPressed(key, keyCode);
+        if (currentSceneFloor != null) currentSceneFloor.keyPressed(key, keyCode);
+    }
 }
 
 void loadCamera() {
@@ -134,7 +155,9 @@ void loadCamera() {
         String cameraName = cameras[0];
         for (int i = 0; i < cameras.length; i++) {
             println(cameras[i]);
-            cameraName = cameras[i].equals(Constants.CAMERA_NAME) ? Constants.CAMERA_NAME : cameraName;
+            if (cameras[i].equals(Constants.CAMERA_NAME)) {
+                cameraName = Constants.CAMERA_NAME;
+            }
         }
         println("Camera in use: " + cameraName);
         cam = new Capture(this, Constants.CAMERA_WIDTH, Constants.CAMERA_HEIGHT, cameraName, Constants.CAMERA_FPS);
