@@ -65,7 +65,6 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
         // Draw text last so it appears on top
         p.fill(255);  // Set text color to white
-        p.textAlign(p.LEFT, p.TOP);  // Align text to top-left
         p.textSize(24);
         String text = "Speed: " + String.format("%.1f", speedTop);
         p.text(text, 20, 20);  // Position text in top-left corner
