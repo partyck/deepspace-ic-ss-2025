@@ -18,6 +18,9 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private final float SPEED_CHANGE_AMOUNT = 0.5f;
     private final float ROTATION_SPEED = 0.05f;
 
+    // ⚠️ Floor height used in rotated mode to match stripe block size
+    private final float floorStripeBlockHeight = 400;
+
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);
         this.timeElapsed = 0;
@@ -59,15 +62,18 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         boolean isRotated = Math.abs(rotationAngle - PConstants.HALF_PI) < 0.01f;
 
         p.pushMatrix();
-        p.translate(p.width / 2f, p.height / 2f);
+        p.translate(p.width / 2f, p.height / 2f);  // center of wall window
         p.rotate(rotationAngle);
         p.background(0);
 
-        p.translate(-p.width / 2f, -p.height / 2f);
-
         if (isRotated) {
-            drawFloorStripes(0, 0);
+            // 🟢 CENTER floor-content (width: p.height, height: floorStripeBlockHeight)
+            float floorContentWidth = p.height;
+            float floorContentHeight = floorStripeBlockHeight;
+            p.translate(-floorContentWidth / 2f, -floorContentHeight / 2f);
+            drawFloorStripes(0, 0, floorContentWidth, floorContentHeight);
         } else {
+            p.translate(-p.width / 2f, -p.height / 2f);
             float croppedHeight = p.height / 4f;
             drawStripes(0, p.height - croppedHeight, p.width, croppedHeight, stripeThicknessTop, speedTop);
         }
@@ -88,7 +94,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         p.translate(-p.width / 2f, -p.height / 2f);
 
         if (isRotated) {
-            drawFloorStripes(0, 0);
+            drawFloorStripes(0, 0, p.width, p.height);
         } else {
             p.translate(0, p.height / 2f - 50);
             drawStripes(0, 0, p.width, p.height / 2f, stripeThicknessBottom, -speedTop);
@@ -99,10 +105,10 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         p.popMatrix();
     }
 
-    private void drawFloorStripes(float offsetX, float offsetY) {
-        drawStripes(offsetX, offsetY + p.height / 2f, p.width, p.height / 2f, stripeThicknessBottom, -speedTop);
-        drawStripes(offsetX, offsetY, p.width, p.height / 2f, stripeThicknessTop, speedTop);
-        drawStripes(offsetX, offsetY - overlap, p.width, overlap, stripeThicknessTop, speedTop);
+    private void drawFloorStripes(float offsetX, float offsetY, float canvasW, float canvasH) {
+        drawStripes(offsetX, offsetY + canvasH / 2f, canvasW, canvasH / 2f, stripeThicknessBottom, -speedTop);
+        drawStripes(offsetX, offsetY, canvasW, canvasH / 2f, stripeThicknessTop, speedTop);
+        drawStripes(offsetX, offsetY - overlap, canvasW, overlap, stripeThicknessTop, speedTop);
     }
 
     private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
