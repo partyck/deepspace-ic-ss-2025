@@ -21,7 +21,7 @@ public void settings() {
     if (Constants.DEV) {
         size(Constants.WIDTH, Constants.WALL_HEIGHT, P2D);
     } else {
-        fullScreen(P2D, 2);
+        fullScreen(P2D, 1);
     }
 
     floor = new Floor();
