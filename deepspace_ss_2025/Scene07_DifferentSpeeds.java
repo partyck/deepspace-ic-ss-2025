@@ -52,10 +52,12 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     public void drawWall() {
         background(0);
         noStroke();
-        timeElapsed = (timeElapsed + 1) % animationTime;
-        noiseOffset += 0.005 * speedTop;
 
-        // Draw the black background and stripes first
+        timeElapsed = (timeElapsed + 1) % animationTime;
+        if (speedTop > 0.0f) {
+            noiseOffset += 0.005 * speedTop;
+        }
+
         p.pushMatrix();
         p.noStroke();
         p.fill(0);
@@ -63,12 +65,11 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         drawStripes(0, p.height - p.height/4f, p.width, p.height/4f, stripeThicknessTop, speedTop);
         p.popMatrix();
 
-        // Draw text last so it appears on top
-        p.fill(255);  // Set text color to white
+        p.fill(255);
         p.textSize(24);
         String text = "Speed: " + String.format("%.1f", speedTop);
-        p.text(text, 20, 20);  // Position text in top-left corner
-        
+        p.text(text, 20, 20);
+
         p.textSize(16);
         p.text("Press UP/DOWN arrows to change speed", 20, 50);
     }
@@ -77,10 +78,12 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     public void drawFloor() {
         background(0);
         noStroke();
-        
+
         timeElapsed = (timeElapsed + 1) % animationTime;
-        noiseOffset += 0.005 * speedTop;
-        
+        if (speedTop > 0.0f) {
+            noiseOffset += 0.005 * speedTop;
+        }
+
         p.pushMatrix();
         p.translate(0, p.height/2f - 50);
 
@@ -95,74 +98,49 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         p.popMatrix();
     }
 
-    /**
-     * Draws vertical white stripes across a region with irregular widths.
-     *
-     * @param x         left corner x
-     * @param y         top corner y
-     * @param w         region width
-     * @param h         region height
-     * @param thickness base stripe width
-     * @param speed     pixels/frame (0 → static)
-     */
     private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
         float offset = (timeElapsed * speed) % (thickness * 2);
         p.fill(255);
         p.noStroke();
-        
+
         float currentX = -offset;
         while (currentX < w) {
-            // Use Perlin noise to create more dramatic variation in stripe width
-            float noiseValue = p.noise(currentX * 0.005f, noiseOffset); // Even lower frequency for more dramatic changes
-            
-            // Create more extreme variations with more black space
+            float noiseValue = p.noise(currentX * 0.005f, noiseOffset);
+
             float stripeWidth;
             if (noiseValue < 0.15f) {
-                // Ultra thin lines (1-2 pixels)
                 stripeWidth = thickness * 0.03f;
             } else if (noiseValue < 0.3f) {
-                // Very thin lines
                 stripeWidth = thickness * 0.1f;
             } else if (noiseValue < 0.5f) {
-                // Medium lines
                 stripeWidth = thickness * 0.3f;
             } else if (noiseValue < 0.7f) {
-                // Normal stripes
                 stripeWidth = thickness * (0.5f + (noiseValue - 0.5f) * 2f);
             } else if (noiseValue < 0.85f) {
-                // Wide blocks
                 stripeWidth = thickness * (2f + (noiseValue - 0.7f) * 4f);
             } else {
-                // Ultra wide blocks
                 stripeWidth = thickness * (6f + (noiseValue - 0.85f) * 8f);
             }
-            
+
             p.rect(x + currentX, y, stripeWidth, h);
-            
-            // Random width for black space using a different noise value
-            float gapNoise = p.noise((currentX + 1000) * 0.002f, noiseOffset + 0.5f); // Offset to get different pattern
+
+            float gapNoise = p.noise((currentX + 1000) * 0.002f, noiseOffset + 0.5f);
             float gapWidth;
             if (gapNoise < 0.2f) {
-                // Very narrow gaps
                 gapWidth = thickness * 0.5f;
             } else if (gapNoise < 0.4f) {
-                // Narrow gaps
                 gapWidth = thickness * 1.0f;
             } else if (gapNoise < 0.6f) {
-                // Medium gaps
                 gapWidth = thickness * 2.0f;
             } else if (gapNoise < 0.8f) {
-                // Wide gaps
                 gapWidth = thickness * 3.0f;
             } else {
-                // Very wide gaps
                 gapWidth = thickness * 4.0f;
             }
-            
-            // Add random multiplication to gap width
+
             float randomMultiplier = 0.2f + p.random(0.5f);
             gapWidth *= randomMultiplier;
-            
+
             currentX += stripeWidth + gapWidth;
         }
     }
