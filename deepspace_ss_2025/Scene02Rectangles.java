@@ -4,25 +4,14 @@ import TUIO.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-// Buttons to press 'q' to start animation, 'w' to fix position of all rectangles
-// slider to controll 'x' and 'y' position of all rectangles
-// implement midi control to size the rectangles
-
-// first rectangle comes from the curtain
-// then resize it slowly with midi control (KORG nanoKONTROL2)
-// then fix the position
-// size of each rectangle should cahnge
-// stepping just with really fast movement, otherwise the dancers can expand the the size of the rectangle
-
 public class Scene02Rectangles extends AbstractScene {
     TuioClient tracker;
     private static HashMap<Integer, Rectangle> rectangles = new HashMap<>();
-    private static float animationSize = 0;
     private static boolean isAnimating = false;
 
     private class Rectangle {
         float x, y;
-        float width = Float.valueOf(width() / 10) ; // 50;
+        float width = Float.valueOf(width() / 10);
         float height = Float.valueOf(height() / 10);
         boolean isFixed = false;
         float maxHeight = 0;
@@ -30,37 +19,38 @@ public class Scene02Rectangles extends AbstractScene {
         float animationProgress = 0;
         float targetWidth;
         float targetHeight;
-        float expansionSpeed = 2.0f; // Speed at which rectangle expands
-        
+        float expansionSpeed = 2.0f;
+
+        TuioCursor lastCursor = null;
+        boolean wasCursorInside = false;
+
         Rectangle(float x, float y) {
             this.x = x;
             this.y = y;
-            // Assign random animation type (0-5)
             this.animationType = (int) random(6);
-            // Set target sizes based on animation type
-            switch(animationType) {
-                case 0: // Tall and thin
-                    targetWidth = Float.valueOf((width() / 10) /2); 
+            switch (animationType) {
+                case 0:
+                    targetWidth = Float.valueOf((width() / 10) / 2);
                     targetHeight = Float.valueOf((height() / 10) * 8);
                     break;
-                case 1: // Wide and short
-                    targetWidth = Float.valueOf((width() / 10) * 1);
+                case 1:
+                    targetWidth = Float.valueOf((width() / 10));
                     targetHeight = Float.valueOf((height() / 10) * 2);
                     break;
-                case 2: // Square but large
+                case 2:
                     targetWidth = Float.valueOf((width() / 10) / 2);
                     targetHeight = Float.valueOf((height() / 10) * 5);
                     break;
-                case 3: // Tall and medium width
+                case 3:
                     targetWidth = Float.valueOf((width() / 10) / 2);
                     targetHeight = Float.valueOf((height() / 10) * 9);
                     break;
-                case 4: // Medium square
-                    targetWidth = Float.valueOf((width() / 10 )* 1);
-                    targetHeight = Float.valueOf((height() / 10) * 1);
+                case 4:
+                    targetWidth = Float.valueOf((width() / 10));
+                    targetHeight = Float.valueOf((height() / 10));
                     break;
-                case 5: // Wide and medium height
-                    targetWidth = Float.valueOf((width() / 10) * 1);
+                case 5:
+                    targetWidth = Float.valueOf((width() / 10));
                     targetHeight = Float.valueOf((height() / 10) * 6);
                     break;
             }
@@ -68,68 +58,72 @@ public class Scene02Rectangles extends AbstractScene {
 
         void updateAnimation() {
             if (isAnimating) {
-                animationProgress += 0.02; // Animation speed
-                if (animationProgress > 1) {
-                    animationProgress = 1;
-                }
-                
-                // Different easing functions for different animation types
+                animationProgress += 0.02;
+                if (animationProgress > 1) animationProgress = 1;
+
                 float easedProgress;
-                switch(animationType) {
-                    case 0: // Linear
-                        easedProgress = animationProgress;
-                        break;
-                    case 1: // Ease out
-                        easedProgress = 1 - (1 - animationProgress) * (1 - animationProgress);
-                        break;
-                    case 2: // Ease in
-                        easedProgress = animationProgress * animationProgress;
-                        break;
-                    case 3: // Bounce
-                        easedProgress = 1 - (float)Math.cos(animationProgress * Math.PI * 2);
-                        break;
-                    case 4: // Elastic
-                        easedProgress = (float)Math.sin(animationProgress * Math.PI * 4) * (1 - animationProgress) + animationProgress;
-                        break;
-                    case 5: // Smooth step
-                        easedProgress = animationProgress * animationProgress * (3 - 2 * animationProgress);
-                        break;
-                    default:
-                        easedProgress = animationProgress;
+                switch (animationType) {
+                    case 0: easedProgress = animationProgress; break;
+                    case 1: easedProgress = 1 - (1 - animationProgress) * (1 - animationProgress); break;
+                    case 2: easedProgress = animationProgress * animationProgress; break;
+                    case 3: easedProgress = 1 - (float) Math.cos(animationProgress * Math.PI * 2); break;
+                    case 4: easedProgress = (float) Math.sin(animationProgress * Math.PI * 4) * (1 - animationProgress) + animationProgress; break;
+                    case 5: easedProgress = animationProgress * animationProgress * (3 - 2 * animationProgress); break;
+                    default: easedProgress = animationProgress;
                 }
-                
+
                 width = lerp(width, targetWidth, easedProgress);
                 height = lerp(height, targetHeight, easedProgress);
                 maxHeight = Math.max(maxHeight, height);
             }
         }
 
-        void updateWithCursor(float cursorX, float cursorY) {
-            if (isFixed) {
-                // Calculate distances from cursor to rectangle edges
-                float distToLeft = Math.abs(cursorX - (x - width/2));
-                float distToRight = Math.abs(cursorX - (x + width/2));
-                float distToTop = Math.abs(cursorY - (y - height/2));
-                float distToBottom = Math.abs(cursorY - (y + height/2));
-                
-                // If cursor is outside the rectangle, expand in that direction
-                if (cursorX < x - width/2) {
-                    width += expansionSpeed;
-                    x -= expansionSpeed/2; // Keep center point stable
-                } else if (cursorX > x + width/2) {
-                    width += expansionSpeed;
-                    x += expansionSpeed/2; // Keep center point stable
-                }
-                
-                if (cursorY < y - height/2) {
-                    height += expansionSpeed;
-                    y -= expansionSpeed/2; // Keep center point stable
-                } else if (cursorY > y + height/2) {
-                    height += expansionSpeed;
-                    y += expansionSpeed/2; // Keep center point stable
+        void updateWithClosestCursor(ArrayList<TuioCursor> cursors, int sceneWidth, int sceneHeight) {
+            TuioCursor closest = null;
+            float minDist = Float.MAX_VALUE;
+
+            for (TuioCursor tcur : cursors) {
+                float cx = tcur.getScreenX(sceneWidth);
+                float cy = tcur.getScreenY(sceneHeight);
+                float d = dist(cx, cy, x, y);
+                if (d < minDist) {
+                    minDist = d;
+                    closest = tcur;
                 }
             }
+
+            if (closest == null) return;
+
+            float cx = closest.getScreenX(sceneWidth);
+            float cy = closest.getScreenY(sceneHeight);
+
+            boolean isInside = cx >= x - width / 2 && cx <= x + width / 2 &&
+                            cy >= y - height / 2 && cy <= y + height / 2;
+
+            if (!isInside) {
+                // Expand continuously while cursor stays outside
+                if (cx < x - width / 2) {
+                    width += expansionSpeed;
+                    x -= expansionSpeed / 2;
+                } else if (cx > x + width / 2) {
+                    width += expansionSpeed;
+                    x += expansionSpeed / 2;
+                }
+
+                if (cy < y - height / 2) {
+                    height += expansionSpeed;
+                    y -= expansionSpeed / 2;
+                } else if (cy > y + height / 2) {
+                    height += expansionSpeed;
+                    y += expansionSpeed / 2;
+                }
+            }
+
+            // Update tracking state
+            wasCursorInside = isInside;
+            lastCursor = closest;
         }
+
     }
 
     public Scene02Rectangles(PApplet p, TuioClient tracker) {
@@ -141,19 +135,15 @@ public class Scene02Rectangles extends AbstractScene {
     public void drawWall() {
         background(0);
         fill(255);
-        textSize(24); 
+        textSize(24);
         String text = "Scene Rectangles".toUpperCase();
         float textWidth = p.textWidth(text);
         float textHeight = p.textAscent() + p.textDescent();
         text(text, width() - textWidth - 20, 20 + textHeight);
 
-        // Save the current transformation state
-        p.pushMatrix(); 
-        // Translate to the bottom of the wall
+        p.pushMatrix();
         p.translate(0, height());
-        // Call display with the translated coordinates
         display();
-        // Restore the transformation state
         p.popMatrix();
     }
 
@@ -180,54 +170,37 @@ public class Scene02Rectangles extends AbstractScene {
 
     private void display() {
         background(0);
-
         ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
-        
-        // Update or create rectangles for each cursor
+
         for (TuioCursor tcur : tuioCursorList) {
             int cursorId = tcur.getCursorID();
             if (!rectangles.containsKey(cursorId)) {
                 rectangles.put(cursorId, new Rectangle(
-                    tcur.getScreenX(this.width()),
-                    tcur.getScreenY(this.height())
+                        tcur.getScreenX(this.width()),
+                        tcur.getScreenY(this.height())
                 ));
             }
-            
-            Rectangle rect = rectangles.get(cursorId);
+        }
+
+        for (Rectangle rect : rectangles.values()) {
             if (!rect.isFixed) {
-                rect.x = tcur.getScreenX(this.width());
-                rect.y = tcur.getScreenY(this.height());
+                for (TuioCursor tcur : tuioCursorList) {
+                    if (rect == rectangles.get(tcur.getCursorID())) {
+                        rect.x = tcur.getScreenX(this.width());
+                        rect.y = tcur.getScreenY(this.height());
+                    }
+                }
             } else {
-                // Update rectangle with cursor position for expansion
-                rect.updateWithCursor(
-                    tcur.getScreenX(this.width()),
-                    tcur.getScreenY(this.height())
-                );
+                rect.updateWithClosestCursor(tuioCursorList, this.width(), this.height());
             }
+
             rect.updateAnimation();
         }
 
-        // Draw all rectangles
         p.noStroke();
         p.fill(255);
         for (Rectangle rect : rectangles.values()) {
-            p.rect(rect.x - rect.width/2, rect.y - rect.height/2, rect.width, rect.height);
+            p.rect(rect.x - rect.width / 2, rect.y - rect.height / 2, rect.width, rect.height);
         }
-
-        // Draw cursor paths just for debugging
-        /*
-        p.stroke(p.color(0, 0, 255));
-        for (TuioCursor tcur : tuioCursorList) {
-            ArrayList<TuioPoint> pointList = tcur.getPath();
-            if (!pointList.isEmpty()) {
-                TuioPoint startPoint = pointList.get(0);
-                for (TuioPoint end_point : pointList) {
-                    p.line(startPoint.getScreenX(this.width()), startPoint.getScreenY(this.height()), 
-                         end_point.getScreenX(this.width()), end_point.getScreenY(this.height()));
-                    startPoint = end_point;
-                }
-            }
-        }
-        */
     }
 }
