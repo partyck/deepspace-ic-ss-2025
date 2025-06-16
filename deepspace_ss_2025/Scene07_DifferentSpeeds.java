@@ -2,146 +2,126 @@ import processing.core.*;
 import TUIO.*;
 import java.util.ArrayList;
 
-/**
- * CONTROLS : 
- *    speed of the stripes
- *        - speedUp [up arrow]
- *        - speedDown [down arrow]
- *    direction of the stripes
- *        - change direction [d]
- *    Rotation trigger an animation of 90deg rotation of whole scene (should be extended over floor and wall like one big canvas)
- *        - 90deg rotate [r] 
- *    stripes thickness irregular with Noise
- */
-
 public class Scene07_DifferentSpeeds extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
 
-    // stripe settings
-    private final int   stripeThicknessTop      = 20;
-    private final int   stripeThicknessBottom   = 40;
-    private float speedTop                      = 1.0f;
-    private final float speedBottom             = 0f;
-    private final float overlap                 = 20f;
-    private float noiseOffset                   = 0; 
-    private final float SPEED_CHANGE_AMOUNT     = 0.5f;
+    // Shared animation state
+    private static float speedTop = 1.0f;
+    private static float noiseOffset = 0f;
+    private static float rotationAngle = 0f;
+    private static float targetRotationAngle = 0f;
+    private static boolean isKeyRegistered = false;
+
+    // Constants
+    private final int stripeThicknessTop = 20;
+    private final int stripeThicknessBottom = 40;
+    private final float overlap = 20f;
+    private final float SPEED_CHANGE_AMOUNT = 0.5f;
+    private final float ROTATION_SPEED = 0.05f; // how fast the rotation animates
 
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);
-        this.timeElapsed   = 0;
+        this.timeElapsed = 0;
         this.animationTime = 100;
-        System.out.println("Scene initialized with speed: " + speedTop);
-        p.registerMethod("keyEvent", this);  // Register for key events
+
+        if (!isKeyRegistered) {
+            p.registerMethod("keyEvent", this);
+            isKeyRegistered = true;
+        }
     }
 
     public void keyEvent(processing.event.KeyEvent event) {
         if (event.getAction() == processing.event.KeyEvent.PRESS) {
-            System.out.println("Key pressed: TTTTTTTTTTTTTTTTTTT" + event.getKeyCode());
             if (event.getKeyCode() == 38) { // UP arrow
                 speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
-                System.out.println("Speed increased to: " + speedTop);
             } else if (event.getKeyCode() == 40) { // DOWN arrow
                 speedTop = Math.max(speedTop - SPEED_CHANGE_AMOUNT, 0.0f);
-                System.out.println("Speed decreased to: " + speedTop);
+            } else if (event.getKey() == 'r' || event.getKey() == 'R') {
+                // Toggle between 0 and HALF_PI (90 degrees)
+                if (targetRotationAngle == 0) {
+                    targetRotationAngle = PConstants.HALF_PI;
+                } else {
+                    targetRotationAngle = 0;
+                }
             }
+        }
+    }
+
+    private void updateAnimationState() {
+        timeElapsed = (timeElapsed + 1) % animationTime;
+
+        if (speedTop > 0.0f) {
+            noiseOffset += 0.005 * speedTop;
+        }
+
+        // Smooth rotation
+        float angleDiff = targetRotationAngle - rotationAngle;
+        if (Math.abs(angleDiff) > 0.001f) {
+            rotationAngle += angleDiff * ROTATION_SPEED;
         }
     }
 
     @Override
     public void drawWall() {
-        background(0);
-        noStroke();
-
-        timeElapsed = (timeElapsed + 1) % animationTime;
-        if (speedTop > 0.0f) {
-            noiseOffset += 0.005 * speedTop;
-        }
+        updateAnimationState();
 
         p.pushMatrix();
-        p.noStroke();
-        p.fill(0);
-        p.rect(0, 0, p.width, p.height/2f);
-        drawStripes(0, p.height - p.height/4f, p.width, p.height/4f, stripeThicknessTop, speedTop);
+        p.translate(p.width / 2f, p.height / 2f);
+        p.rotate(rotationAngle);
+        p.translate(-p.width / 2f, -p.height / 2f);
+        drawScene(true);
         p.popMatrix();
-
-        p.fill(255);
-        p.textSize(24);
-        String text = "Speed: " + String.format("%.1f", speedTop);
-        p.text(text, 20, 20);
-
-        p.textSize(16);
-        p.text("Press UP/DOWN arrows to change speed", 20, 50);
     }
 
     @Override
     public void drawFloor() {
-        background(0);
-        noStroke();
-
-        timeElapsed = (timeElapsed + 1) % animationTime;
-        if (speedTop > 0.0f) {
-            noiseOffset += 0.005 * speedTop;
-        }
+        updateAnimationState();
 
         p.pushMatrix();
-        p.translate(0, p.height/2f - 50);
-
-        p.noStroke();
-        p.fill(0);
-        p.rect(0, 0, p.width, p.height/2f);
-
-        drawStripes(0, 0, p.width, p.height/2f, stripeThicknessBottom, -speedTop);    
-        drawStripes(0, - p.height/2f, p.width, p.height/2f, stripeThicknessTop, speedTop);
-        drawStripes(0, -overlap, p.width, overlap, stripeThicknessTop, speedTop);
-
+        p.translate(p.width / 2f, p.height / 2f);
+        p.rotate(rotationAngle);
+        p.translate(-p.width / 2f, -p.height / 2f);
+        drawScene(false);
         p.popMatrix();
     }
 
-    private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
-        float offset = (timeElapsed * speed) % (thickness * 2);
-        p.fill(255);
+    private void drawScene(boolean isWall) {
+        p.background(0);
         p.noStroke();
 
-        float currentX = -offset;
-        while (currentX < w) {
-            float noiseValue = p.noise(currentX * 0.005f, noiseOffset);
+        if (isWall) {
+            // Wall: upper portion
+            p.fill(0);
+            p.rect(0, 0, p.width, p.height / 2f);
+            drawStripes(0, p.height - p.height / 4f, p.width, p.height / 4f, stripeThicknessTop, speedTop);
+        } else {
+            // Floor: lower portion
+            p.translate(0, p.height / 2f - 50);
+            p.fill(0);
+            p.rect(0, 0, p.width, p.height / 2f);
+            drawStripes(0, 0, p.width, p.height / 2f, stripeThicknessBottom, -speedTop);
+            drawStripes(0, -p.height / 2f, p.width, p.height / 2f, stripeThicknessTop, speedTop);
+            drawStripes(0, -overlap, p.width, overlap, stripeThicknessTop, speedTop);
+        }
+    }
 
-            float stripeWidth;
-            if (noiseValue < 0.15f) {
-                stripeWidth = thickness * 0.03f;
-            } else if (noiseValue < 0.3f) {
-                stripeWidth = thickness * 0.1f;
-            } else if (noiseValue < 0.5f) {
-                stripeWidth = thickness * 0.3f;
-            } else if (noiseValue < 0.7f) {
-                stripeWidth = thickness * (0.5f + (noiseValue - 0.5f) * 2f);
-            } else if (noiseValue < 0.85f) {
-                stripeWidth = thickness * (2f + (noiseValue - 0.7f) * 4f);
-            } else {
-                stripeWidth = thickness * (6f + (noiseValue - 0.85f) * 8f);
+    private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
+        float baseStripeWidth = thickness;
+        float totalWidth = w + baseStripeWidth * 2;
+        float offset = (timeElapsed * speed) % baseStripeWidth;
+
+        for (float currentX = -offset; currentX < totalWidth; currentX += baseStripeWidth * 2) {
+            float stripeWidth = baseStripeWidth;
+
+            // Subtle widening effect only at high speeds
+            if (speedTop > 4.5f) {
+                float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
+                stripeWidth *= 0.8f + 0.4f * noiseVal;
             }
 
+            p.fill(255);
             p.rect(x + currentX, y, stripeWidth, h);
-
-            float gapNoise = p.noise((currentX + 1000) * 0.002f, noiseOffset + 0.5f);
-            float gapWidth;
-            if (gapNoise < 0.2f) {
-                gapWidth = thickness * 0.5f;
-            } else if (gapNoise < 0.4f) {
-                gapWidth = thickness * 1.0f;
-            } else if (gapNoise < 0.6f) {
-                gapWidth = thickness * 2.0f;
-            } else if (gapNoise < 0.8f) {
-                gapWidth = thickness * 3.0f;
-            } else {
-                gapWidth = thickness * 4.0f;
-            }
-
-            float randomMultiplier = 0.2f + p.random(0.5f);
-            gapWidth *= randomMultiplier;
-
-            currentX += stripeWidth + gapWidth;
         }
     }
 }
