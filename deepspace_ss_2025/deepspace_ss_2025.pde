@@ -107,7 +107,7 @@ void nextScene() {
     floor.setScene(currentSceneFloor);
 
     if (midiSound != null) {
-        midiSound.sendMessage(0xB0, 0, 1, 1);
+        midiSound.sendMessage(0xB0, 0, 1, frameCount % 127);
     } else {
         println("🎛️ midiSound not available, skipping MIDI trigger.");
     }
