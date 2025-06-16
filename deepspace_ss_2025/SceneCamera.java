@@ -50,14 +50,13 @@ public class SceneCamera extends AbstractScene {
             buffer = new LinkedList<>();
         }
         grid.init();
+        circles = floor(width() / separation);
+        updateGrid();
     }
 
     @Override
     public void init() {
         noiseDetail(noiseDetail);
-        circles = floor(width() / separation);
-        updateGrid();
-        background(0);
     }
 
     @Override

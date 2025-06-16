@@ -135,7 +135,6 @@ public class Scene02Rectangles extends AbstractScene {
     public Scene02Rectangles(PApplet p, TuioClient tracker) {
         super(p);
         this.tracker = tracker;
-        p.registerMethod("keyEvent", this);
     }
 
     @Override
@@ -163,19 +162,17 @@ public class Scene02Rectangles extends AbstractScene {
         display();
     }
 
-    public void keyEvent(processing.event.KeyEvent event) {
-        if (event.getAction() == processing.event.KeyEvent.PRESS) {
-            if (event.getKey() == 'q' || event.getKey() == 'Q') {
-                isAnimating = true;
-                // Reset animation progress for all rectangles
-                for (Rectangle rect : rectangles.values()) {
-                    rect.animationProgress = 0;
-                }
-            } else if (event.getKey() == 'w' || event.getKey() == 'W') {
-                for (Rectangle rect : rectangles.values()) {
-                    if (!rect.isFixed) {
-                        rect.isFixed = true;
-                    }
+     public void keyPressed(char key, int keyCode) {
+        if (key == 'q' || key == 'Q') {
+            isAnimating = true;
+            // Reset animation progress for all rectangles
+            for (Rectangle rect : rectangles.values()) {
+                rect.animationProgress = 0;
+            }
+        } else if (key == 'w' || key == 'W') {
+            for (Rectangle rect : rectangles.values()) {
+                if (!rect.isFixed) {
+                    rect.isFixed = true;
                 }
             }
         }
