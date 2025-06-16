@@ -10,6 +10,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private static float noiseOffset = 0f;
     private static float rotationAngle = 0f;
     private static float targetRotationAngle = 0f;
+    private static int direction = 1;
     private static boolean isKeyRegistered = false;
 
     private final int stripeThicknessTop = 20;
@@ -18,8 +19,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private final float SPEED_CHANGE_AMOUNT = 0.5f;
     private final float ROTATION_SPEED = 0.05f;
 
-    // ⚠️ Floor height used in rotated mode to match stripe block size
-    private final float floorStripeBlockHeight = 400;
+    private final float floorStripeBlockHeight = height();
 
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);
@@ -34,12 +34,14 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     public void keyEvent(processing.event.KeyEvent event) {
         if (event.getAction() == processing.event.KeyEvent.PRESS) {
-            if (event.getKeyCode() == 38) {
+            if (event.getKeyCode() == 38) { // UP
                 speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
-            } else if (event.getKeyCode() == 40) {
+            } else if (event.getKeyCode() == 40) { // DOWN
                 speedTop = Math.max(speedTop - SPEED_CHANGE_AMOUNT, 0.0f);
             } else if (event.getKey() == 'r' || event.getKey() == 'R') {
                 targetRotationAngle = (targetRotationAngle == 0) ? PConstants.HALF_PI : 0;
+            } else if (event.getKey() == 'd' || event.getKey() == 'D') {
+                direction *= -1;
             }
         }
     }
@@ -62,12 +64,11 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         boolean isRotated = Math.abs(rotationAngle - PConstants.HALF_PI) < 0.01f;
 
         p.pushMatrix();
-        p.translate(p.width / 2f, p.height / 2f);  // center of wall window
+        p.translate(p.width / 2f, p.height / 2f);
         p.rotate(rotationAngle);
         p.background(0);
 
         if (isRotated) {
-            // 🟢 CENTER floor-content (width: p.height, height: floorStripeBlockHeight)
             float floorContentWidth = p.height;
             float floorContentHeight = floorStripeBlockHeight;
             p.translate(-floorContentWidth / 2f, -floorContentHeight / 2f);
@@ -75,7 +76,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         } else {
             p.translate(-p.width / 2f, -p.height / 2f);
             float croppedHeight = p.height / 4f;
-            drawStripes(0, p.height - croppedHeight, p.width, croppedHeight, stripeThicknessTop, speedTop);
+            drawStripes(0, p.height - croppedHeight, p.width, croppedHeight, stripeThicknessTop, speedTop * direction);
         }
 
         p.popMatrix();
@@ -97,18 +98,18 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
             drawFloorStripes(0, 0, p.width, p.height);
         } else {
             p.translate(0, p.height / 2f - 50);
-            drawStripes(0, 0, p.width, p.height / 2f, stripeThicknessBottom, -speedTop);
-            drawStripes(0, -p.height / 2f, p.width, p.height / 2f, stripeThicknessTop, speedTop);
-            drawStripes(0, -overlap, p.width, overlap, stripeThicknessTop, speedTop);
+            drawStripes(0, 0, p.width, p.height / 2f, stripeThicknessBottom, -speedTop * direction);
+            drawStripes(0, -p.height / 2f, p.width, p.height / 2f, stripeThicknessTop, speedTop * direction);
+            drawStripes(0, -overlap, p.width, overlap, stripeThicknessTop, speedTop * direction);
         }
 
         p.popMatrix();
     }
 
     private void drawFloorStripes(float offsetX, float offsetY, float canvasW, float canvasH) {
-        drawStripes(offsetX, offsetY + canvasH / 2f, canvasW, canvasH / 2f, stripeThicknessBottom, -speedTop);
-        drawStripes(offsetX, offsetY, canvasW, canvasH / 2f, stripeThicknessTop, speedTop);
-        drawStripes(offsetX, offsetY - overlap, canvasW, overlap, stripeThicknessTop, speedTop);
+        drawStripes(offsetX, offsetY + canvasH / 2f, canvasW, canvasH / 2f, stripeThicknessBottom, -speedTop * direction);
+        drawStripes(offsetX, offsetY, canvasW, canvasH / 2f, stripeThicknessTop, speedTop * direction);
+        drawStripes(offsetX, offsetY - overlap, canvasW, overlap, stripeThicknessTop, speedTop * direction);
     }
 
     private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
