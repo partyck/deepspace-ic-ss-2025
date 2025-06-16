@@ -5,6 +5,7 @@ import java.util.ArrayList;
 // key R - rotate scene
 // key D - change animation direction
 // arrow keys up/down - speed up/down
+// arrow key left/right - change width of stripes (three states: 1- equal width, 2 getting unequal,3 noisy width)
 
 public class Scene07_DifferentSpeeds extends AbstractScene {
     private int timeElapsed;
@@ -15,6 +16,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private static float rotationAngle = 0f;
     private static float targetRotationAngle = 0f;
     private static int direction = 1;
+    private static int stripeMode = 0; // 0=normal, 1=every 5th wide, 2=every 5th wide + 3rd narrow
     private static boolean isKeyRegistered = false;
 
     private final int stripeThicknessTop = 20;
@@ -22,7 +24,6 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private final float overlap = 20f;
     private final float SPEED_CHANGE_AMOUNT = 0.5f;
     private final float ROTATION_SPEED = 0.05f;
-
     private final float floorStripeBlockHeight = height();
 
     public Scene07_DifferentSpeeds(PApplet p) {
@@ -38,14 +39,18 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     public void keyEvent(processing.event.KeyEvent event) {
         if (event.getAction() == processing.event.KeyEvent.PRESS) {
-            if (event.getKeyCode() == 38) { // UP
+            if (event.getKeyCode() == 38) {
                 speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
-            } else if (event.getKeyCode() == 40) { // DOWN
+            } else if (event.getKeyCode() == 40) {
                 speedTop = Math.max(speedTop - SPEED_CHANGE_AMOUNT, 0.0f);
             } else if (event.getKey() == 'r' || event.getKey() == 'R') {
                 targetRotationAngle = (targetRotationAngle == 0) ? PConstants.HALF_PI : 0;
             } else if (event.getKey() == 'd' || event.getKey() == 'D') {
                 direction *= -1;
+            } else if (event.getKeyCode() == 39) { // RIGHT arrow
+                stripeMode = (stripeMode + 1) % 3;
+            } else if (event.getKeyCode() == 37) { // LEFT arrow
+                stripeMode = (stripeMode + 2) % 3; // go back
             }
         }
     }
@@ -95,7 +100,6 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         p.translate(p.width / 2f, p.height / 2f);
         p.rotate(rotationAngle);
         p.background(0);
-
         p.translate(-p.width / 2f, -p.height / 2f);
 
         if (isRotated) {
@@ -121,15 +125,29 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         float totalWidth = w + baseStripeWidth * 2;
         float offset = (timeElapsed * speed) % baseStripeWidth;
 
-        for (float currentX = -offset; currentX < totalWidth; currentX += baseStripeWidth * 2) {
+        int stripeIndex = 0;
+        for (float currentX = -offset; currentX < totalWidth; ) {
             float stripeWidth = baseStripeWidth;
-            if (speedTop > 4.5f) {
+
+            if (stripeMode == 1 && stripeIndex % 5 == 0) {
+                stripeWidth *= 3.5f;
+            } else if (stripeMode == 2) {
+                if (stripeIndex % 5 == 0) {
+                    stripeWidth *= 3.5f;
+                } else if (stripeIndex % 3 == 0) {
+                    float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
+                    stripeWidth *= 0.4f + 0.3f * noiseVal;
+                }
+            } else if (speedTop > 4.5f) {
                 float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
                 stripeWidth *= 0.8f + 0.4f * noiseVal;
             }
 
             p.fill(255);
             p.rect(x + currentX, y, stripeWidth, h);
+
+            currentX += stripeWidth + baseStripeWidth; // fixed gap
+            stripeIndex++;
         }
     }
 }
