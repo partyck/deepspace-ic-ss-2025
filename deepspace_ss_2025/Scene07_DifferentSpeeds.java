@@ -131,12 +131,13 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
             if (stripeMode == 1 && stripeIndex % 5 == 0) {
                 stripeWidth *= 3.5f;
+
             } else if (stripeMode == 2) {
                 if (stripeIndex % 5 == 0) {
                     stripeWidth *= 3.5f;
                 } else if (stripeIndex % 3 == 0) {
                     float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
-                    stripeWidth *= 0.4f + 0.3f * noiseVal;
+                    stripeWidth *= 0.2f + 0.2f * noiseVal; // narrower and more variation
                 }
             } else if (speedTop > 4.5f) {
                 float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
