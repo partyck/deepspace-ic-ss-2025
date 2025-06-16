@@ -32,26 +32,23 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         this.animationTime = 100;
 
         if (!isKeyRegistered) {
-            p.registerMethod("keyEvent", this);
             isKeyRegistered = true;
         }
     }
 
-    public void keyEvent(processing.event.KeyEvent event) {
-        if (event.getAction() == processing.event.KeyEvent.PRESS) {
-            if (event.getKeyCode() == 38) {
-                speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
-            } else if (event.getKeyCode() == 40) {
-                speedTop = Math.max(speedTop - SPEED_CHANGE_AMOUNT, 0.0f);
-            } else if (event.getKey() == 'r' || event.getKey() == 'R') {
-                targetRotationAngle = (targetRotationAngle == 0) ? PConstants.HALF_PI : 0;
-            } else if (event.getKey() == 'd' || event.getKey() == 'D') {
-                direction *= -1;
-            } else if (event.getKeyCode() == 39) { // RIGHT arrow
-                stripeMode = (stripeMode + 1) % 3;
-            } else if (event.getKeyCode() == 37) { // LEFT arrow
-                stripeMode = (stripeMode + 2) % 3; // go back
-            }
+    public void keyPressed(char key, int keyCode) {
+        if (keyCode == PConstants.UP) {
+            speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
+        } else if (keyCode == PConstants.DOWN) {
+            speedTop = Math.max(speedTop - SPEED_CHANGE_AMOUNT, 0.0f);
+        } else if (key == 'r' || key == 'R') {
+            targetRotationAngle = (targetRotationAngle == 0) ? PConstants.HALF_PI : 0;
+        } else if (key == 'd' || key == 'D') {
+            direction *= -1;
+        } else if (keyCode == PConstants.RIGHT) { // RIGHT arrow
+            stripeMode = (stripeMode + 1) % 3;
+        } else if (keyCode == PConstants.LEFT) { // LEFT arrow
+            stripeMode = (stripeMode + 2) % 3; // go back
         }
     }
 

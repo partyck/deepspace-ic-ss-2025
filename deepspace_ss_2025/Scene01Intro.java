@@ -150,7 +150,7 @@ public class Scene01Intro extends AbstractScene{
                 endShape();
             }
         }
-        System.out.println(frameRate());
+        // System.out.println(frameRate());
     }
 
     @Override
@@ -164,7 +164,6 @@ public class Scene01Intro extends AbstractScene{
     public void keyPressed(char key, int keyCode) {
         if (key == 'w' || key == 'W') {
             waveMode = !waveMode;
-            
         } 
 
         if (key == 'f' || key == 'F') {

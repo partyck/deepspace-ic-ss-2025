@@ -1,9 +1,8 @@
 public class Constants {
-    public static final boolean DEV = true;
+    public static final boolean DEV = false;
     
     // Camera configuration
-    // public static final String CAMERA_NAME = "48MP USB Camera";
-    public static final String CAMERA_NAME = "FaceTime HD Camera";
+    public static final String CAMERA_NAME = "48MP USB Camera";
     public static final int CAMERA_WIDTH = 640;
     public static final int CAMERA_HEIGHT = 480;
     public static final float CAMERA_FPS = 20f;
