@@ -21,10 +21,8 @@ public class SceneCamera extends AbstractScene {
     private ArrayList<Dancer> hull;
     private LinkedList<int[]> buffer;
 
-    private NoiseGrid grid;
+    // private NoiseGrid grid;
     private float alphaFade = 3.0f;
-
-    boolean showWallGrid = true;
 
     float noiseScale = 0.001f;
     float baseNoiseAmount = 10;
@@ -39,17 +37,17 @@ public class SceneCamera extends AbstractScene {
     public SceneCamera(PApplet p, Capture cam, TuioClient tracker) {
         super(p);
         this.tracker  = tracker;
-        grid = NoiseGrid.getInstance();
+        // grid = NoiseGrid.getInstance();
         dancers = new ArrayList<>();
         hull = new ArrayList<>();
         if (p instanceof Floor) {
-            grid.setFloor(this);
+            // grid.setFloor(this);
         } else {
-            grid.setWall(this);
+            // grid.setWall(this);
             this.cam = cam;
             buffer = new LinkedList<>();
         }
-        grid.init();
+        // grid.init();
         circles = floor(width() / separation);
         updateGrid();
     }
@@ -81,21 +79,21 @@ public class SceneCamera extends AbstractScene {
             int[] bufferFrame = buffer.remove();
             int[] bufferFrame1 = buffer.get(100);
             int[] bufferFrame2 = buffer.get(200);
-            PImage bufferImage = new PImage(frame.width, frame.height, bufferFrame, false, p);
-            PImage bufferImage1 = new PImage(frame.width, frame.height, bufferFrame1, false, p);
-            PImage bufferImage2 = new PImage(frame.width, frame.height, bufferFrame2, false, p);
+            // PImage bufferImage = new PImage(frame.width, frame.height, bufferFrame, false, p);
+            // PImage bufferImage1 = new PImage(frame.width, frame.height, bufferFrame1, false, p);
+            // PImage bufferImage2 = new PImage(frame.width, frame.height, bufferFrame2, false, p);
             // image(bufferImage, 0, 0, width() * 0.25f, width() * 0.25f * aspectRatio);
             // image(bufferImage1, width() - (width() * 0.25f), 0, width() * 0.25f, width() * 0.25f * aspectRatio);
             // image(bufferImage2, width() - (width() * 0.25f), height() - width() * 0.25f * aspectRatio, width() * 0.25f, width() * 0.25f * aspectRatio);
-            image(bufferImage, 0, 0);
-            image(bufferImage1, width() - (width() * 0.25f), 0);
-            image(bufferImage2, width() - (width() * 0.25f), height() - width() * 0.25f * aspectRatio);
+            // image(bufferImage, 0, 0);
+            // image(bufferImage1, width() - (width() * 0.25f), 0);
+            // image(bufferImage2, width() - (width() * 0.25f), height() - width() * 0.25f * aspectRatio);
         }
 
         image(cam, 0, 0, 0, 0);
         image(frame, width() * 0.25f, (height() - width() * 0.5f * aspectRatio) * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
 
-        System.out.println("wall frameRate: "+frameRate());
+        // System.out.println("wall frameRate: "+frameRate());
     }
 
     @Override
@@ -106,9 +104,9 @@ public class SceneCamera extends AbstractScene {
         updateDancers();
         calculateConvexHull();
         
-        for (Dancer dancer : dancers) {
-            grid.affect(dancer.x, dancer.y);
-        }
+        // for (Dancer dancer : dancers) {
+        //     grid.affect(dancer.x, dancer.y);
+        // }
 
         stroke(255);
         strokeWeight(1);
@@ -118,11 +116,11 @@ public class SceneCamera extends AbstractScene {
         // grid.update();
         // grid.displayFloor();
 
-        stroke(255, 0, 0);
-        strokeWeight(6);
-        for (Dancer p : dancers) {
-            point(p.x, p.y);
-        }
+        // stroke(255, 0, 0);
+        // strokeWeight(6);
+        // for (Dancer p : dancers) {
+        //     point(p.x, p.y);
+        // }
         // System.out.println("floor frameRate: "+frameRate());
     }
 
@@ -203,52 +201,39 @@ public class SceneCamera extends AbstractScene {
 
     @Override
     public void midiIn(int slider, int value) {
-        // grid.midiIn(slider, value);
-        switch(slider) {
-            case 0:
-                NoiseGrid.speed = value / 127f;
-                System.out.println("    grid.speed: "+NoiseGrid.speed);
-                break;
-            case 1:
-                NoiseGrid.noiseScale = value / 127f;
-                System.out.println("    grid.noiseScale: "+NoiseGrid.noiseScale);
-                break;
-            case 2:
-                NoiseGrid.speedFill = value / 127f;
-                System.out.println("    grid.speedFill: "+NoiseGrid.speedFill);
-                break;
-            case 3:
-                NoiseGrid.noiseScaleFill = value / 127f;
-                System.out.println("    grid.noiseScaleFill: "+NoiseGrid.noiseScaleFill);
-                break;
-            case 4:
-                noiseDetail = floor(map(value, 0, 127, 1, 8));
-                noiseDetail(noiseDetail);
-                System.out.println("    noiseDetail: "+noiseDetail);
-                break;
-            case 5:
-                NoiseGrid.noiseLinesForceStrength = value / 127f;
-                System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
-                break;
-            case 6:
-                alphaFade = 255 * (value / 127f);
-                System.out.println("    alphaFade: "+alphaFade);
-                break;
-            case 7:
-                grid.displayTreshold = 1 - (value / 127f);
-                System.out.println("    displayTreshold: "+grid.displayTreshold);
-                break;
-            case 64:
-                grid.linesOn = value == 127;
-                System.out.println("    linesOn: "+grid.linesOn + " value: "+value);
-                break;
-            case 48:
-                grid.tilesOn = value == 127;
-                System.out.println("    tilesOn: "+grid.tilesOn + " value: "+value);
-                break;
-            default:
-                System.out.println("    default: "+value);
-        }
+        // switch(slider) {
+            // case 0:
+            //     NoiseGrid.speed = value / 127f;
+            //     System.out.println("    grid.speed: "+NoiseGrid.speed);
+            //     break;
+            // case 1:
+            //     NoiseGrid.noiseScale = value / 127f;
+            //     System.out.println("    grid.noiseScale: "+NoiseGrid.noiseScale);
+            //     break;
+            // case 2:
+            //     NoiseGrid.speedFill = value / 127f;
+            //     System.out.println("    grid.speedFill: "+NoiseGrid.speedFill);
+            //     break;
+            // case 3:
+            //     NoiseGrid.noiseScaleFill = value / 127f;
+            //     System.out.println("    grid.noiseScaleFill: "+NoiseGrid.noiseScaleFill);
+            //     break;
+            // case 4:
+            //     noiseDetail = floor(map(value, 0, 127, 1, 8));
+            //     noiseDetail(noiseDetail);
+            //     System.out.println("    noiseDetail: "+noiseDetail);
+            //     break;
+            // case 5:
+            //     NoiseGrid.noiseLinesForceStrength = value / 127f;
+            //     System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
+            //     break;
+            // case 6:
+            //     alphaFade = 255 * (value / 127f);
+            //     System.out.println("    alphaFade: "+alphaFade);
+            //     break;
+            // default:
+            //     System.out.println("    default: "+value);
+        // }
     }
 
     @Override
@@ -256,68 +241,31 @@ public class SceneCamera extends AbstractScene {
         System.out.println("oscEvent camera");
         switch(path) {
             case "/cam/fader2":
-                NoiseGrid.speed = value;
-                System.out.println("    grid.speed: "+NoiseGrid.speed);
+                baseNoiseAmount = map(value, 0, 1, 0, 150);
+                System.out.println("    baseNoiseAmount: "+baseNoiseAmount);
                 break;
             case "/cam/fader3":
                 noiseScale = map(value, 0, 1, 0.0001f, 0.1f);
                 System.out.println("    noiseScale: "+noiseScale);
                 break;
             case "/cam/fader4":
-                NoiseGrid.speedFill = map(value, 0, 1, 0.000001f, 0.1f);
-                System.out.println("    grid.speedFill: "+NoiseGrid.speedFill);
+                influenceRadius = map(value, 0, 1, 50, 1000);
+                System.out.println("    influenceRadius: "+influenceRadius);
                 break;
             case "/cam/fader5":
-                NoiseGrid.noiseScaleFill = value;
-                System.out.println("    grid.noiseScaleFill: "+NoiseGrid.noiseScaleFill);
+                lerpAmount = map(value, 0, 1, 0.001f, 0.2f);
+                System.out.println("    lerpAmount: "+lerpAmount);
                 break;
             case "/cam/fader6":
                 noiseDetail = floor(map(value, 0, 1, 1, 8));
                 noiseDetail(noiseDetail);
                 System.out.println("    noiseDetail: "+noiseDetail);
                 break;
-            case "/cam/fader7":
-                NoiseGrid.noiseLinesForceStrength = value;
-                System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
-                break;
             case "/cam/fader8":
                 alphaFade = 255 * value;
                 System.out.println("    alphaFade: "+alphaFade);
                 break;
-            case "/cam/fader9":
-                grid.displayTreshold = 1 - value;
-                System.out.println("    displayTreshold: "+grid.displayTreshold);
-                break;
-            case "/cam/toggle1":
-                grid.linesOn = value == 1.0f;
-                System.out.println("    linesOn: "+grid.linesOn + " value: "+value);
-                break;
-            case "/cam/toggle2":
-                grid.tilesOn = value == 1.0f;
-                System.out.println("    tilesOn: "+grid.tilesOn + " value: "+value);
-                break;
-            case "/cam/toggle3":
-                showWallGrid = value == 1.0f;
-                System.out.println("    showWallGrid: "+showWallGrid);
-                break;
-            default:
-                System.out.println("    default: "+value);
         }
-    }
-    
-    @Override
-    public void keyPressed(char key, int keyCode) {
-        switch(key) {
-            case 't':
-                grid.tilesOn = !grid.tilesOn;
-                System.out.println("    grid.linesOn: "+grid.tilesOn);
-                break;
-            case 'l':
-                grid.linesOn = !grid.linesOn;
-                System.out.println("    grid.linesOn: "+grid.linesOn);
-                break;
-        }
-
     }
 
     private void updateDancers() {

@@ -150,7 +150,7 @@ public class Scene01Intro extends AbstractScene{
                 endShape();
             }
         }
-        System.out.println(frameRate());
+        // System.out.println(frameRate());
     }
 
     @Override
