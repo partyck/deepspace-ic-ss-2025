@@ -6,19 +6,17 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
 
-    // Shared animation state
     private static float speedTop = 1.0f;
     private static float noiseOffset = 0f;
     private static float rotationAngle = 0f;
     private static float targetRotationAngle = 0f;
     private static boolean isKeyRegistered = false;
 
-    // Constants
     private final int stripeThicknessTop = 20;
     private final int stripeThicknessBottom = 40;
     private final float overlap = 20f;
     private final float SPEED_CHANGE_AMOUNT = 0.5f;
-    private final float ROTATION_SPEED = 0.05f; // how fast the rotation animates
+    private final float ROTATION_SPEED = 0.05f;
 
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);
@@ -33,29 +31,22 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     public void keyEvent(processing.event.KeyEvent event) {
         if (event.getAction() == processing.event.KeyEvent.PRESS) {
-            if (event.getKeyCode() == 38) { // UP arrow
+            if (event.getKeyCode() == 38) {
                 speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
-            } else if (event.getKeyCode() == 40) { // DOWN arrow
+            } else if (event.getKeyCode() == 40) {
                 speedTop = Math.max(speedTop - SPEED_CHANGE_AMOUNT, 0.0f);
             } else if (event.getKey() == 'r' || event.getKey() == 'R') {
-                // Toggle between 0 and HALF_PI (90 degrees)
-                if (targetRotationAngle == 0) {
-                    targetRotationAngle = PConstants.HALF_PI;
-                } else {
-                    targetRotationAngle = 0;
-                }
+                targetRotationAngle = (targetRotationAngle == 0) ? PConstants.HALF_PI : 0;
             }
         }
     }
 
     private void updateAnimationState() {
         timeElapsed = (timeElapsed + 1) % animationTime;
-
         if (speedTop > 0.0f) {
             noiseOffset += 0.005 * speedTop;
         }
 
-        // Smooth rotation
         float angleDiff = targetRotationAngle - rotationAngle;
         if (Math.abs(angleDiff) > 0.001f) {
             rotationAngle += angleDiff * ROTATION_SPEED;
@@ -65,45 +56,53 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     @Override
     public void drawWall() {
         updateAnimationState();
+        boolean isRotated = Math.abs(rotationAngle - PConstants.HALF_PI) < 0.01f;
 
         p.pushMatrix();
         p.translate(p.width / 2f, p.height / 2f);
         p.rotate(rotationAngle);
+        p.background(0);
+
         p.translate(-p.width / 2f, -p.height / 2f);
-        drawScene(true);
+
+        if (isRotated) {
+            drawFloorStripes(0, 0);
+        } else {
+            float croppedHeight = p.height / 4f;
+            drawStripes(0, p.height - croppedHeight, p.width, croppedHeight, stripeThicknessTop, speedTop);
+        }
+
         p.popMatrix();
     }
 
     @Override
     public void drawFloor() {
         updateAnimationState();
+        boolean isRotated = Math.abs(rotationAngle - PConstants.HALF_PI) < 0.01f;
 
         p.pushMatrix();
         p.translate(p.width / 2f, p.height / 2f);
         p.rotate(rotationAngle);
-        p.translate(-p.width / 2f, -p.height / 2f);
-        drawScene(false);
-        p.popMatrix();
-    }
-
-    private void drawScene(boolean isWall) {
         p.background(0);
-        p.noStroke();
 
-        if (isWall) {
-            // Wall: upper portion
-            p.fill(0);
-            p.rect(0, 0, p.width, p.height / 2f);
-            drawStripes(0, p.height - p.height / 4f, p.width, p.height / 4f, stripeThicknessTop, speedTop);
+        p.translate(-p.width / 2f, -p.height / 2f);
+
+        if (isRotated) {
+            drawFloorStripes(0, 0);
         } else {
-            // Floor: lower portion
             p.translate(0, p.height / 2f - 50);
-            p.fill(0);
-            p.rect(0, 0, p.width, p.height / 2f);
             drawStripes(0, 0, p.width, p.height / 2f, stripeThicknessBottom, -speedTop);
             drawStripes(0, -p.height / 2f, p.width, p.height / 2f, stripeThicknessTop, speedTop);
             drawStripes(0, -overlap, p.width, overlap, stripeThicknessTop, speedTop);
         }
+
+        p.popMatrix();
+    }
+
+    private void drawFloorStripes(float offsetX, float offsetY) {
+        drawStripes(offsetX, offsetY + p.height / 2f, p.width, p.height / 2f, stripeThicknessBottom, -speedTop);
+        drawStripes(offsetX, offsetY, p.width, p.height / 2f, stripeThicknessTop, speedTop);
+        drawStripes(offsetX, offsetY - overlap, p.width, overlap, stripeThicknessTop, speedTop);
     }
 
     private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
@@ -113,8 +112,6 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
         for (float currentX = -offset; currentX < totalWidth; currentX += baseStripeWidth * 2) {
             float stripeWidth = baseStripeWidth;
-
-            // Subtle widening effect only at high speeds
             if (speedTop > 4.5f) {
                 float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
                 stripeWidth *= 0.8f + 0.4f * noiseVal;
