@@ -2,6 +2,10 @@ import processing.core.*;
 import TUIO.*;
 import java.util.ArrayList;
 
+// key R - rotate scene
+// key D - change animation direction
+// arrow keys up/down - speed up/down
+
 public class Scene07_DifferentSpeeds extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
