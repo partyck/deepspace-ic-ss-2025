@@ -8,7 +8,7 @@ public class SceneOne extends AbstractScene {
     public SceneOne(PApplet p) {
         super(p);
         this.timeElapsed = 0;
-        this.animationTime = 200;
+        this.animationTime = (int) (frameRate() * 60 * 3);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class SceneOne extends AbstractScene {
     private void display() {
         background(30);
         noStroke();
-        fill(200);
+        fill(255);
 
         float rectW = lerp(this.width(), 0, animationProgress());
 
