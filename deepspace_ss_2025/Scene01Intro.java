@@ -13,13 +13,17 @@ public class Scene01Intro extends AbstractScene{
     float lerpAmount = 0.01f;
     float alphaFade = 1.0f;
     int personHeight = 50;
-    int floorHeightInteraction = 100;
+    int floorHeightInteraction = 800;
     //NEW variable
     // curtain
     boolean foldCurtain = false;
     float curtainProgress = 0;
     float curtainSpeed = 0.003f;
     float targetCurtainProgress = 0;
+    
+    float circleSize;
+    
+    
     float incDecNoiseAmount = 0.01f;
     float incDecInfluenceAmount = 30;
     float incDecBaseNoiseAmount = 10;
@@ -48,7 +52,7 @@ public class Scene01Intro extends AbstractScene{
         int x = 30;
         int y = 30;
         int gap = 50;
-        floorHeightInteraction = (int) (height() * 0.2f);
+        floorHeightInteraction = height();
     }
 
    
@@ -102,36 +106,67 @@ public class Scene01Intro extends AbstractScene{
 
                 float n = noise(x * noiseScale, y * noiseScale, zoff);
                 float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
-                float influence = 0;
+                //float influence = 0;
 
-                for(TuioCursor cursor: tuioCursorList) {
-                    if (cursor.getScreenY(height()) < floorHeightInteraction) {
-                        int px = cursor.getScreenX(this.width());
-                        // float dx = xpos - px;
-                        // float d = dist(xpos, ypos, px, height() - personHeight);//
-                        float effectiveX = xpos + foldOffset;
-                        float dx = effectiveX - px;
-                        float d = dist(effectiveX, ypos, px, height() - personHeight);
+                //for(TuioCursor cursor: tuioCursorList) {
+                //    if (cursor.getScreenY(height()) < floorHeightInteraction) {
+                //        int px = cursor.getScreenX(this.width());
+                //        int py = cursor.getScreenY(this.height());
+                //        float strengthEffect = map(py,0,height(),1f,0.1f);
+
+                //        float effectiveX = xpos + foldOffset;
+                //        float dx = effectiveX - px;
+                //        float d = dist(effectiveX, ypos, px, height() - personHeight);
                         
 
 
-                        if (d < influenceRadius) {
-                            float strength = 1 - (d / influenceRadius);
-                            strength *= strength;
-                            float direction = dx > 0 ? 1 : -1;
-                            float direction2 = direction * sin(n);
+                //        //if (d < influenceRadius) {
+                //            float strength = 1 - (d / influenceRadius) ;
+                //            strength *= strength;
+                //            float direction = dx > 0 ? 1 : -1;
+                //            float direction2 = direction * sin(n);
 
-                            if (waveMode) {
-                                float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
-                                direction2 += wave * 0.75;
-                            }
+                //            if (waveMode) {
+                //                float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
+                //                direction2 += wave * 0.75;
+                //            }
 
-                            influence = direction2 * strength * maxPush;
-                        }
-                    }
-                }
+                //            influence = direction2 * strength * maxPush * strengthEffect;
+                //        //}
+                //    }
+                //}
+                
+                float totalInfluence = 0;
 
-                float target = baseWave + influence;
+for (TuioCursor cursor : tuioCursorList) {
+    int px = cursor.getScreenX(this.width());
+    int py = cursor.getScreenY(this.height());
+
+    float strengthEffect = map(py, 0, height(), 1f, 0.1f);
+
+    float effectiveX = xpos + foldOffset;
+    float dx = effectiveX - px;
+    float d = dist(effectiveX, ypos, px, height() - personHeight);
+
+    float strength = 1 - (d / influenceRadius);
+    if (strength > 0) {
+        strength *= strength;
+        float direction = dx > 0 ? 1 : -1;
+        float direction2 = direction * sin(n);
+
+        if (waveMode) {
+            float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
+            direction2 += wave * 0.75;
+        }
+
+        totalInfluence += direction2 * strength * maxPush * strengthEffect;
+    }
+}
+
+                
+                
+
+                float target = baseWave + totalInfluence;
                 offsets[x][y] = lerp(offsets[x][y], target, lerpAmount);
 
                 float px = xpos + offsets[x][y] + foldOffset;
@@ -145,25 +180,47 @@ public class Scene01Intro extends AbstractScene{
                 beginShape();
                 for (PVector p : shapePoints) {
                     float mirroredX = width() - p.x;
-                    curveVertex(mirroredX, p.y);
+                    curveVertex(mirroredX, p.y); 
                 }
                 endShape();
             }
         }
-        // System.out.println(frameRate());
+        System.out.println(frameRate());
     }
 
     @Override
-    public void drawFloor() {
-        background(0);
-        fill(255);
-        noStroke();
-        rect(0, 0, width(), floorHeightInteraction);
+    //public void drawFloor() {
+    //    background(0);
+    //    fill(255);
+    //    noStroke();
+    //    rect(0, 0, width(), floorHeightInteraction);
+    //}
+//@Override
+public void drawFloor() {
+    background(0);
+    
+   
+    fill(255);
+    noStroke();
+    //rect(0, 0, width(), floorHeightInteraction);
+
+    
+    ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
+    fill(255); // White color
+    noStroke();
+    for (TuioCursor cursor : tuioCursorList) {
+        float x = cursor.getScreenX(width());
+        float y = cursor.getScreenY(height());
+        float circleSize = map(y,0,height(),100,10);
+        ellipse(x, y, circleSize, circleSize);  // Bigger circles (80x80)
     }
+}
+
 
     public void keyPressed(char key, int keyCode) {
         if (key == 'w' || key == 'W') {
             waveMode = !waveMode;
+            
         } 
 
         if (key == 'f' || key == 'F') {
@@ -209,7 +266,7 @@ public class Scene01Intro extends AbstractScene{
                 System.out.println("    spacing: "+spacing);
                 break;
             case "/1/fader2":
-                influenceRadius = map(value, 0, 1, 50, 1000);
+                influenceRadius = map(value, 0, 1, 50, 500);
                 System.out.println("    influenceRadius: "+influenceRadius);
                 break;
             case "/1/fader3":
