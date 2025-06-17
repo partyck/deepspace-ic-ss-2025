@@ -61,14 +61,29 @@ public class Scene02Rectangles extends AbstractScene {
     }
 
     @Override
-    public void drawFloor() {
-        if (!isExtended) return;
+public void drawFloor() {
+    // clear
+    p.background(0);
+    if (!isExtended) return;
 
-        // Draw the exact same rects at the bottom of the floor window
-        p.background(0);
-        p.noStroke(); p.fill(255);
-        for (SceneRect r : rects) r.draw();
+    // ensure "in" animation runs here too, mirroring wall state
+    for (SceneRect r : rects) r.animateIn();
+
+    // Mirror the wall rectangles onto the floor by flipping vertically
+    p.pushMatrix();
+    // Move origin to bottom of window, then invert Y-axis
+    p.translate(0, p.height);
+    p.scale(1, -1);
+
+    p.noStroke();
+    p.fill(255);
+    for (SceneRect r : rects) {
+        // you could also r.animateClose(), r.deform(), r.followCursor(...) here as needed
+        r.draw();
     }
+
+    p.popMatrix();
+}
 
     @Override
     public void keyPressed(char key, int keyCode) {
@@ -129,9 +144,9 @@ public class Scene02Rectangles extends AbstractScene {
         void animateIn() {
             if (animInDone || animStartFrame < 0) return;
             int t = p.frameCount - animStartFrame;
-            float prog = p.constrain(t / ANIM_DURATION_FRMS, 0, 1);
-            float eased = p.sin(prog * PConstants.HALF_PI);
-            w = p.lerp(0, targetW, eased);
+            float prog = PApplet.constrain(t / ANIM_DURATION_FRMS, 0, 1);
+            float eased = PApplet.sin(prog * PConstants.HALF_PI);
+            w = PApplet.lerp(0, targetW, eased);
             h = p.lerp(0, targetH, eased);
             if (prog >= 1) animInDone = true;
         }
