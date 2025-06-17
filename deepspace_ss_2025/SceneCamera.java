@@ -20,6 +20,8 @@ public class SceneCamera extends AbstractScene {
     int windowWidth;
     int vwX, vwY;
     int hwX, hwY;
+    int bufferOffset = 0;
+    boolean delay = true;
 
     public SceneCamera(PApplet p, Capture cam) {
         super(p);
@@ -37,7 +39,6 @@ public class SceneCamera extends AbstractScene {
     @Override
     public void drawWall() {
         background(0);
-
         if (cam.available()) {
             cam.read();
             cam.filter(12);
@@ -48,34 +49,67 @@ public class SceneCamera extends AbstractScene {
         float aspectRatio = (float) frame.height / (float) frame.width;
 
         buffer.add(frame.pixels);
-        if (buffer.size() > 300) {
-            int[] bufferFrame = buffer.remove();
-            int[] bufferFrame1 = buffer.get(100);
-            int[] bufferFrame2 = buffer.get(200);
-            // PImage bufferImage = new PImage(frame.width, frame.height, bufferFrame, false, p);
-            // PImage bufferImage1 = new PImage(frame.width, frame.height, bufferFrame1, false, p);
-            // PImage bufferImage2 = new PImage(frame.width, frame.height, bufferFrame2, false, p);
-            // image(bufferImage, 0, 0, width() * 0.25f, width() * 0.25f * aspectRatio);
-            // image(bufferImage1, width() - (width() * 0.25f), 0, width() * 0.25f, width() * 0.25f * aspectRatio);
-            // image(bufferImage2, width() - (width() * 0.25f), height() - width() * 0.25f * aspectRatio, width() * 0.25f, width() * 0.25f * aspectRatio);
-            // image(bufferImage, 0, 0);
-            // image(bufferImage1, width() - (width() * 0.25f), 0);
-            // image(bufferImage2, width() - (width() * 0.25f), height() - width() * 0.25f * aspectRatio);
-        }
-
         image(cam, 0, 0, 0, 0);
         image(frame, width() * 0.25f, (height() - width() * 0.5f * aspectRatio) * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
+
+        if (buffer.size() > 300) {
+            if (delay) {
+                PImage bufferImage = getSubset(buffer.get(300 - bufferOffset) , 0, 0, frame.width * 0.5f, frame.width * 0.5f * aspectRatio);
+                PImage bufferImage1 = getSubset(buffer.get(300 - (int) (bufferOffset * 0.33f)), frame.width * 0.5f, 0, frame.width * 0.5f, frame.width * 0.5f * aspectRatio);
+                PImage bufferImage2 = getSubset(buffer.get(300 - (int) (bufferOffset * 0.66f)), 0, frame.height * 0.5f, frame.width * 0.5f, frame.width * 0.5f * aspectRatio);
+                image(bufferImage, width() * 0.25f, (height() - width() * 0.5f * aspectRatio) * 0.5f, width() * 0.25f, width() * 0.25f * aspectRatio);
+                image(bufferImage1, width() * 0.5f, (height() - width() * 0.5f * aspectRatio) * 0.5f, width() * 0.25f, width() * 0.25f * aspectRatio);
+                image(bufferImage2, width() * 0.25f, height() * 0.5f, width() * 0.25f, width() * 0.25f * aspectRatio);
+            }
+            buffer.remove();
+        }
 
         noStroke();
         fill(0);
         rect(vwX, vwY, windowWidth, height());
         rect(hwX, hwY, width(), windowWidth);
-
         // System.out.println("wall frameRate: "+frameRate());
     }
 
     @Override
     public void drawFloor() {
         background(0);
+    }
+
+     @Override
+    public void oscEvent(String path, float value) {
+        System.out.println("oscEvent camera");
+        switch(path) {
+            case "/cam2/toggle5":
+                delay = value == 1;
+                System.out.println("    delay: "+delay);
+                break;
+            case "/cam2/fader30":
+                bufferOffset = (int) map(value, 0, 1, 0, 300);
+                System.out.println("    bufferOffset: "+bufferOffset+ "; "+bufferOffset * 0.33f+ "; "+bufferOffset * 0.66f);
+                break;
+        }
+    }
+
+    PImage getSubset(int[] source, float xf, float yf, float wf, float hf) {
+        int x = (int) xf;
+        int y = (int) yf;
+        int w = (int) wf;
+        int h = (int) hf;
+        int[] subset = new int[w * h];
+
+        for (int j = 0; j < h; j++) {
+            for (int i = 0; i < w; i++) {
+            int sourceX = x + i;
+            int sourceY = y + j;
+
+            int sourceIndex = sourceY * Constants.CAMERA_WIDTH + sourceX;
+            int destIndex = j * w + i;
+
+            subset[destIndex] = source[sourceIndex];
+            }
+        }
+
+        return new PImage(w, h, subset, false, p);
     }
 }
