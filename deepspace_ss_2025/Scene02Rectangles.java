@@ -47,9 +47,10 @@ public class Scene02Rectangles extends AbstractScene {
 
         // update animations
         for (SceneRect r : rects) {
-            r.animateIn();
-            r.animateDeform();
-        }
+    r.animateIn();
+    r.animateDeform();
+    if (isFollow) r.followCursor(tracker.getTuioCursorList(), p.width, p.height);
+}
         p.noStroke(); p.fill(255);
         for (SceneRect r : rects) r.draw();
     }
@@ -60,9 +61,10 @@ public class Scene02Rectangles extends AbstractScene {
         p.background(0);
         // update animations
         for (SceneRect r : rects) {
-            r.animateIn();
-            r.animateDeform();
-        }
+    r.animateIn();
+    r.animateDeform();
+    if (isFollow) r.followCursor(tracker.getTuioCursorList(), p.width, p.height);
+}
         p.pushMatrix();
         p.translate(0, p.height);
         p.scale(1, -1);
@@ -194,6 +196,26 @@ public class Scene02Rectangles extends AbstractScene {
             float eased = 1 - PApplet.sin(prog * PConstants.HALF_PI);
             w = PApplet.lerp(targetW, 0, eased);
             h = PApplet.lerp(targetH, 0, eased);
+        }
+
+        /**
+         * If a cursor is inside this rect, follow it by recentering the rect on the cursor
+         */
+        void followCursor(ArrayList<TuioCursor> cursors, int sw, int sh) {
+            for (TuioCursor c : cursors) {
+                float cx = c.getScreenX(sw);
+                float cy = c.getScreenY(sh);
+                float left = x - w/2;
+                float right = x + w/2;
+                float top = baseY - h;
+                float bottom = baseY;
+                if (cx >= left && cx <= right && cy >= top && cy <= bottom) {
+                    // center rect on cursor
+                    x = cx;
+                    baseY = cy + h/2;
+                    break;
+                }
+            }
         }
 
         void draw() {
