@@ -1,5 +1,5 @@
 public class Constants {
-    public static final boolean DEV = false;
+    public static final boolean DEV = true;
     
     // Camera configuration
     public static final String CAMERA_NAME = "48MP USB Camera";

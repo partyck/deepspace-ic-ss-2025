@@ -4,20 +4,20 @@ import java.util.ArrayList;
 
 // key R - rotate scene
 // key D - change animation direction
+// key N - adding noise
 // arrow keys up/down - speed up/down
 // arrow key left/right - change width of stripes (three states: 1- equal width, 2 getting unequal,3 noisy width)
 
 public class Scene07_DifferentSpeeds extends AbstractScene {
-    private int timeElapsed;
-    private final int animationTime;
-
+    private float animationOffset = 0f;
     private static float speedTop = 1.0f;
     private static float noiseOffset = 0f;
     private static float rotationAngle = 0f;
     private static float targetRotationAngle = 0f;
     private static int direction = 1;
-    private static int stripeMode = 0; // 0=normal, 1=every 5th wide, 2=every 5th wide + 3rd narrow
+    private static int stripeMode = 0;
     private static boolean isKeyRegistered = false;
+    private static float noiseStrength = 5.0f;
 
     private final int stripeThicknessTop = 80;
     private final int stripeThicknessBottom = 120;
@@ -28,9 +28,6 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);
-        this.timeElapsed = 0;
-        this.animationTime = 100;
-
         if (!isKeyRegistered) {
             p.registerMethod("keyEvent", this);
             isKeyRegistered = true;
@@ -51,12 +48,15 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
                 stripeMode = (stripeMode + 1) % 3;
             } else if (event.getKeyCode() == 37) {
                 stripeMode = (stripeMode + 2) % 3;
+            } else if (event.getKey() == 'n' || event.getKey() == 'N') {
+                noiseStrength = (noiseStrength < 3.0f) ? noiseStrength + 1.0f : 0.0f;
+                System.out.println("Noise Strength (×): " + noiseStrength);
             }
         }
     }
 
     private void updateAnimationState() {
-        timeElapsed = (timeElapsed + 1) % animationTime;
+        animationOffset = (animationOffset + speedTop * direction) % 10000;
         if (speedTop > 0.0f) {
             noiseOffset += 0.005 * speedTop;
         }
@@ -122,32 +122,30 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
         float baseStripeWidth = thickness;
-        float totalWidth = w + baseStripeWidth * 2;
-        float offset = (timeElapsed * speed) % baseStripeWidth;
-
+        float currentX = -(animationOffset % (baseStripeWidth * 2));
         int stripeIndex = 0;
-        for (float currentX = -offset; currentX < totalWidth; ) {
+
+        while (currentX < w + baseStripeWidth * 2) {
             float stripeWidth = baseStripeWidth;
 
             if (stripeMode == 1 && stripeIndex % 5 == 0) {
                 stripeWidth *= 3.5f;
-
             } else if (stripeMode == 2) {
                 if (stripeIndex % 5 == 0) {
                     stripeWidth *= 3.5f;
                 } else if (stripeIndex % 3 == 0) {
                     float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
-                    stripeWidth *= 0.2f + 0.2f * noiseVal; // narrower and more variation
+                    stripeWidth *= 0.2f + 0.2f * noiseVal * noiseStrength;
                 }
             } else if (speedTop > 4.5f) {
                 float noiseVal = p.noise(currentX * 0.01f, noiseOffset);
-                stripeWidth *= 0.8f + 0.4f * noiseVal;
+                stripeWidth *= 0.8f + 0.4f * noiseVal * noiseStrength;
             }
 
             p.fill(255);
             p.rect(x + currentX, y, stripeWidth, h);
 
-            currentX += stripeWidth + baseStripeWidth; // fixed gap
+            currentX += stripeWidth + baseStripeWidth;
             stripeIndex++;
         }
     }

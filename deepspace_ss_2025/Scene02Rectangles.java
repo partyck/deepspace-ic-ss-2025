@@ -1,206 +1,220 @@
 import processing.core.PApplet;
+import processing.core.PConstants;
 import TUIO.*;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Scene02Rectangles extends AbstractScene {
-    TuioClient tracker;
-    private static HashMap<Integer, Rectangle> rectangles = new HashMap<>();
-    private static boolean isAnimating = false;
+    private TuioClient tracker;
+    private ArrayList<SceneRect> rects;
 
-    private class Rectangle {
-        float x, y;
-        float width = Float.valueOf(width() / 10);
-        float height = Float.valueOf(height() / 10);
-        boolean isFixed = false;
-        float maxHeight = 0;
-        int animationType;
-        float animationProgress = 0;
-        float targetWidth;
-        float targetHeight;
-        float expansionSpeed = 2.0f;
+    // Animation stage control
+    private int animStage = 0;
+    private static final int NUM_STAGES = 4;
 
-        TuioCursor lastCursor = null;
-        boolean wasCursorInside = false;
+    // Other states
+    private boolean isExtended   = false;
+    private boolean isDeformed   = false;
+    private boolean isFollow     = false;
+    private boolean isClosing    = false;
 
-        Rectangle(float x, float y) {
-            this.x = x;
-            this.y = y;
-            this.animationType = (int) random(6);
-            switch (animationType) {
-                case 0:
-                    targetWidth = Float.valueOf((width() / 10) / 2);
-                    targetHeight = Float.valueOf((height() / 10) * 8);
-                    break;
-                case 1:
-                    targetWidth = Float.valueOf((width() / 10));
-                    targetHeight = Float.valueOf((height() / 10) * 2);
-                    break;
-                case 2:
-                    targetWidth = Float.valueOf((width() / 10) / 2);
-                    targetHeight = Float.valueOf((height() / 10) * 5);
-                    break;
-                case 3:
-                    targetWidth = Float.valueOf((width() / 10) / 2);
-                    targetHeight = Float.valueOf((height() / 10) * 9);
-                    break;
-                case 4:
-                    targetWidth = Float.valueOf((width() / 10));
-                    targetHeight = Float.valueOf((height() / 10));
-                    break;
-                case 5:
-                    targetWidth = Float.valueOf((width() / 10));
-                    targetHeight = Float.valueOf((height() / 10) * 6);
-                    break;
-            }
-        }
+    // Parameters
+    private static final int   NUM_RECTS       = 7;
+    private static final float ANIM_DELAY_BASE = 15f;
 
-        void updateAnimation() {
-            if (isAnimating) {
-                animationProgress += 0.02;
-                if (animationProgress > 1) animationProgress = 1;
-
-                float easedProgress;
-                switch (animationType) {
-                    case 0: easedProgress = animationProgress; break;
-                    case 1: easedProgress = 1 - (1 - animationProgress) * (1 - animationProgress); break;
-                    case 2: easedProgress = animationProgress * animationProgress; break;
-                    case 3: easedProgress = 1 - (float) Math.cos(animationProgress * Math.PI * 2); break;
-                    case 4: easedProgress = (float) Math.sin(animationProgress * Math.PI * 4) * (1 - animationProgress) + animationProgress; break;
-                    case 5: easedProgress = animationProgress * animationProgress * (3 - 2 * animationProgress); break;
-                    default: easedProgress = animationProgress;
-                }
-
-                width = lerp(width, targetWidth, easedProgress);
-                height = lerp(height, targetHeight, easedProgress);
-                maxHeight = Math.max(maxHeight, height);
-            }
-        }
-
-        void updateWithClosestCursor(ArrayList<TuioCursor> cursors, int sceneWidth, int sceneHeight) {
-            TuioCursor closest = null;
-            float minDist = Float.MAX_VALUE;
-
-            for (TuioCursor tcur : cursors) {
-                float cx = tcur.getScreenX(sceneWidth);
-                float cy = tcur.getScreenY(sceneHeight);
-                float d = dist(cx, cy, x, y);
-                if (d < minDist) {
-                    minDist = d;
-                    closest = tcur;
-                }
-            }
-
-            if (closest == null) return;
-
-            float cx = closest.getScreenX(sceneWidth);
-            float cy = closest.getScreenY(sceneHeight);
-
-            boolean isInside = cx >= x - width / 2 && cx <= x + width / 2 &&
-                            cy >= y - height / 2 && cy <= y + height / 2;
-
-            if (!isInside) {
-                // Expand continuously while cursor stays outside
-                if (cx < x - width / 2) {
-                    width += expansionSpeed;
-                    x -= expansionSpeed / 2;
-                } else if (cx > x + width / 2) {
-                    width += expansionSpeed;
-                    x += expansionSpeed / 2;
-                }
-
-                if (cy < y - height / 2) {
-                    height += expansionSpeed;
-                    y -= expansionSpeed / 2;
-                } else if (cy > y + height / 2) {
-                    height += expansionSpeed;
-                    y += expansionSpeed / 2;
-                }
-            }
-
-            // Update tracking state
-            wasCursorInside = isInside;
-            lastCursor = closest;
-        }
-
-    }
+    // Dimensions
+    private final float wallTargetW;
+    private final float wallTargetH;
 
     public Scene02Rectangles(PApplet p, TuioClient tracker) {
         super(p);
         this.tracker = tracker;
+        this.wallTargetW = p.width  / 10f;
+        this.wallTargetH = (p.height / 10f) * 6f;
+        initRectangles();
+    }
+
+    private void initRectangles() {
+        rects = new ArrayList<>();
+        float gap = p.width / (NUM_RECTS + 1f);
+        for (int i = 0; i < NUM_RECTS; i++) {
+            float x = gap * (i + 1);
+            float y = p.height - wallTargetH; // bottom-of-wall origin: translated in drawWall
+            rects.add(new SceneRect(x, y, wallTargetW, wallTargetH, i));
+        }
+    }
+
+    /**
+     * Always update any rectangles flagged to animate in
+     */
+    private void animateInSequence() {
+        for (SceneRect r : rects) r.animateIn();
+    }
+
+    private void extendToFloor() {
+        isExtended = true;
+    }
+
+    private void deformRectangles() {
+        isDeformed = true;
+        for (SceneRect r : rects) r.deform();
+    }
+
+    private void enableFollow() {
+        isFollow = true;
+    }
+
+    private void closeRectangles() {
+        isClosing = true;
+        for (SceneRect r : rects) r.close();
     }
 
     @Override
     public void drawWall() {
-        background(0);
-        fill(255);
-        textSize(24);
-        String text = "Scene Rectangles".toUpperCase();
-        float textWidth = p.textWidth(text);
-        float textHeight = p.textAscent() + p.textDescent();
-        text(text, width() - textWidth - 20, 20 + textHeight);
+        p.background(0);
+        p.fill(255);
+        p.textSize(24);
+        String title = "SCENE RECTANGLES";
+        float tw = p.textWidth(title);
+        p.text(title, p.width - tw - 20, 40);
+
+        // always update animations
+        animateInSequence();
 
         p.pushMatrix();
-        p.translate(0, height());
-        display();
+        // origin (0,0) at bottom of wall
+        // p.translate(0, p.height);
+        displayRects();
         p.popMatrix();
     }
 
     @Override
     public void drawFloor() {
-        display();
+        // background(0);
+        if (!isExtended) return;
+        displayRects();
     }
 
-     public void keyPressed(char key, int keyCode) {
-        if (key == 'q' || key == 'Q') {
-            isAnimating = true;
-            // Reset animation progress for all rectangles
-            for (Rectangle rect : rectangles.values()) {
-                rect.animationProgress = 0;
-            }
-        } else if (key == 'w' || key == 'W') {
-            for (Rectangle rect : rectangles.values()) {
-                if (!rect.isFixed) {
-                    rect.isFixed = true;
-                }
-            }
-        }
-    }
-
-    private void display() {
-        background(0);
-        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
-
-        for (TuioCursor tcur : tuioCursorList) {
-            int cursorId = tcur.getCursorID();
-            if (!rectangles.containsKey(cursorId)) {
-                rectangles.put(cursorId, new Rectangle(
-                        tcur.getScreenX(this.width()),
-                        tcur.getScreenY(this.height())
-                ));
-            }
-        }
-
-        for (Rectangle rect : rectangles.values()) {
-            if (!rect.isFixed) {
-                for (TuioCursor tcur : tuioCursorList) {
-                    if (rect == rectangles.get(tcur.getCursorID())) {
-                        rect.x = tcur.getScreenX(this.width());
-                        rect.y = tcur.getScreenY(this.height());
-                    }
-                }
-            } else {
-                rect.updateWithClosestCursor(tuioCursorList, this.width(), this.height());
-            }
-
-            rect.updateAnimation();
-        }
-
+    private void displayRects() {
         p.noStroke();
         p.fill(255);
-        for (Rectangle rect : rectangles.values()) {
-            p.rect(rect.x - rect.width / 2, rect.y - rect.height / 2, rect.width, rect.height);
+        ArrayList<TuioCursor> cursors = tracker.getTuioCursorList();
+
+        for (SceneRect r : rects) {
+            if (isFollow) r.followCursor(cursors, p.width, p.height);
+            if (isClosing) r.animateClose();
+            r.draw();
+        }
+    }
+
+    @Override
+    public void keyPressed(char key, int keyCode) {
+        switch (Character.toLowerCase(key)) {
+            case 'a': triggerNextAnimStage(); break;
+            case 't': extendToFloor();       break;
+            case 'd': deformRectangles();    break;
+            case 'f': enableFollow();        break;
+            case 'c': closeRectangles();     break;
+        }
+    }
+
+    /**
+     * On each 'a' press, animate the next group: center, 1-away, 2-away, 3-away
+     */
+    private void triggerNextAnimStage() {
+        int center = NUM_RECTS / 2;
+        switch (animStage) {
+            case 0:
+                rects.get(center).shouldAnimateIn = true;
+                break;
+            case 1:
+                rects.get(center - 1).shouldAnimateIn = true;
+                rects.get(center + 1).shouldAnimateIn = true;
+                break;
+            case 2:
+                rects.get(center - 2).shouldAnimateIn = true;
+                rects.get(center + 2).shouldAnimateIn = true;
+                break;
+            case 3:
+                rects.get(center - 3).shouldAnimateIn = true;
+                rects.get(center + 3).shouldAnimateIn = true;
+                break;
+            default:
+                return;
+        }
+        animStage++;
+    }
+
+    private class SceneRect {
+        float x, y;
+        float w, h;
+        float targetW, targetH;
+        int index;
+        int frameOffset;
+
+        // NEW: only animate in when flagged
+        boolean shouldAnimateIn = false;
+        boolean animInDone      = false;
+
+        // Closing
+        boolean closing    = false;
+        int closeFrame     = 0;
+
+        SceneRect(float x, float y, float targetW, float targetH, int idx) {
+            this.x = x;
+            this.y = y;
+            this.targetW = targetW;
+            this.targetH = targetH;
+            this.w = 0;
+            this.h = 0;
+            this.index = idx;
+            int center = NUM_RECTS / 2;
+            this.frameOffset = Math.abs(idx - center);
+        }
+
+        void animateIn() {
+            if (!shouldAnimateIn || animInDone) return;
+            int delay = (int)(frameOffset * ANIM_DELAY_BASE);
+            int t = p.frameCount - delay;
+            if (t < 0) return;
+            float prog = p.constrain(t / 60f, 0, 1);
+            w = p.lerp(0, targetW, prog);
+            h = p.lerp(0, targetH, prog);
+            if (prog >= 1) animInDone = true;
+        }
+
+        void deform() {
+            targetW *= p.random(0.7f, 1.3f);
+            targetH *= p.random(0.7f, 1.3f);
+        }
+
+        void followCursor(ArrayList<TuioCursor> cursors, int sw, int sh) {
+            for (TuioCursor c : cursors) {
+                float cx = c.getScreenX(sw);
+                float cy = c.getScreenY(sh);
+                if (cx >= x - w/2 && cx <= x + w/2 &&
+                    cy >= y - h/2 && cy <= y + h/2) {
+                    x = cx;
+                    y = cy;
+                    break;
+                }
+            }
+        }
+
+        void close() {
+            closing = true;
+            closeFrame = p.frameCount;
+        }
+
+        void animateClose() {
+            int t = p.frameCount - closeFrame;
+            float prog = p.constrain(t / 60f, 0, 1);
+            w = p.lerp(targetW, 0, prog);
+            h = p.lerp(targetH, 0, prog);
+        }
+
+        void draw() {
+            // p.rectMode(PConstants.CENTER, 0);
+            p.rect(x, y, w, h);
         }
     }
 }
