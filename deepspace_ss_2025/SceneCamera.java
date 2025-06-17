@@ -14,54 +14,28 @@ import TUIO.*;
 
 public class SceneCamera extends AbstractScene {
     private Capture cam;
-    private TuioClient tracker;
     private int noiseDetail = 4;
-
-    private ArrayList<Dancer> dancers;
-    private ArrayList<Dancer> hull;
     private LinkedList<int[]> buffer;
 
-    // private NoiseGrid grid;
-    private float alphaFade = 3.0f;
+    int windowWidth;
+    int vwX, vwY;
+    int hwX, hwY;
 
-    float noiseScale = 0.001f;
-    float baseNoiseAmount = 10;
-    float influenceRadius = 10;
-    float maxPush = 300;
-    float lerpAmount = 0.05f;
-    float[][] offsets;
-    int circles = 8;
-    int points = 32;
-    int separation = 50;
-
-    public SceneCamera(PApplet p, Capture cam, TuioClient tracker) {
+    public SceneCamera(PApplet p, Capture cam) {
         super(p);
-        this.tracker  = tracker;
-        // grid = NoiseGrid.getInstance();
-        dancers = new ArrayList<>();
-        hull = new ArrayList<>();
-        if (p instanceof Floor) {
-            // grid.setFloor(this);
-        } else {
-            // grid.setWall(this);
+        windowWidth =  (int) (width() * 0.01);
+        vwX = (width() / 2) - (windowWidth / 2);
+        vwY = 0;
+        hwX = 0;
+        hwY = (height() / 2) - (windowWidth / 2);
+        if (!(p instanceof Floor)) {
             this.cam = cam;
             buffer = new LinkedList<>();
         }
-        // grid.init();
-        circles = floor(width() / separation);
-        updateGrid();
-    }
-
-    @Override
-    public void init() {
-        noiseDetail(noiseDetail);
     }
 
     @Override
     public void drawWall() {
-        // fill(0, alphaFade);
-        // noStroke();
-        // rect(0, 0, width(), height());
         background(0);
 
         if (cam.available()) {
@@ -71,7 +45,6 @@ public class SceneCamera extends AbstractScene {
             cam.updatePixels();
         }
         PImage frame = cam.get();
-        frame.filter(12);
         float aspectRatio = (float) frame.height / (float) frame.width;
 
         buffer.add(frame.pixels);
@@ -93,300 +66,16 @@ public class SceneCamera extends AbstractScene {
         image(cam, 0, 0, 0, 0);
         image(frame, width() * 0.25f, (height() - width() * 0.5f * aspectRatio) * 0.5f, width() * 0.5f, width() * 0.5f * aspectRatio);
 
+        noStroke();
+        fill(0);
+        rect(vwX, vwY, windowWidth, height());
+        rect(hwX, hwY, width(), windowWidth);
+
         // System.out.println("wall frameRate: "+frameRate());
     }
 
     @Override
     public void drawFloor() {
-        fill(0, alphaFade);
-        noStroke();
-        rect(0, 0, width(), height());
-        updateDancers();
-        calculateConvexHull();
-        
-        // for (Dancer dancer : dancers) {
-        //     grid.affect(dancer.x, dancer.y);
-        // }
-
-        stroke(255);
-        strokeWeight(1);
-        noFill();
-        drawCircles();
-        
-        // grid.update();
-        // grid.displayFloor();
-
-        // stroke(255, 0, 0);
-        // strokeWeight(6);
-        // for (Dancer p : dancers) {
-        //     point(p.x, p.y);
-        // }
-        // System.out.println("floor frameRate: "+frameRate());
-    }
-
-    private void drawCircles() {
-        float centerX = width() / 2;
-        float centerY = height() / 2;
-        float zoff = frameCount() * 0.01f;
-        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
-
-        for (int circleI = 0 ; circleI < circles ; circleI++) {
-            int noiseRadius = (circleI + 1) * separation;
-            beginShape();
-            for (int angleI = 0; angleI < points; angleI++) {
-                float radius = offsets[circleI][angleI];
-                float angle = map(angleI, 0, points, 0, PConstants.TWO_PI);
-                int x = (int) (centerX + cos(angle) * radius);
-                int y = (int) (centerY + sin(angle) * radius);
-                int xn = (int) (centerX + cos(angle) * noiseRadius);
-                int yn = (int) (centerY + sin(angle) * noiseRadius);
-
-                float n = noise(xn * noiseScale, yn * noiseScale, zoff);
-                float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
-                float influence = 0;
-                
-                for(TuioCursor cursor: tuioCursorList) {
-                    int px = cursor.getScreenX(width());
-                    int py = cursor.getScreenY(height());
-                    float dx = x - px;
-                    float dy = y - py;
-                    float d = dist(x, y, px, py);
-
-                    if (d < influenceRadius) {
-                        float strength = 1 - (d / influenceRadius);
-                        strength *= strength;
-                        float dRadius = dist(centerX, centerY, px, py);
-                        influence = (radius - dRadius) * strength * maxPush;
-                    }
-                }
-                float target = radius + baseWave + influence;
-                offsets[circleI][angleI] = lerp(radius, target, lerpAmount);
-
-                x = (int) (centerX + cos(angle) * offsets[circleI][angleI]);
-                y = (int) (centerY + sin(angle) * offsets[circleI][angleI]);
-                curveVertex(x, y);
-            }
-
-            for (int angleI = 0; angleI < 3; angleI++) {
-                float angle = map(angleI, 0, points, 0, PConstants.TWO_PI);
-                int x = (int) (centerX + cos(angle) * offsets[circleI][angleI]);
-                int y = (int) (centerY + sin(angle) * offsets[circleI][angleI]);
-                curveVertex(x, y);
-            }
-            endShape(PConstants.CLOSE);
-        }
-
-        // for (int circleI = 0; circleI < circles; circleI++) {
-        //     for (int angleI = 0; angleI < points; angleI++) {
-        //         float radius = offsets[circleI][angleI];
-        //         float angle = map(angleI, 0, points, 0, PConstants.TWO_PI);
-        //         int x = (int) (centerX + cos(angle) * radius);
-        //         int y = (int) (centerY + sin(angle) * radius);
-        //         stroke(255, 0, 0);
-        //         strokeWeight(6);
-        //         point(x, y);
-        //     }
-        // }
-    }
-
-    void updateGrid() {
-        offsets = new float[circles][points];
-        for (int circleI = 0; circleI < circles; circleI++) {
-            int radius = (circleI + 1) * separation;
-            for (int angleI = 0; angleI < points; angleI++) {
-                offsets[circleI][angleI] = radius;
-            }
-        }
-    }
-
-    @Override
-    public void midiIn(int slider, int value) {
-        // switch(slider) {
-            // case 0:
-            //     NoiseGrid.speed = value / 127f;
-            //     System.out.println("    grid.speed: "+NoiseGrid.speed);
-            //     break;
-            // case 1:
-            //     NoiseGrid.noiseScale = value / 127f;
-            //     System.out.println("    grid.noiseScale: "+NoiseGrid.noiseScale);
-            //     break;
-            // case 2:
-            //     NoiseGrid.speedFill = value / 127f;
-            //     System.out.println("    grid.speedFill: "+NoiseGrid.speedFill);
-            //     break;
-            // case 3:
-            //     NoiseGrid.noiseScaleFill = value / 127f;
-            //     System.out.println("    grid.noiseScaleFill: "+NoiseGrid.noiseScaleFill);
-            //     break;
-            // case 4:
-            //     noiseDetail = floor(map(value, 0, 127, 1, 8));
-            //     noiseDetail(noiseDetail);
-            //     System.out.println("    noiseDetail: "+noiseDetail);
-            //     break;
-            // case 5:
-            //     NoiseGrid.noiseLinesForceStrength = value / 127f;
-            //     System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
-            //     break;
-            // case 6:
-            //     alphaFade = 255 * (value / 127f);
-            //     System.out.println("    alphaFade: "+alphaFade);
-            //     break;
-            // default:
-            //     System.out.println("    default: "+value);
-        // }
-    }
-
-    @Override
-    public void oscEvent(String path, float value) {
-        System.out.println("oscEvent camera");
-        switch(path) {
-            case "/cam/fader2":
-                baseNoiseAmount = map(value, 0, 1, 0, 150);
-                System.out.println("    baseNoiseAmount: "+baseNoiseAmount);
-                break;
-            case "/cam/fader3":
-                noiseScale = map(value, 0, 1, 0.0001f, 0.1f);
-                System.out.println("    noiseScale: "+noiseScale);
-                break;
-            case "/cam/fader4":
-                influenceRadius = map(value, 0, 1, 50, 1000);
-                System.out.println("    influenceRadius: "+influenceRadius);
-                break;
-            case "/cam/fader5":
-                lerpAmount = map(value, 0, 1, 0.001f, 0.2f);
-                System.out.println("    lerpAmount: "+lerpAmount);
-                break;
-            case "/cam/fader6":
-                noiseDetail = floor(map(value, 0, 1, 1, 8));
-                noiseDetail(noiseDetail);
-                System.out.println("    noiseDetail: "+noiseDetail);
-                break;
-            case "/cam/fader8":
-                alphaFade = 255 * value;
-                System.out.println("    alphaFade: "+alphaFade);
-                break;
-        }
-    }
-
-    private void updateDancers() {
-        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
-        for (int dI = 0; dI < dancers.size(); dI++) {
-            boolean toDelete = true;
-            Dancer dancer = dancers.get(dI);
-            for (int tI = 0; tI < tuioCursorList.size(); tI++) {
-                TuioCursor cursor = tuioCursorList.get(tI);
-                if (dancer.isLinkedTo(cursor)) {
-                    dancer.update(cursor);
-                    toDelete = false;
-                    break;
-                }
-            }
-            if (toDelete) {
-                dancers.remove(dI);
-                dI--;
-            }
-        }
-
-        if (tuioCursorList.size() > dancers.size()) {
-            for (int tI = 0; tI < tuioCursorList.size(); tI++) {
-                TuioCursor cursor = tuioCursorList.get(tI);
-                boolean toAdd = true;
-                for (int dI = 0; dI < dancers.size(); dI++) {
-                    Dancer dancer = dancers.get(dI);
-                    if (dancer.isLinkedTo(cursor)) {
-                        toAdd = false;
-                        break;
-                    }
-                }
-                if (toAdd) {
-                    dancers.add(new Dancer(this, cursor));
-                }
-            }
-        }
-
-    }
-
-    void calculateConvexHull() {
-        if (dancers.size() < 3) {
-            hull = new ArrayList<Dancer>(dancers);
-            return;
-        }
-
-        Collections.sort(dancers, new Comparator<Dancer>() {
-            @Override
-            public int compare(Dancer p1, Dancer p2) {
-            if (p1.x != p2.x) {
-                return Float.compare(p1.x, p2.x);
-            }
-            return Float.compare(p1.y, p2.y);
-            }
-        });
-
-        ArrayList<Dancer> upper = new ArrayList<Dancer>();
-        for (Dancer p : dancers) {
-            while (upper.size() >= 2 && crossProduct(upper.get(upper.size() - 2), upper.get(upper.size() - 1), p) <= 0) {
-            upper.remove(upper.size() - 1);
-            }
-            upper.add(p);
-        }
-
-        ArrayList<Dancer> lower = new ArrayList<Dancer>();
-        for (int i = dancers.size() - 1; i >= 0; i--) {
-            Dancer p = dancers.get(i);
-            while (lower.size() >= 2 && crossProduct(lower.get(lower.size() - 2), lower.get(lower.size() - 1), p) <= 0) {
-                lower.remove(lower.size() - 1);
-            }
-            lower.add(p);
-        }
-        hull.clear();
-        hull.addAll(upper);
-        
-        if (!lower.isEmpty() && !upper.isEmpty() && lower.get(lower.size() - 1).equals(upper.get(0))) {
-            lower.remove(lower.size() - 1);
-        }
-
-        if (!lower.isEmpty() && !(hull.size() > 0 && lower.get(0).equals(hull.get(hull.size() -1)))) {
-            lower.remove(0);
-        } else if (!lower.isEmpty() && hull.size() > 0 && lower.get(0).equals(upper.get(upper.size() -1))) {
-            lower.remove(0);
-        }
-        
-        hull.addAll(lower);
-        
-        if (hull.size() > 1 && hull.get(0).equals(hull.get(hull.size() - 1))) {
-            hull.remove(hull.size() - 1);
-        }
-    }
-
-    float crossProduct(Dancer p1, Dancer p2, Dancer p3) {
-        return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
-    }
-
-
-    // inner classes
-
-    private class Dancer {
-        float x;
-        float y;
-        long cursorId;
-        SceneCamera scene;
-        
-        Dancer(SceneCamera scene, TuioCursor cursor) {
-            this.scene = scene;
-            this.cursorId = cursor.getSessionID();
-            x = cursor.getScreenX(scene.width()); 
-            y = cursor.getScreenY(scene.height());
-        }
-
-        boolean isLinkedTo(TuioCursor cursor) {
-            return cursorId == cursor.getSessionID();
-        }
-
-        void update(TuioCursor cursor) {
-            // x = cursor.getScreenX(Constants.WIDTH) - width() / 2f;
-            // y = cursor.getScreenY(Constants.FLOOR_HEIGHT) - height() / 2f;
-            x = cursor.getScreenX(width());
-            y = cursor.getScreenY(height());
-        }
+        background(0);
     }
 }
