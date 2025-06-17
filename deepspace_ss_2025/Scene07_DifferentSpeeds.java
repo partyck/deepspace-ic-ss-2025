@@ -19,12 +19,12 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private static boolean isKeyRegistered = false;
     private static float noiseStrength = 5.0f;
 
-    private final int stripeThicknessTop = (width()/10) * 2;
-    private final int stripeThicknessBottom = (width()/10) * 3;
-    private final float overlap = 20f;
+    private final int stripeThicknessTop = (width()/27);
+    private final int stripeThicknessBottom = (width()/20);
+    private final float overlap = height()/10;
     private final float SPEED_CHANGE_AMOUNT = 0.5f;
     private final float ROTATION_SPEED = 0.05f;
-    private final float floorStripeBlockHeight = (height()/10) * 6;
+    private final float floorStripeBlockHeight = (width()/10);
 
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);
@@ -73,19 +73,19 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         boolean isRotated = Math.abs(rotationAngle - PConstants.HALF_PI) < 0.01f;
 
         p.pushMatrix();
-        p.translate(p.width / 2f, p.height / 2f);
+        p.translate(p.width/2f, p.height/2f);
         p.rotate(rotationAngle);
         p.background(0);
 
         if (isRotated) {
-            float floorContentWidth = p.height;
-            float floorContentHeight = floorStripeBlockHeight;
-            p.translate(-floorContentWidth / 2f, -floorContentHeight / 2f);
-            drawFloorStripes(0, 0, floorContentWidth, floorContentHeight);
+            // mirror the floor exactly
+            p.translate(-p.width/2f, -p.height/2f);
+            drawFloorStripes(0, 0, p.width, p.height);
         } else {
-            p.translate(-p.width / 2f, -p.height / 2f);
-            float croppedHeight = p.height / 4f;
-            drawStripes(0, p.height - croppedHeight, p.width, croppedHeight, stripeThicknessTop, speedTop * direction);
+            p.translate(-p.width/2f, -p.height/2f);
+            float croppedHeight = p.height/4f;
+            drawStripes(0, p.height - croppedHeight, p.width, croppedHeight,
+                        stripeThicknessTop, speedTop * direction);
         }
 
         p.popMatrix();
