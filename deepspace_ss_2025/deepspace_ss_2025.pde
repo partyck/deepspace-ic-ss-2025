@@ -72,7 +72,7 @@ void setup() {
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene02Rectangles(this, tracker), new Scene02Rectangles(floor, tracker)});
-    scenes.add(new AbstractScene[]{new Scene02Rectangles1(this, tracker), new Scene02Rectangles1(floor, tracker)});
+    // scenes.add(new AbstractScene[]{new Scene02Rectangles1(this, tracker), new Scene02Rectangles1(floor, tracker)});
     scenes.add(new AbstractScene[]{new SceneCamera(this, cam), new SceneCamera(floor, cam)});
     scenes.add(new AbstractScene[]{new Scene07_DifferentSpeeds(this), new Scene07_DifferentSpeeds(floor)});
     scenes.add(new AbstractScene[]{new Scene02ValerioMorning(this), new Scene02ValerioMorning(floor)});

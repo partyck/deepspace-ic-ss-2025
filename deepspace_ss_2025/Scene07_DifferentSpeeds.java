@@ -19,12 +19,12 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private static boolean isKeyRegistered = false;
     private static float noiseStrength = 5.0f;
 
-    private final int stripeThicknessTop = 80;
-    private final int stripeThicknessBottom = 120;
+    private final int stripeThicknessTop = (width()/10) * 2;
+    private final int stripeThicknessBottom = (width()/10) * 3;
     private final float overlap = 20f;
     private final float SPEED_CHANGE_AMOUNT = 0.5f;
     private final float ROTATION_SPEED = 0.05f;
-    private final float floorStripeBlockHeight = height();
+    private final float floorStripeBlockHeight = (height()/10) * 6;
 
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);

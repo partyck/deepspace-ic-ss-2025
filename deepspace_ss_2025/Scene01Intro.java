@@ -211,7 +211,7 @@ public void drawFloor() {
     for (TuioCursor cursor : tuioCursorList) {
         float x = cursor.getScreenX(width());
         float y = cursor.getScreenY(height());
-        float circleSize = map(y,0,height(),100,10);
+        float circleSize = map(y,0,height(),(height()/9),(height()/12));
         ellipse(x, y, circleSize, circleSize);  // Bigger circles (80x80)
     }
 }
