@@ -19,8 +19,8 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private static int stripeMode = 0; // 0=normal, 1=every 5th wide, 2=every 5th wide + 3rd narrow
     private static boolean isKeyRegistered = false;
 
-    private final int stripeThicknessTop = 20;
-    private final int stripeThicknessBottom = 40;
+    private final int stripeThicknessTop = 80;
+    private final int stripeThicknessBottom = 120;
     private final float overlap = 20f;
     private final float SPEED_CHANGE_AMOUNT = 0.5f;
     private final float ROTATION_SPEED = 0.05f;
