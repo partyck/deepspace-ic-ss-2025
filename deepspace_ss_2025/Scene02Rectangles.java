@@ -9,7 +9,6 @@ public class Scene02Rectangles extends AbstractScene {
 
     // Animation stage control
     private int animStage = 0;
-    private static final int NUM_STAGES = 4;
 
     // Other states
     private boolean isExtended   = false;
@@ -18,18 +17,20 @@ public class Scene02Rectangles extends AbstractScene {
     private boolean isClosing    = false;
 
     // Parameters
-    private static final int   NUM_RECTS       = 7;
-    private static final float ANIM_DELAY_BASE = 15f;
+    private static final int   NUM_RECTS          = 7;
+    private static final float ANIM_DURATION_FRMS  = 120f;
 
-    // Dimensions
+    // Dimensions & baseline for wall
     private final float wallTargetW;
     private final float wallTargetH;
+    private final float baselineY;
 
     public Scene02Rectangles(PApplet p, TuioClient tracker) {
         super(p);
         this.tracker = tracker;
         this.wallTargetW = p.width  / 10f;
         this.wallTargetH = (p.height / 10f) * 6f;
+        this.baselineY    = p.height - wallTargetH;
         initRectangles();
     }
 
@@ -38,34 +39,8 @@ public class Scene02Rectangles extends AbstractScene {
         float gap = p.width / (NUM_RECTS + 1f);
         for (int i = 0; i < NUM_RECTS; i++) {
             float x = gap * (i + 1);
-            float y = p.height - wallTargetH; // bottom-of-wall origin: translated in drawWall
-            rects.add(new SceneRect(x, y, wallTargetW, wallTargetH, i));
+            rects.add(new SceneRect(x, baselineY, wallTargetW, wallTargetH));
         }
-    }
-
-    /**
-     * Always update any rectangles flagged to animate in
-     */
-    private void animateInSequence() {
-        for (SceneRect r : rects) r.animateIn();
-    }
-
-    private void extendToFloor() {
-        isExtended = true;
-    }
-
-    private void deformRectangles() {
-        isDeformed = true;
-        for (SceneRect r : rects) r.deform();
-    }
-
-    private void enableFollow() {
-        isFollow = true;
-    }
-
-    private void closeRectangles() {
-        isClosing = true;
-        for (SceneRect r : rects) r.close();
     }
 
     @Override
@@ -77,108 +52,89 @@ public class Scene02Rectangles extends AbstractScene {
         float tw = p.textWidth(title);
         p.text(title, p.width - tw - 20, 40);
 
-        // always update animations
-        animateInSequence();
+        // Update "in" animations
+        for (SceneRect r : rects) r.animateIn();
 
-        p.pushMatrix();
-        // origin (0,0) at bottom of wall
-        // p.translate(0, p.height);
-        displayRects();
-        p.popMatrix();
+        // Draw wall rects
+        p.noStroke();
+        p.fill(255);
+        for (SceneRect r : rects) r.draw();
     }
 
     @Override
     public void drawFloor() {
-        // background(0);
         if (!isExtended) return;
-        displayRects();
-    }
 
-    private void displayRects() {
+        // Shift origin so that rectangles draw onto the floor area above the wall
+        p.pushMatrix();
+        p.translate(0, -baselineY);
+
         p.noStroke();
         p.fill(255);
-        ArrayList<TuioCursor> cursors = tracker.getTuioCursorList();
+        for (SceneRect r : rects) r.draw();
 
-        for (SceneRect r : rects) {
-            if (isFollow) r.followCursor(cursors, p.width, p.height);
-            if (isClosing) r.animateClose();
-            r.draw();
-        }
+        p.popMatrix();
     }
 
     @Override
     public void keyPressed(char key, int keyCode) {
         switch (Character.toLowerCase(key)) {
             case 'a': triggerNextAnimStage(); break;
-            case 't': extendToFloor();       break;
-            case 'd': deformRectangles();    break;
-            case 'f': enableFollow();        break;
-            case 'c': closeRectangles();     break;
+            case 't': isExtended = true;      break;
+            case 'd': for (SceneRect r : rects) r.deform(); break;
+            case 'f': isFollow   = true;      break;
+            case 'c': for (SceneRect r : rects) r.close(); break;
         }
     }
 
-    /**
-     * On each 'a' press, animate the next group: center, 1-away, 2-away, 3-away
-     */
     private void triggerNextAnimStage() {
         int center = NUM_RECTS / 2;
         switch (animStage) {
             case 0:
-                rects.get(center).shouldAnimateIn = true;
+                rects.get(center).startIn();
                 break;
             case 1:
-                rects.get(center - 1).shouldAnimateIn = true;
-                rects.get(center + 1).shouldAnimateIn = true;
+                rects.get(center - 1).startIn();
+                rects.get(center + 1).startIn();
                 break;
             case 2:
-                rects.get(center - 2).shouldAnimateIn = true;
-                rects.get(center + 2).shouldAnimateIn = true;
+                rects.get(center - 2).startIn();
+                rects.get(center + 2).startIn();
                 break;
             case 3:
-                rects.get(center - 3).shouldAnimateIn = true;
-                rects.get(center + 3).shouldAnimateIn = true;
+                rects.get(center - 3).startIn();
+                rects.get(center + 3).startIn();
                 break;
-            default:
-                return;
         }
         animStage++;
     }
 
     private class SceneRect {
-        float x, y;
-        float w, h;
+        float x, baseY;
+        float w = 0, h = 0;
         float targetW, targetH;
-        int index;
-        int frameOffset;
+        boolean animInDone     = false;
+        int animStartFrame     = -1;
 
-        // NEW: only animate in when flagged
-        boolean shouldAnimateIn = false;
-        boolean animInDone      = false;
-
-        // Closing
-        boolean closing    = false;
-        int closeFrame     = 0;
-
-        SceneRect(float x, float y, float targetW, float targetH, int idx) {
+        SceneRect(float x, float baseY, float targetW, float targetH) {
             this.x = x;
-            this.y = y;
+            this.baseY = baseY;
             this.targetW = targetW;
             this.targetH = targetH;
-            this.w = 0;
-            this.h = 0;
-            this.index = idx;
-            int center = NUM_RECTS / 2;
-            this.frameOffset = Math.abs(idx - center);
+        }
+
+        void startIn() {
+            if (animInDone) return;
+            animStartFrame = p.frameCount;
         }
 
         void animateIn() {
-            if (!shouldAnimateIn || animInDone) return;
-            int delay = (int)(frameOffset * ANIM_DELAY_BASE);
-            int t = p.frameCount - delay;
-            if (t < 0) return;
-            float prog = p.constrain(t / 60f, 0, 1);
-            w = p.lerp(0, targetW, prog);
-            h = p.lerp(0, targetH, prog);
+            if (animInDone || animStartFrame < 0) return;
+            int t = p.frameCount - animStartFrame;
+            float prog = p.constrain(t / ANIM_DURATION_FRMS, 0, 1);
+            float eased = p.sin(prog * PConstants.HALF_PI);
+            w = p.lerp(0, targetW, eased);
+            h = p.lerp(0, targetH, eased);
             if (prog >= 1) animInDone = true;
         }
 
@@ -187,34 +143,13 @@ public class Scene02Rectangles extends AbstractScene {
             targetH *= p.random(0.7f, 1.3f);
         }
 
-        void followCursor(ArrayList<TuioCursor> cursors, int sw, int sh) {
-            for (TuioCursor c : cursors) {
-                float cx = c.getScreenX(sw);
-                float cy = c.getScreenY(sh);
-                if (cx >= x - w/2 && cx <= x + w/2 &&
-                    cy >= y - h/2 && cy <= y + h/2) {
-                    x = cx;
-                    y = cy;
-                    break;
-                }
-            }
-        }
-
         void close() {
-            closing = true;
-            closeFrame = p.frameCount;
-        }
-
-        void animateClose() {
-            int t = p.frameCount - closeFrame;
-            float prog = p.constrain(t / 60f, 0, 1);
-            w = p.lerp(targetW, 0, prog);
-            h = p.lerp(targetH, 0, prog);
+            // implement closing if needed
         }
 
         void draw() {
-            // p.rectMode(PConstants.CENTER, 0);
-            p.rect(x, y, w, h);
+            p.rectMode(PConstants.CORNER);
+            p.rect(x - w/2, baseY - h, w, h);
         }
     }
 }
