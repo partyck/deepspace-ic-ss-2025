@@ -86,7 +86,7 @@ public class Scene02Rectangles extends AbstractScene {
                 break;
             case 'd':
                 // assign new targets
-                rects.get(0).setTarget(wallTargetW * 0.5f, wallTargetH * 1.0f);
+                rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
                 rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.2f);
                 rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
                 rects.get(3).setTarget(wallTargetW * 0.6f, wallTargetH * 1.5f);
