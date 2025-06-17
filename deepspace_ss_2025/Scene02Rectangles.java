@@ -88,11 +88,11 @@ public void drawFloor() {
     @Override
     public void keyPressed(char key, int keyCode) {
         switch (Character.toLowerCase(key)) {
-            case 'a': triggerNextAnimStage();           break;
-            case 't': isExtended = true;                break;
+            case 'a': triggerNextAnimStage();               break;
+            case 't': isExtended = true;                    break;
             case 'd': for (SceneRect r : rects) r.deform(); break;
-            case 'f': isFollow   = true;                break;
-            case 'c': for (SceneRect r : rects) r.close();   break;
+            case 'f': isFollow   = true;                    break;
+            case 'c': for (SceneRect r : rects) r.close();  break;
         }
     }
 
