@@ -47,10 +47,10 @@ public class Scene02Rectangles extends AbstractScene {
 
         // update animations
         for (SceneRect r : rects) {
-    r.animateIn();
-    r.animateDeform();
-    if (isFollow) r.followCursor(tracker.getTuioCursorList(), p.width, p.height);
-}
+            r.animateIn();
+            r.animateDeform();
+            if (isFollow) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+        }
         p.noStroke(); p.fill(255);
         for (SceneRect r : rects) r.draw();
     }
@@ -61,10 +61,10 @@ public class Scene02Rectangles extends AbstractScene {
         p.background(0);
         // update animations
         for (SceneRect r : rects) {
-    r.animateIn();
-    r.animateDeform();
-    if (isFollow) r.followCursor(tracker.getTuioCursorList(), p.width, p.height);
-}
+            r.animateIn();
+            r.animateDeform();
+            if (isFollow) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+        }
         p.pushMatrix();
         p.translate(0, p.height);
         p.scale(1, -1);
@@ -87,7 +87,7 @@ public class Scene02Rectangles extends AbstractScene {
             case 'd':
                 // assign new targets
                 rects.get(0).setTarget(wallTargetW * 0.5f, wallTargetH * 1.0f);
-                rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.8f);
+                rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.2f);
                 rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
                 rects.get(3).setTarget(wallTargetW * 0.6f, wallTargetH * 1.5f);
                 rects.get(4).setTarget(wallTargetW * 1.2f, wallTargetH * 0.7f);
@@ -138,6 +138,10 @@ public class Scene02Rectangles extends AbstractScene {
         boolean isDeforming = false;
         int deformStartFrame = -1;
 
+        // follow
+        int assignedCursorId = -1;
+
+        // closing
         boolean closing = false;
         int closeFrame = 0;
 
@@ -199,9 +203,21 @@ public class Scene02Rectangles extends AbstractScene {
         }
 
         /**
-         * If a cursor is inside this rect, follow it by recentering the rect on the cursor
+         * Assigns this rectangle to the first cursor that touches it, then follows that cursor.
          */
-        void followCursor(ArrayList<TuioCursor> cursors, int sw, int sh) {
+        void updateFollow(ArrayList<TuioCursor> cursors, int sw, int sh) {
+            // if already assigned, follow that cursor
+            if (assignedCursorId >= 0) {
+                for (TuioCursor c : cursors) {
+                    if (c.getCursorID() == assignedCursorId) {
+                        x = c.getScreenX(sw);
+                        baseY = c.getScreenY(sh) + h/2;
+                        return;
+                    }
+                }
+                assignedCursorId = -1;
+            }
+            // assign first cursor that touches
             for (TuioCursor c : cursors) {
                 float cx = c.getScreenX(sw);
                 float cy = c.getScreenY(sh);
@@ -210,10 +226,8 @@ public class Scene02Rectangles extends AbstractScene {
                 float top = baseY - h;
                 float bottom = baseY;
                 if (cx >= left && cx <= right && cy >= top && cy <= bottom) {
-                    // center rect on cursor
-                    x = cx;
-                    baseY = cy + h/2;
-                    break;
+                    assignedCursorId = c.getCursorID();
+                    return;
                 }
             }
         }
