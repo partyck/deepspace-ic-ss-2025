@@ -17,8 +17,8 @@ public class Scene02Rectangles extends AbstractScene {
     private boolean isClosing    = false;
 
     // Parameters
-    private static final int   NUM_RECTS          = 7;
-    private static final float ANIM_DURATION_FRMS  = 120f;
+    private static final int   NUM_RECTS         = 7;
+    private static final float ANIM_DURATION_FRMS = 120f;
 
     // Dimensions & baseline for wall
     private final float wallTargetW;
@@ -27,10 +27,10 @@ public class Scene02Rectangles extends AbstractScene {
 
     public Scene02Rectangles(PApplet p, TuioClient tracker) {
         super(p);
-        this.tracker = tracker;
-        this.wallTargetW = p.width  / 10f;
-        this.wallTargetH = (p.height / 10f) * 6f;
-        this.baselineY    = p.height - wallTargetH;
+        this.tracker      = tracker;
+        this.wallTargetW  = p.width  / 10f;
+        this.wallTargetH  = (p.height / 10f) * 6f;
+        this.baselineY    = p.height;          // bottom of the window
         initRectangles();
     }
 
@@ -52,12 +52,11 @@ public class Scene02Rectangles extends AbstractScene {
         float tw = p.textWidth(title);
         p.text(title, p.width - tw - 20, 40);
 
-        // Update "in" animations
+        // Animate "in" for any rect started
         for (SceneRect r : rects) r.animateIn();
 
-        // Draw wall rects
-        p.noStroke();
-        p.fill(255);
+        // Draw wall rects at bottom of window
+        p.noStroke(); p.fill(255);
         for (SceneRect r : rects) r.draw();
     }
 
@@ -65,25 +64,20 @@ public class Scene02Rectangles extends AbstractScene {
     public void drawFloor() {
         if (!isExtended) return;
 
-        // Shift origin so that rectangles draw onto the floor area above the wall
-        p.pushMatrix();
-        p.translate(0, -baselineY);
-
-        p.noStroke();
-        p.fill(255);
+        // Draw the exact same rects at the bottom of the floor window
+        p.background(0);
+        p.noStroke(); p.fill(255);
         for (SceneRect r : rects) r.draw();
-
-        p.popMatrix();
     }
 
     @Override
     public void keyPressed(char key, int keyCode) {
         switch (Character.toLowerCase(key)) {
-            case 'a': triggerNextAnimStage(); break;
-            case 't': isExtended = true;      break;
+            case 'a': triggerNextAnimStage();           break;
+            case 't': isExtended = true;                break;
             case 'd': for (SceneRect r : rects) r.deform(); break;
-            case 'f': isFollow   = true;      break;
-            case 'c': for (SceneRect r : rects) r.close(); break;
+            case 'f': isFollow   = true;                break;
+            case 'c': for (SceneRect r : rects) r.close();   break;
         }
     }
 
@@ -113,12 +107,16 @@ public class Scene02Rectangles extends AbstractScene {
         float x, baseY;
         float w = 0, h = 0;
         float targetW, targetH;
-        boolean animInDone     = false;
-        int animStartFrame     = -1;
+        boolean animInDone    = false;
+        int animStartFrame    = -1;
+
+        // Closing
+        boolean closing       = false;
+        int closeFrame        = 0;
 
         SceneRect(float x, float baseY, float targetW, float targetH) {
-            this.x = x;
-            this.baseY = baseY;
+            this.x       = x;
+            this.baseY   = baseY;
             this.targetW = targetW;
             this.targetH = targetH;
         }
@@ -144,7 +142,16 @@ public class Scene02Rectangles extends AbstractScene {
         }
 
         void close() {
-            // implement closing if needed
+            closing = true;
+            closeFrame = p.frameCount;
+        }
+
+        void animateClose() {
+            int t = p.frameCount - closeFrame;
+            float prog = p.constrain(t / ANIM_DURATION_FRMS, 0, 1);
+            float eased = 1 - p.sin(prog * PConstants.HALF_PI);
+            w = p.lerp(targetW, 0, eased);
+            h = p.lerp(targetH, 0, eased);
         }
 
         void draw() {
