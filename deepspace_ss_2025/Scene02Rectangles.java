@@ -13,6 +13,7 @@ public class Scene02Rectangles extends AbstractScene {
 
     private static final int NUM_RECTS = 7;
     private static final float ANIM_DURATION_FRMS = 120f;
+    private static final float DEFORM_DURATION_FRMS = 60f;
 
     private final float wallTargetW;
     private final float wallTargetH;
@@ -44,7 +45,11 @@ public class Scene02Rectangles extends AbstractScene {
         float tw = p.textWidth(title);
         p.text(title, p.width - tw - 20, 40);
 
-        for (SceneRect r : rects) r.animateIn();
+        // update animations
+        for (SceneRect r : rects) {
+            r.animateIn();
+            r.animateDeform();
+        }
         p.noStroke(); p.fill(255);
         for (SceneRect r : rects) r.draw();
     }
@@ -52,11 +57,12 @@ public class Scene02Rectangles extends AbstractScene {
     @Override
     public void drawFloor() {
         if (!isExtended) return;
-
-        // clear and draw mirrored floor
         p.background(0);
-        for (SceneRect r : rects) r.animateIn();
-
+        // update animations
+        for (SceneRect r : rects) {
+            r.animateIn();
+            r.animateDeform();
+        }
         p.pushMatrix();
         p.translate(0, p.height);
         p.scale(1, -1);
@@ -77,7 +83,7 @@ public class Scene02Rectangles extends AbstractScene {
                 for (SceneRect r : rects) r.startIn();
                 break;
             case 'd':
-                // hardcoded deformation
+                // assign new targets
                 rects.get(0).setTarget(wallTargetW * 0.5f, wallTargetH * 1.0f);
                 rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.8f);
                 rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
@@ -85,7 +91,7 @@ public class Scene02Rectangles extends AbstractScene {
                 rects.get(4).setTarget(wallTargetW * 1.2f, wallTargetH * 0.7f);
                 rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
                 rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
-                for (SceneRect r : rects) r.applyTarget();
+                for (SceneRect r : rects) r.startDeform();
                 break;
             case 'f':
                 isFollow = true;
@@ -125,6 +131,11 @@ public class Scene02Rectangles extends AbstractScene {
         boolean animInDone = false;
         int animStartFrame = -1;
 
+        // deformation
+        float startW, startH;
+        boolean isDeforming = false;
+        int deformStartFrame = -1;
+
         boolean closing = false;
         int closeFrame = 0;
 
@@ -140,25 +151,36 @@ public class Scene02Rectangles extends AbstractScene {
             this.targetH = th;
         }
 
-        void applyTarget() {
-            this.w = targetW;
-            this.h = targetH;
-            this.animInDone = true;
-        }
-
         void startIn() {
             if (animInDone) return;
             animStartFrame = p.frameCount;
         }
 
         void animateIn() {
-            if ((animInDone && !isExtended) || animStartFrame < 0) return;
+            if (animStartFrame < 0) return;
             int t = p.frameCount - animStartFrame;
             float prog = PApplet.constrain(t / ANIM_DURATION_FRMS, 0, 1);
             float eased = PApplet.sin(prog * PConstants.HALF_PI);
             w = PApplet.lerp(0, targetW, eased);
             h = PApplet.lerp(0, targetH, eased);
             if (prog >= 1) animInDone = true;
+        }
+
+        void startDeform() {
+            this.startW = this.w;
+            this.startH = this.h;
+            this.deformStartFrame = p.frameCount;
+            this.isDeforming = true;
+        }
+
+        void animateDeform() {
+            if (!isDeforming) return;
+            int t = p.frameCount - deformStartFrame;
+            float prog = PApplet.constrain(t / DEFORM_DURATION_FRMS, 0, 1);
+            float eased = PApplet.sin(prog * PConstants.HALF_PI);
+            w = PApplet.lerp(startW, targetW, eased);
+            h = PApplet.lerp(startH, targetH, eased);
+            if (prog >= 1) isDeforming = false;
         }
 
         void close() {
