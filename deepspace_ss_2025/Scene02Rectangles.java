@@ -3,6 +3,12 @@ import processing.core.PConstants;
 import TUIO.*;
 import java.util.ArrayList;
 
+// key 'a': triggerNextAnimStage();               
+// key 't': isExtended = true;                    
+// key 'd': for (SceneRect r : rects) r.deform(); 
+// key 'f': isFollow   = true;                    
+// key 'c': for (SceneRect r : rects) r.close();  
+
 public class Scene02Rectangles extends AbstractScene {
     private TuioClient tracker;
     private ArrayList<SceneRect> rects;
