@@ -20,6 +20,7 @@ public class Floor extends PApplet {
         if (Constants.DEV) {
             windowMove(0, Constants.WALL_HEIGHT + 75);
         }
+        noCursor();
     }
 
     @Override

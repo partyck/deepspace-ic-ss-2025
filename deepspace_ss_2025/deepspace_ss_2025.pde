@@ -39,6 +39,7 @@ void setup() {
         surface.setLocation(0, 50);
         surface.setResizable(true);
     }
+    noCursor();
     surface.setTitle("Wall");
 
     oscP5 = new OscP5(this, 10000);
