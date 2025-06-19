@@ -14,13 +14,13 @@ import TUIO.*;
 
 public class SceneRave extends AbstractScene {
     private TuioClient tracker;
-    private int noiseDetail = 4;
+    private int noiseDetail = 8;
 
     private ArrayList<Dancer> dancers;
     private ArrayList<Dancer> hull;
 
     private NoiseGrid grid;
-    private float alphaFade = 3.0f;
+    private float alphaFade = 21.0f;
 
     boolean showWallGrid = true;
 
@@ -49,8 +49,6 @@ public class SceneRave extends AbstractScene {
         noStroke();
         rect(0, 0, width(), height());
         grid.displayWall();
-
-        System.out.println("wall frameRate: "+frameRate());
     }
 
     @Override
@@ -73,12 +71,10 @@ public class SceneRave extends AbstractScene {
         for (Dancer p : dancers) {
             point(p.x, p.y);
         }
-        // System.out.println("floor frameRate: "+frameRate());
     }
 
     @Override
     public void midiIn(int slider, int value) {
-        // grid.midiIn(slider, value);
         switch(slider) {
             case 0:
                 NoiseGrid.speed = value / 127f;

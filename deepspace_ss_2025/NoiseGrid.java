@@ -17,19 +17,19 @@ public class NoiseGrid {
     boolean linesOn = false;
     boolean tilesOn = true;
 
-    static float speed = 0.005f;
+    static float speed = 0.5f;
     static float timeOffset = 0f;
-    static float noiseScale = 0f;
+    static float noiseScale = 0.09f;
 
-    static float speedFill = 0.005f;
+    static float speedFill = 0.09f;
     static float timeOffsetFill = 0f;
-    static float noiseScaleFill = 0.05f;
+    static float noiseScaleFill = 1f;
 
-    float displayTreshold = 0.5f;
+    float displayTreshold = 0.6f;
 
     int tileTimer;
 
-    static float noiseLinesForceStrength = 0.8f;
+    static float noiseLinesForceStrength = 0.9f;
     float affectDistance;
 
     int width;
@@ -63,7 +63,7 @@ public class NoiseGrid {
         height = wallHeight + floorHeight;
 
         affectDistance = width * 0.2f;
-        tileTimer = (int) wall.frameRate() * 5;
+        tileTimer = (int) wall.frameRate() * 1;
 
         int xLines = 20;
         int yLines = 20;
@@ -235,16 +235,14 @@ public class NoiseGrid {
             AbstractScene scene = getScene(isWall);
             int currentY = isWall ? y : y - wallHeight;
             if (timer > 0) {
-                scene.fill(255);
-                scene.rect(x, currentY, w, h);
-                return;
+                scene.fill(200);
             }
             if (n > displayTreshold) {
                 int fill = (int) (255 * Math.pow(n, 1f / 3f));
                 scene.fill(fill);
-                scene.rect(x, currentY, w, h);
-                return;
             }
+            scene.rect(x, currentY, w, h);
+            return;
         }
 
         void update(int prevX, int prevY, int w, int h, float noise) {
