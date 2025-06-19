@@ -13,6 +13,7 @@ MidiBus midiSound, midiController;
 
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
+int currentSceneIndex = -1;
 AbstractScene currentSceneWall = null;
 AbstractScene currentSceneFloor = null;
 boolean initialized = false;
@@ -93,31 +94,46 @@ public void draw() {
 }
 
 void nextScene() {
-    AbstractScene[] currentScenes = scenes.poll();
-    if (currentScenes == null) {
-        exit();
-        return;
+    currentSceneIndex++;
+    if (currentSceneIndex >= scenes.size()) {
+        currentSceneIndex = 0;
     }
+    AbstractScene[] currentScenes = scenes.get(currentSceneIndex);
     currentSceneWall = currentScenes[0];
     currentSceneFloor = currentScenes[1];
     currentSceneWall.init();
     currentSceneFloor.init();
     floor.setScene(currentSceneFloor);
 
-    if (midiSound != null) {
-        midiSound.sendMessage(0xB0, 0, 1, frameCount % 127);
-    } else {
-        println("🎛️ midiSound not available, skipping MIDI trigger.");
-    }
+
 
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
+}
+
+void previousScene() {
+    currentSceneIndex--;
+    if (currentSceneIndex < 0) {
+        currentSceneIndex = scenes.size() - 1;
+    }
+    AbstractScene[] currentScenes = scenes.get(currentSceneIndex);
+    currentSceneWall = currentScenes[0];
+    currentSceneFloor = currentScenes[1];
+    currentSceneWall.init();
+    currentSceneFloor.init();
+    floor.setScene(currentSceneFloor);
+
+    System.out.println("Previous scene: " + currentScenes[0].getClass().getSimpleName());
 }
 
 void oscEvent(OscMessage oscMessage) {
     println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
     if (oscMessage.addrPattern().equals("/nextScene")) {
         nextScene();
-    } else {
+    } 
+    else if (oscMessage.addrPattern().equals("/previousScene")) {
+        previousScene();
+    }
+    else {
         if (currentSceneWall != null) currentSceneWall.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
         if (currentSceneFloor != null) currentSceneFloor.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
     }

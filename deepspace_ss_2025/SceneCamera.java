@@ -39,6 +39,7 @@ public class SceneCamera extends AbstractScene {
     @Override
     public void drawWall() {
         background(0);
+        if (cam == null) return;
         if (cam.available()) {
             cam.read();
             cam.filter(12);
