@@ -112,6 +112,9 @@ public abstract class AbstractScene {
     public float frameRate() { return p.frameRate; }
     public void frameRate(float fps) { p.frameRate(fps); }
     public void translate(int x, int y) { p.translate(x, y); }
+    public void rotate(float angle) { p.rotate(angle); }
+    public void pushMatrix() { p.pushMatrix(); }
+    public void popMatrix() { p.popMatrix(); }
 
     // --- Transform ---
     public void scale(float s) {p.scale(s); }

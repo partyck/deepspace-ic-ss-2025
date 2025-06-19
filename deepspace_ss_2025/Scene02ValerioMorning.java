@@ -7,50 +7,59 @@ public class Scene02ValerioMorning extends AbstractScene {
     private final int color1;
     private final int color2;
     private int timeElapsed;
+    private int targetSpeed;
     private int speed;
     private int animationTime;
+    private int segments;
+    private int circleWidth;
+    private float distance;
 
     public Scene02ValerioMorning(PApplet p) {
         super(p);
         color1 = color(255, 255, 255);
         color2 = color(0, 0, 0);
         timeElapsed = 0;
-        speed = 1;
-        animationTime = 100000;
-
+        speed = 10;
+        targetSpeed = speed;
+        animationTime = 1000000;
+        segments = 300;
+        circleWidth = width();
+        distance = PConstants.TWO_PI / segments;
     }
 
     @Override
     public void drawWall() {
         background(0);
-        float centerX = this.width() * 0.5f;
-        float centerY = this.height();
+        float centerX = width() * 0.5f;
+        float centerY = height();
         display(centerX, centerY);
     }
 
     @Override
     public void drawFloor() {
         background(0);
-        float centerX = this.width() * 0.5f;
+        float centerX = width() * 0.5f;
         float centerY = 0;
         display(centerX, centerY);
     }
 
     public void display(float centerX, float centerY) {
-        float circleWidth = width() - (width() * speed / 100f);
-        int segments = 200;
-        float distance = PConstants.TWO_PI / segments;
+        // float circleWidth = width() - (width() * speed / 30000f);
 
         noStroke();
         float offSet = segments * animationProgress();
 
+        pushMatrix();
+        translate(centerX, centerY);
+        rotate(PConstants.TWO_PI * animationProgress());
         for (int i = 0; i < segments; i++ ) {
             float interval = (float) i / (float) segments;
             fill(lerpColor(color1, color2, interval));
-            float angleStart = offSet + distance * i;
-            float angleEnd = offSet + distance * (i + 1) + 0.01f;
-            arc(centerX, centerY, circleWidth, circleWidth,  angleStart, angleEnd);
+            float angleStart = distance * i;
+            float angleEnd = distance * (i + 1) + 0.01f;
+            arc(0, 0, circleWidth, circleWidth,  angleStart, angleEnd);
         }
+        popMatrix();
 
         fill(0);
         circle(centerX, centerY, width() * 0.1f);
@@ -63,6 +72,7 @@ public class Scene02ValerioMorning extends AbstractScene {
     }
 
     private void update() {
+        speed = (int) lerp(speed, targetSpeed, 0.4f);
         timeElapsed += speed;
         if (this.timeElapsed >= this.animationTime) this.timeElapsed = 0;
     }
@@ -71,14 +81,18 @@ public class Scene02ValerioMorning extends AbstractScene {
     public void oscEvent(String path, float value) {
         switch(path) {
             case "/Valerio/fader9":
-                speed = floor(map(value, 0, 1, 1, 100));
-                System.out.println("    speed: "+speed);
-                System.out.println(speed / 100f);
+                circleWidth = floor(map(value, 0, 1, 100, width()));
+                // speed = floor(map(value, 0, 1, 100, 10000));
+                System.out.println("    circleWidth: "+circleWidth);
                 break;
-            case "/Valerio/fader10":
-              
-            default:
-                // code block
+            case "/Valerio/toggle1":
+                targetSpeed = targetSpeed * 2;
+                System.out.println("    targetSpeed: " + targetSpeed + " speed: " + speed + " value: "+value);
+                break;
+            case "/Valerio/toggle2":
+                targetSpeed = targetSpeed / 2;
+                System.out.println("    targetSpeed: " + targetSpeed + " speed: " + speed + " value: "+value);
+                break;
         }
     }
 

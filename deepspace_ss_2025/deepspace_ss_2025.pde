@@ -93,6 +93,13 @@ public void draw() {
     }
 }
 
+void closeAll() {
+    if (cam != null) cam.stop();
+    oscP5.stop();
+    tracker.disconnect();
+    exit();
+}
+
 void nextScene() {
     currentSceneIndex++;
     if (currentSceneIndex >= scenes.size()) {
@@ -126,16 +133,24 @@ void previousScene() {
 }
 
 void oscEvent(OscMessage oscMessage) {
-    println("osc message in: "+oscMessage.addrPattern()+", value: "+oscMessage.get(0).floatValue());
-    if (oscMessage.addrPattern().equals("/nextScene")) {
-        nextScene();
-    } 
-    else if (oscMessage.addrPattern().equals("/previousScene")) {
-        previousScene();
-    }
-    else {
-        if (currentSceneWall != null) currentSceneWall.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
-        if (currentSceneFloor != null) currentSceneFloor.oscEvent(oscMessage.addrPattern(), oscMessage.get(0).floatValue());
+    String pattern = oscMessage.addrPattern();
+    float value = oscMessage.get(0).floatValue();
+    println("osc message in: "+pattern+", value: "+oscMessage.get(0).floatValue());
+    
+    switch (pattern) {
+        case "/nextScene":
+            nextScene();
+            break;
+        case "/previousScene":
+            previousScene();
+            break;
+        case "/close":
+            closeAll();
+            break;
+        default :
+            if (currentSceneWall != null) currentSceneWall.oscEvent(pattern, value);
+            if (currentSceneFloor != null) currentSceneFloor.oscEvent(pattern, value);
+            break;	
     }
 }
 
