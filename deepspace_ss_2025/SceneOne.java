@@ -36,8 +36,14 @@ public class SceneOne extends AbstractScene {
         this.update();
     }
 
+    private float easeOutSeventh(float t) {
+        return 1 - (float)Math.pow(1 - t, 7);
+    }
+
+
     private float animationProgress() {
-        return timeElapsed / (float) animationTime;
+        float linearProgress = timeElapsed / (float) animationTime;
+        return easeOutSeventh(linearProgress);
     }
 
     private void update() {
