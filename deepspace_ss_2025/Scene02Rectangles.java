@@ -125,6 +125,32 @@ public class Scene02Rectangles extends AbstractScene {
     }
 
     @Override
+    public void oscEvent(String path, float value) {
+        switch (path) {
+            case "/rect/push22": triggerNextAnimStage(); break;
+            case "/rect/push24": isExtended = true; for (SceneRect r : rects) r.startIn(); break;
+            case "/rect/push26":
+                // assign new targets
+                rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
+                rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.2f);
+                rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
+                rects.get(3).setTarget(wallTargetW * 0.6f, wallTargetH * 1.5f);
+                rects.get(4).setTarget(wallTargetW * 1.2f, wallTargetH * 0.7f);
+                rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
+                rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
+                for (SceneRect r : rects) r.startDeform();
+                break;
+            case "/rect/push32": isFollow = true; break;
+            // case "/rect/c": for (SceneRect r : rects) r.close(); break;
+            case "/rect/toggle7": 
+                showTrace = value == 1;
+                if (!showTrace) traces.clear();
+                break;
+            case "/rect/push38": hideExceptSecond = true; break;
+        }
+    }
+
+    @Override
     public void keyPressed(char key, int keyCode) {
         char k = Character.toLowerCase(key);
         switch (k) {
