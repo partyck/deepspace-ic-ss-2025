@@ -34,6 +34,36 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         }
     }
 
+    @Override
+    public void oscEvent(String path, float value) {
+        switch(path) {
+            case "/Stripes/push52":
+                speedTop = Math.min(speedTop + SPEED_CHANGE_AMOUNT, 5.0f);
+                break;
+            case "/Stripes/push53":
+                speedTop = Math.max(speedTop - SPEED_CHANGE_AMOUNT, 0.0f);
+                break;
+            case "/Stripes/toggle10":
+                targetRotationAngle = (value == 1) ? PConstants.HALF_PI : 0;
+                System.out.println("osc Rotation "+ targetRotationAngle);
+                break;
+            case "/Stripes/toggle11":
+                direction = (value == 0) ? 1 : -1;
+                System.out.println("osc Direction " + direction);
+                break;
+            case "/Stripes/push54":
+                stripeMode = (stripeMode + 1) % 3;
+                break;
+            case "/Stripes/push55":
+                stripeMode = (stripeMode + 2) % 3;
+                break;
+            case "/Stripes/push56":
+                noiseStrength = (noiseStrength < 3.0f) ? noiseStrength + 1.0f : 0.0f;
+                System.out.println("Noise Strength (×): " + noiseStrength);
+                break;
+        }
+    }
+
     public void keyEvent(processing.event.KeyEvent event) {
         if (event.getAction() == processing.event.KeyEvent.PRESS) {
             if (event.getKeyCode() == 38) {
