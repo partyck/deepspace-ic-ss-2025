@@ -269,7 +269,7 @@ public void drawFloor() {
                 System.out.println("    maxPush: "+maxPush);
                 break;
             case "/1/fader4":
-                baseNoiseAmount = map(value, 0, 1, 0, 500);
+                baseNoiseAmount = map(value, 0, 1, 0, 150);
                 System.out.println("    baseNoiseAmount: "+baseNoiseAmount);
                 break;
             case "/1/fader5":
@@ -290,18 +290,8 @@ public void drawFloor() {
                 break;
             case "/1/fader9":
                 baseNoiseAmount = floor(map(value, 0, 1, 0, 500));
-                boolean variable = value == 1; 
                 System.out.println("    baseNoiseAmount: "+incDecBaseNoiseAmount);
-                break;
-            case "/Curtains/toggle13":
-                foldCurtain = value == 1;
-                targetCurtainProgress = foldCurtain ? 1 : 0;
-                break;
-            case "/Curtains/toggle14":
-                cloneMirrored = value == 1;
-                break;
-            case "/Curtains/toggle15":
-                waveMode = value == 1;
+                
                 break;
             default:
         }
