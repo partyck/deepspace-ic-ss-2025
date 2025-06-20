@@ -55,11 +55,11 @@ public class Scene02Rectangles extends AbstractScene {
         float tw = p.textWidth(title);
         p.text(title, p.width - tw - 20, 40);
 
-        // update and draw animations
-        for (SceneRect r : rects) {
+        for (int i = 0; i < rects.size(); i++) {
+            SceneRect r = rects.get(i);
             r.animateIn();
             r.animateDeform();
-            if (isFollow) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+            if (isFollow && i != 1) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
         }
         p.noStroke(); p.fill(255);
         for (SceneRect r : rects) r.draw();
@@ -71,10 +71,12 @@ public class Scene02Rectangles extends AbstractScene {
     public void drawFloor() {
         if (!isExtended) return;
         p.background(0);
-        for (SceneRect r : rects) {
+
+        for (int i = 0; i < rects.size(); i++) {
+            SceneRect r = rects.get(i);
             r.animateIn();
             r.animateDeform();
-            if (isFollow) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+            if (isFollow && i != 1) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
         }
         p.pushMatrix();
         p.translate(0, p.height);
