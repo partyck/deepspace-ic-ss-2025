@@ -14,6 +14,7 @@ public class Scene02Rectangles extends AbstractScene {
     private boolean isFollow = false;
     private boolean isClosing = false;
     private boolean showTrace = false;
+    private boolean hideExceptSecond = false;
 
     private static final int NUM_RECTS = 7;
     private static final float ANIM_DURATION_FRMS = 120f;
@@ -62,7 +63,11 @@ public class Scene02Rectangles extends AbstractScene {
             if (isFollow && i != 1) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
         }
         p.noStroke(); p.fill(255);
-        for (SceneRect r : rects) r.draw();
+        if (hideExceptSecond) {
+            rects.get(1).draw(); // Only draw the second rectangle
+        } else {
+            for (SceneRect r : rects) r.draw();
+        }
 
         if (showTrace) drawTraces(tracker.getTuioCursorList(), false);
     }
@@ -82,7 +87,13 @@ public class Scene02Rectangles extends AbstractScene {
         p.translate(0, p.height);
         p.scale(1, -1);
         p.noStroke(); p.fill(255);
-        for (SceneRect r : rects) r.draw();
+
+        if (hideExceptSecond) {
+            rects.get(1).draw(); // Only draw the second rectangle
+        } else {
+            for (SceneRect r : rects) r.draw();
+        }
+
         if (showTrace) drawTraces(tracker.getTuioCursorList(), true);
         p.popMatrix();
     }
@@ -133,6 +144,7 @@ public class Scene02Rectangles extends AbstractScene {
             case 'f': isFollow = true; break;
             case 'c': for (SceneRect r : rects) r.close(); break;
             case 'p': showTrace = !showTrace; if (!showTrace) traces.clear(); break;
+            case 'h': hideExceptSecond = true; break;
         }
     }
 
