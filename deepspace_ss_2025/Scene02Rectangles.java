@@ -49,13 +49,6 @@ public class Scene02Rectangles extends AbstractScene {
 
     @Override
     public void drawWall() {
-        p.background(0);
-        p.fill(255);
-        p.textSize(24);
-        String title = "SCENE RECTANGLES";
-        float tw = p.textWidth(title);
-        p.text(title, p.width - tw - 20, 40);
-
         for (int i = 0; i < rects.size(); i++) {
             SceneRect r = rects.get(i);
             r.animateIn();
