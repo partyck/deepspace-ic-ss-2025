@@ -213,19 +213,19 @@ public void drawFloor() {
 
 
     public void keyPressed(char key, int keyCode) {
-        if (key == 'w' || key == 'W') {
-            waveMode = !waveMode;
+        // if (key == 'w' || key == 'W') {
+        //     waveMode = !waveMode;
             
-        } 
+        // } 
 
-        if (key == 'f' || key == 'F') {
-            foldCurtain = !foldCurtain;
-            targetCurtainProgress = foldCurtain ? 1 : 0;
-        } 
+        // if (key == 'f' || key == 'F') {
+        //     foldCurtain = !foldCurtain;
+        //     targetCurtainProgress = foldCurtain ? 1 : 0;
+        // } 
 
-        if (key == 'c' || key == 'C') {
-            cloneMirrored = !cloneMirrored;
-        } 
+        // if (key == 'c' || key == 'C') {
+        //     cloneMirrored = !cloneMirrored;
+        // } 
 
         //baseNoiseAmount
         if (key == PConstants.UP) {
@@ -292,6 +292,16 @@ public void drawFloor() {
                 baseNoiseAmount = floor(map(value, 0, 1, 0, 500));
                 System.out.println("    baseNoiseAmount: "+incDecBaseNoiseAmount);
                 
+                break;
+                 case "/Curtains/toggle13":
+                foldCurtain = value == 1;
+                targetCurtainProgress = foldCurtain ? 1 : 0;
+                break;
+            case "/Curtains/toggle14":
+                cloneMirrored = value == 1;
+                break;
+            case "/Curtains/toggle15":
+                waveMode = value == 1;
                 break;
             default:
         }
