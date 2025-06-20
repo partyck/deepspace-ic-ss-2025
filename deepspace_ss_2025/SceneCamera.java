@@ -13,9 +13,11 @@ import processing.video.*;
 import TUIO.*;
 
 public class SceneCamera extends AbstractScene {
+    private TuioClient tracker;
     private Capture cam;
     private int noiseDetail = 4;
     private LinkedList<int[]> buffer;
+    private ArrayList<Dancer> dancers;
 
     int windowWidth;
     int vwX, vwY;
@@ -23,9 +25,23 @@ public class SceneCamera extends AbstractScene {
     int bufferOffset = 0;
     boolean delay = true;
     boolean showCamera = false;
+    float haloIterations = 100;
+    int alphaFade = 255;
+    float alpha = 6;
+    int spotDiameter = 100;
+    int[] colors;
 
-    public SceneCamera(PApplet p, Capture cam) {
+
+    public SceneCamera(PApplet p, Capture cam, TuioClient tracker) {
         super(p);
+        this.tracker = tracker;
+        colors = new int[]{
+            color(63, 0, 255),
+            color(11, 56, 158),
+            color(35, 41, 122),
+            color(0, 71, 171)
+        };
+        dancers = new ArrayList<>();
         windowWidth =  (int) (width() * 0.01);
         vwX = (width() / 2) - (windowWidth / 2);
         vwY = 0;
@@ -76,7 +92,21 @@ public class SceneCamera extends AbstractScene {
 
     @Override
     public void drawFloor() {
-        background(0);
+        fill(0, alphaFade);
+        noStroke();
+        rect(0, 0, width(), height());
+        
+        updateDancers();
+
+        
+        for (int di = 0; di < dancers.size(); di++) {
+            Dancer d = dancers.get(di);
+            fill(colors[di % colors.length], alpha);
+            for (int i = 0; i < haloIterations; i++) {
+                float diameter = spotDiameter * (i / haloIterations);
+                circle(d.x, d.y, diameter);
+            }
+        }
     }
 
      @Override
@@ -94,6 +124,18 @@ public class SceneCamera extends AbstractScene {
             case "/cam2/fader30":
                 bufferOffset = (int) map(value, 0, 1, 0, 300);
                 System.out.println("    bufferOffset: "+bufferOffset+ "; "+bufferOffset * 0.33f+ "; "+bufferOffset * 0.66f);
+                break;
+            case "/cam2/fader33":
+                alpha = map(value, 0, 1, 0, 50);
+                System.out.println("    alpha: "+alpha);
+                break;
+            case "/cam2/fader34":
+                alphaFade = (int ) (value * 255);
+                System.out.println("    alphaFade: "+alphaFade);
+                break;
+            case "/cam2/fader35":
+                spotDiameter = (int) (value * width() * 0.2f);
+                System.out.println("    spotDiameter: "+spotDiameter);
                 break;
         }
     }
@@ -118,5 +160,66 @@ public class SceneCamera extends AbstractScene {
         }
 
         return new PImage(w, h, subset, false, p);
+    }
+
+    private void updateDancers() {
+        ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
+        for (int dI = 0; dI < dancers.size(); dI++) {
+            boolean toDelete = true;
+            Dancer dancer = dancers.get(dI);
+            for (int tI = 0; tI < tuioCursorList.size(); tI++) {
+                TuioCursor cursor = tuioCursorList.get(tI);
+                if (dancer.isLinkedTo(cursor)) {
+                    dancer.update(cursor);
+                    toDelete = false;
+                    break;
+                }
+            }
+            if (toDelete) {
+                dancers.remove(dI);
+                dI--;
+            }
+        }
+
+        if (tuioCursorList.size() > dancers.size()) {
+            for (int tI = 0; tI < tuioCursorList.size(); tI++) {
+                TuioCursor cursor = tuioCursorList.get(tI);
+                boolean toAdd = true;
+                for (int dI = 0; dI < dancers.size(); dI++) {
+                    Dancer dancer = dancers.get(dI);
+                    if (dancer.isLinkedTo(cursor)) {
+                        toAdd = false;
+                        break;
+                    }
+                }
+                if (toAdd) {
+                    dancers.add(new Dancer(cursor));
+                }
+            }
+        }
+
+    }
+
+    // inner classes
+
+    private class Dancer {
+        float x;
+        float y;
+        long cursorId;
+        
+        Dancer(TuioCursor cursor) {
+            this.cursorId = cursor.getSessionID();
+            x = cursor.getScreenX(width()); 
+            y = cursor.getScreenY(height());
+        }
+
+        boolean isLinkedTo(TuioCursor cursor) {
+            return cursorId == cursor.getSessionID();
+        }
+
+        void update(TuioCursor cursor) {
+            x = cursor.getScreenX(width());
+            y = cursor.getScreenY(height());
+        }
     }
 }
