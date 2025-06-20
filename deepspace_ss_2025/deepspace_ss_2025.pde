@@ -2,14 +2,12 @@ import processing.core.PApplet;
 import processing.video.*;
 import TUIO.*;
 import oscP5.*;
-import themidibus.*;
 
 import java.util.LinkedList;
 
 TuioClient tracker;
 Capture cam;
 OscP5 oscP5;
-MidiBus midiSound, midiController;
 
 Floor floor;
 LinkedList<AbstractScene[]> scenes;
@@ -44,29 +42,6 @@ void setup() {
     surface.setTitle("Wall");
 
     oscP5 = new OscP5(this, 10000);
-
-    MidiBus.list();
-    try {
-        if (MidiBus.availableInputs() != null && MidiBus.availableOutputs() != null) {
-            midiSound = new MidiBus(this, Constants.MIDI_SOUND_IN, Constants.MIDI_SOUND_OUT);
-            println("midiSound loaded.");
-        } else {
-            println("midiSound not available — inputs/outputs are null");
-        }
-    } catch (Exception e) {
-        println("Couldn't load midiSound: " + e);
-    }
-
-    try {
-        if (MidiBus.availableInputs() != null && MidiBus.availableOutputs() != null) {
-            midiController = new MidiBus(this, Constants.MIDI_CONTROL_IN, Constants.MIDI_CONTROL_OUT);
-            println("midiController loaded.");
-        } else {
-            println("midiController not available — inputs/outputs are null");
-        }
-    } catch (Exception e) {
-        println("Couldn't load midiController: " + e);
-    }
 
     loadCamera();
 
