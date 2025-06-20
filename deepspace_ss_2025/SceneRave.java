@@ -124,7 +124,6 @@ public class SceneRave extends AbstractScene {
 
     @Override
     public void oscEvent(String path, float value) {
-        System.out.println("oscEvent camera");
         switch(path) {
             case "/cam/fader2":
                 NoiseGrid.speed = value;
