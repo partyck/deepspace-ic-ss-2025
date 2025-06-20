@@ -41,6 +41,8 @@ public class SceneRave extends AbstractScene {
     @Override
     public void init() {
         noiseDetail(noiseDetail);
+        // rectMode(PConstants.CORNER);
+        // translate(0, 0);
     }
 
     @Override

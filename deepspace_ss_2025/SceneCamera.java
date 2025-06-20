@@ -54,6 +54,12 @@ public class SceneCamera extends AbstractScene {
     }
 
     @Override
+    public void init() {
+        rectMode(PConstants.CORNER);
+        translate(0, 0);
+    }
+
+    @Override
     public void drawWall() {
         background(0);
         if (!showCamera) return;

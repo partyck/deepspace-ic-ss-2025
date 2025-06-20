@@ -28,6 +28,12 @@ public class Scene02ValerioMorning extends AbstractScene {
     }
 
     @Override
+    public void init() {
+        rectMode(PConstants.CORNER);
+        translate(0, 0);
+    }
+
+    @Override
     public void drawWall() {
         background(0);
         float centerX = width() * 0.5f;

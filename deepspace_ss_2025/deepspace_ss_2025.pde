@@ -62,6 +62,8 @@ void setup() {
 
 public void draw() {
     if (!initialized) {
+        push();
+        floor.push();
         nextScene();
         initialized = true;
     }
@@ -83,14 +85,15 @@ void nextScene() {
         currentSceneIndex = 0;
     }
     AbstractScene[] currentScenes = scenes.get(currentSceneIndex);
+    pop();
+    floor.pop();
+    push();
+    floor.push();
     currentSceneWall = currentScenes[0];
     currentSceneFloor = currentScenes[1];
     currentSceneWall.init();
     currentSceneFloor.init();
     floor.setScene(currentSceneFloor);
-
-
-
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
 }
 
