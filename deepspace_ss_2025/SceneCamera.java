@@ -22,6 +22,7 @@ public class SceneCamera extends AbstractScene {
     int hwX, hwY;
     int bufferOffset = 0;
     boolean delay = true;
+    boolean showCamera = false;
 
     public SceneCamera(PApplet p, Capture cam) {
         super(p);
@@ -39,6 +40,7 @@ public class SceneCamera extends AbstractScene {
     @Override
     public void drawWall() {
         background(0);
+        if (!showCamera) return;
         if (cam == null) return;
         if (cam.available()) {
             cam.read();
@@ -84,6 +86,10 @@ public class SceneCamera extends AbstractScene {
             case "/cam2/toggle5":
                 delay = value == 1;
                 System.out.println("    delay: "+delay);
+                break;
+            case "/cam2/toggle8":
+                showCamera = value == 1;
+                System.out.println("    showCamera: "+showCamera);
                 break;
             case "/cam2/fader30":
                 bufferOffset = (int) map(value, 0, 1, 0, 300);
