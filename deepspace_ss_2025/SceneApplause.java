@@ -5,7 +5,7 @@ public class SceneApplause extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
 
-    public SceneOne(PApplet p) {
+    public SceneApplause(PApplet p) {
         super(p);
         this.timeElapsed = 0;
         this.animationTime = (int) (frameRate() * 60 * 3);

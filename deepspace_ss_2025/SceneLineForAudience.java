@@ -5,7 +5,7 @@ public class SceneLineForAudience extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
 
-    public SceneOne(PApplet p) {
+    public SceneLineForAudience(PApplet p) {
         super(p);
         this.timeElapsed = 0;
         this.animationTime = (int) (frameRate() * 60 * 3);
@@ -19,6 +19,17 @@ public class SceneLineForAudience extends AbstractScene {
     @Override
     public void drawFloor() {
         display();
+    }
+
+     @Override
+    public void oscEvent(String path, float value) {
+        System.out.println("oscEvent camera");
+        switch(path) {
+            case "/lineAudience/fader30":
+                // lineYPosition = (int) map(value, 0, 1, 0, height());
+                // System.out.println("    lineYPosition: "+lineYPosition);
+                break;
+        }
     }
 
     private void display() {
