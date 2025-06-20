@@ -57,7 +57,6 @@ void setup() {
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     scenes.add(new AbstractScene[]{new SceneApplause(this), new SceneApplause(floor)});
-    scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
 }
 
