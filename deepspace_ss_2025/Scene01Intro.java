@@ -71,7 +71,8 @@ public class Scene01Intro extends AbstractScene{
 
      // Draw
     @Override
-    public void drawWall() {
+    public void drawWall() 
+    {
         p.fill(0, alphaFade);
         p.noStroke();
         rect(0, 0, width(), height());
@@ -85,47 +86,53 @@ public class Scene01Intro extends AbstractScene{
          curtainProgress = lerp(curtainProgress, targetCurtainProgress, curtainSpeed);
          //---------------------------------------
 
-        for (int x = 0; x < cols; x++) {
-            if (foldCurtain) {
+        for (int x = 0; x < cols; x++)
+         {
+             float foldOffset = 0;
+            if (foldCurtain) 
+            {
                 curtainProgress += curtainSpeed;
+                 float foldFactor = constrain((float)x / cols, 0, 1);
+                    // float wave = sin((y + frameCount() * 0.3f) * 0.2f + x * 0.5f) * 20;
+                    foldOffset = curtainProgress * 200 * foldFactor ;
             }
 
             ArrayList<PVector> shapePoints = new ArrayList<PVector>();
             beginShape();
-            float xpos = x * spacing;
-            p.curveVertex(xpos, 0);
+            float xpos = x * spacing - spacing;
+            
 
-            for (int y = 0; y < rows; y++) {
-                float foldOffset = 0;
+            for (int y = 0; y < rows; y++) 
+            {
+               
+                float ypos = y * spacing - spacing;
 
-
+                // float n = noise(x * noiseScale, y * noiseScale, zoff);
+                // Increase noiseScale dynamically when curtain is folding
+                float effectiveNoiseScale = noiseScale;
                 if (foldCurtain) {
-                    float foldFactor = constrain((float)x / cols, 0, 1);
-                    // float wave = sin((y + frameCount() * 0.3f) * 0.2f + x * 0.5f) * 20;
-                    foldOffset = curtainProgress * 200 * foldFactor ;
+                    float noiseScaleBoost = 0.1f;  
+                    effectiveNoiseScale += map(curtainProgress, 0, 1, 0, noiseScaleBoost);
                 }
 
-                float ypos = y * spacing;
+                float n = noise(x * effectiveNoiseScale, y * effectiveNoiseScale, zoff);
 
-                float n = noise(x * noiseScale, y * noiseScale, zoff);
-                // float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
+
                 float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
-
-                // Add more noise in bottom area when curtain folds
+                
+                
                 if (foldCurtain) {
-                    float bottomFactor = map(ypos, height() * 0.5f, height(), 0, 1);
-                    bottomFactor = constrain(bottomFactor, 0, 1);
-
-                    float extraNoise = map(noise(x * noiseScale * 5.5f, y * noiseScale * 1.5f, zoff + 100), 0, 1, -50, 50);
-                    baseWave += extraNoise * pow(bottomFactor, 2);  // emphasize more in the bottom area
+                    float curtainWaveBoost = 10; 
+                    baseWave += map(curtainProgress, 0, 1, 0, curtainWaveBoost);
                 }
 
-             
 
-                
+
+
                 float totalInfluence = 0;
 
-                for (TuioCursor cursor : tuioCursorList) {
+                for (TuioCursor cursor : tuioCursorList) 
+                {
                     int px = cursor.getScreenX(this.width());
                     int py = cursor.getScreenY(this.height());
 
@@ -135,20 +142,31 @@ public class Scene01Intro extends AbstractScene{
                     float dx = effectiveX - px;
                     float d = dist(effectiveX, ypos, px, height() - personHeight);
 
+                    // Dynamically boost influenceRadius during curtain fold
+                    float effectiveInfluenceRadius = influenceRadius;
+                    if (foldCurtain) 
+                    {
+                        float influenceBoost = 50; // adjust as needed
+                        effectiveInfluenceRadius += map(curtainProgress, 0, 1, 0, influenceBoost);
+                    }
+
+
                     float strength = 1 - (d / influenceRadius);
-                    if (strength > 0) {
+                    if (strength > 0) 
+                    {
                         strength *= strength;
                         float direction = dx > 0 ? 1 : -1;
                         float direction2 = direction * sin(n);
 
-                        if (waveMode) {
+                        if (waveMode) 
+                        {
                             float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
                             direction2 += wave * 0.75;
                         }
 
                         totalInfluence += direction2 * strength * maxPush * strengthEffect;
-            }
-}
+                    }
+                }
 
 
                 float target = baseWave + totalInfluence;
@@ -161,29 +179,45 @@ public class Scene01Intro extends AbstractScene{
                 shapePoints.add(new PVector(px, py));
             }
             endShape();
-            if (cloneMirrored) {
-                beginShape();
-                for (PVector p : shapePoints) {
-                    float mirroredX = width() - p.x;
-                    curveVertex(mirroredX, p.y); 
+
+            if (cloneMirrored) 
+                {
+                     beginShape();
+
+                                  
+                     PVector first = shapePoints.get(0);
+                     curveVertex(width() - first.x, first.y);
+
+                     
+                     for (PVector p : shapePoints) {
+                         float mirroredX = width() - p.x;
+                         curveVertex(mirroredX, p.y);
+                        }
+
+                     
+                     PVector last = shapePoints.get(shapePoints.size() - 1);
+                     curveVertex(width() - last.x, last.y);
+                    
+                     endShape();
                 }
-                endShape();
-            }
         }
         System.out.println(frameRate());
     }
 
 
+
+
+
     public void drawFadingCircle(float x, float y, float radius) {
-        int steps = 100; // More steps = smoother fade
+        int steps = 100; 
         for (int i = steps; i > 0; i-=2) 
         {
             float r = radius * i / steps;
-            // float alpha = map(i, 0, steps, 50, 1);
+            
             float alpha = 2;
             p.fill(250, 250, 250, alpha); 
             noStroke();
-            // p.blendMode(p.BLEND);
+            
             ellipse(x, y, r , r );
         }
        
@@ -195,7 +229,7 @@ public class Scene01Intro extends AbstractScene{
 
 
 public void drawFloor() {
-    // background(0);
+    
      p.fill(0, alphaFadeFloor);
         p.noStroke();
         rect(0, 0, width(), height());
@@ -218,31 +252,31 @@ public void drawFloor() {
             
         // } 
 
-        // if (key == 'f' || key == 'F') {
-        //     foldCurtain = !foldCurtain;
-        //     targetCurtainProgress = foldCurtain ? 1 : 0;
-        // } 
-
-        // if (key == 'c' || key == 'C') {
-        //     cloneMirrored = !cloneMirrored;
-        // } 
-
-        //baseNoiseAmount
-        if (key == PConstants.UP) {
-            baseNoiseAmount += incDecBaseNoiseAmount;
-        }
-        
-        if (keyCode == PConstants.DOWN) {
-            baseNoiseAmount = Math.max(0, baseNoiseAmount - incDecBaseNoiseAmount);
+        if (key == 'f' || key == 'F') {
+            foldCurtain = !foldCurtain;
+            targetCurtainProgress = foldCurtain ? 1 : 0;
         } 
+
+         if (key == 'c' || key == 'C') {
+             cloneMirrored = !cloneMirrored;
+         } 
+
+        // //baseNoiseAmount
+        //  if (key == PConstants.UP) {
+        //      baseNoiseAmount += incDecBaseNoiseAmount;
+        //  }
+        
+        // if (keyCode == PConstants.DOWN) {
+        //     baseNoiseAmount = Math.max(0, baseNoiseAmount - incDecBaseNoiseAmount);
+        // } 
 
       //influenceRadius
-        if (keyCode == PConstants.RIGHT) {
-            influenceRadius += incDecInfluenceAmount;
-        }
-        if (keyCode == PConstants.LEFT) {
-            influenceRadius = Math.max(0, influenceRadius - incDecInfluenceAmount);
-        } 
+        // if (keyCode == PConstants.RIGHT) {
+        //     influenceRadius += incDecInfluenceAmount;
+        // }
+        // if (keyCode == PConstants.LEFT) {
+        //     influenceRadius = Math.max(0, influenceRadius - incDecInfluenceAmount);
+        // } 
 
         //noise frequency
         if (p.key == 'z' || p.key == 'Z') {
@@ -260,16 +294,19 @@ public void drawFloor() {
                 updateGrid();
                 System.out.println("    spacing: "+spacing);
                 break;
+
             case "/1/fader2":
-                influenceRadius = map(value, 0, 1, 50, 500);
+                influenceRadius = map(value, 0, 1, 0, 500);
                 System.out.println("    influenceRadius: "+influenceRadius);
                 break;
+
             case "/1/fader3":
                 maxPush = map(value, 0, 1, 50, 600);
                 System.out.println("    maxPush: "+maxPush);
                 break;
+
             case "/1/fader4":
-                baseNoiseAmount = map(value, 0, 1, 0, 150);
+                baseNoiseAmount = map(value, 0, 1, 0, 100);
                 System.out.println("    baseNoiseAmount: "+baseNoiseAmount);
                 break;
             case "/1/fader5":
@@ -285,14 +322,10 @@ public void drawFloor() {
                 System.out.println("    personHeight: "+personHeight);
                 break;
             case "/1/fader8":
-                floorHeightInteraction = floor(map(value, 0, 1, 0, 500));
-                System.out.println("    floorHeightInteraction: "+floorHeightInteraction);
+                noiseScale = map(value, 0, 1, 0, 10);
+                System.out.println("    noiseScale: "+noiseScale);
                 break;
-            case "/1/fader9":
-                baseNoiseAmount = floor(map(value, 0, 1, 0, 500));
-                System.out.println("    baseNoiseAmount: "+incDecBaseNoiseAmount);
-                
-                break;
+            
                  case "/Curtains/toggle13":
                 foldCurtain = value == 1;
                 targetCurtainProgress = foldCurtain ? 1 : 0;
