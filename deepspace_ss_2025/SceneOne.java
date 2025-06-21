@@ -11,72 +11,55 @@ public class SceneOne extends AbstractScene {
         this.animationTime = (int) (frameRate() * 60 * 3);
     }
 
-    @Override
-    public void drawWall() {
-        display();
-    }
-
-    @Override
-    public void drawFloor() {
-        display();
-    }
-
-    private void drawGradientRect(float x, float y, float w, float h, int c1, int c2, int c3) {
+    private void drawSmoothGradient(float x, float y, float w, float h, int c1, int c2, boolean reversed) {
         p.loadPixels();
-        float time = p.frameCount * 0.01f; // For animated grain
-        for (int i = (int)x; i < x + w; i++) {
-            for (int j = (int)y; j < y + h; j++) {
-                float t = PApplet.map(i, x, x + w, 0, 1); // Horizontal gradient
-
-                int gradCol;
-                if (t < 0.5f) {
-                    // First half: interpolate c1 to c2
-                    float t2 = t / 0.5f;
-                    gradCol = p.lerpColor(c1, c2, t2);
-                } else {
-                    // Second half: interpolate c2 to c3
-                    float t2 = (t - 0.5f) / 0.5f;
-                    gradCol = p.lerpColor(c2, c3, t2);
-                }
-
-                // Add animated noise-based brightness
-                float n = p.noise(i * 0.005f, j * 0.005f, time);
-                float grain = PApplet.map(n, 0, 1, -100, 100);
-
-                int r = PApplet.constrain((int)(p.red(gradCol) + grain), 0, 255);
-                int g = PApplet.constrain((int)(p.green(gradCol) + grain), 0, 255);
-                int b = PApplet.constrain((int)(p.blue(gradCol) + grain), 0, 255);
-
-                int noisyCol = p.color(r, g, b);
-
-                if (i >= 0 && i < p.width && j >= 0 && j < p.height) {
-                    p.pixels[j * p.width + i] = noisyCol;
-                }
+        
+        for (int px = (int)x; px < x + w; px++) {
+            for (int py = (int)y; py < y + h; py++) {
+                if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
+                
+                // Vertical gradient calculation
+                float t = PApplet.map(py, y, y + h, 0, 1);
+                if (reversed) t = 1 - t; // Flip the interpolation
+                t = smoothstep(t);
+                
+                int gradColor = p.lerpColor(c1, c2, t);
+                p.pixels[py * p.width + px] = gradColor;
             }
         }
         p.updatePixels();
     }
 
-    private void display() {
+    // Smooth interpolation function
+    private float smoothstep(float t) {
+        return t * t * (3 - 2 * t);
+    }
+
+
+    @Override
+    public void drawWall() {
+        display(true); // Reversed gradient for wall
+    }
+
+    @Override
+    public void drawFloor() {
+        display(false); // Normal gradient for floor
+    }
+
+    private void display(boolean reversed) {
         background(30);
         noStroke();
 
-        float rectW = PApplet.lerp(this.width(), 0, animationProgress());
+        float rectW = lerp(this.width(), 0, animationProgress());
         float rectH = this.height();
-
         float x = (this.width() - rectW) / 2f;
         float y = 0;
 
-        // nice orange blue gradient
-        // int c1 = p.color(225, 86, 0);
-        // int c2 = p.color(0, 219, 224);
+        // Define base colors
+        int coolColor = p.color(174, 198, 207); //p.color(139, 157, 195);   // Cool blue-gray
+        int warmColor =  p.color(255, 183, 147); //p.color(244, 209, 174);   // Warm peach
 
-        int c1 = p.color(225, 86, 0);
-        int c2 = p.color(168, 224, 191);
-        int c3 = p.color(255, 86, 0); // Example third color
-
-        drawGradientRect(x, y, rectW, rectH, c1, c2, c3);
-
+        drawSmoothGradient(x, y, rectW, rectH, warmColor, coolColor, reversed);
 
         this.update();
     }
