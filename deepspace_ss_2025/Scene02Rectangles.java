@@ -77,7 +77,7 @@ public class Scene02Rectangles extends AbstractScene {
             for (SceneRect r : rects) r.draw();
         }
 
-        if (showTrace) drawTraces(tracker.getTuioCursorList(), false);
+        if (showTrace) drawTraces(tracker.getTuioCursorList(), true);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class Scene02Rectangles extends AbstractScene {
             for (SceneRect r : rects) r.drawForFloor();
         }
 
-        if (showTrace) drawTraces(tracker.getTuioCursorList(), true);
+        if (showTrace) drawTraces(tracker.getTuioCursorList(), false);
     }
 
     private void drawTraces(ArrayList<TuioCursor> cursors, boolean mirrored) {
