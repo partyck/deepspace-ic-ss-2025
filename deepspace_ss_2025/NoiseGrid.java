@@ -253,8 +253,8 @@ public class NoiseGrid {
         private void drawTimerGradient(AbstractScene scene, float x, float y, float w, float h) {
             scene.noStroke();
             
-            int leftColor = scene.color(255, 255, 255); 
-            int rightColor = scene.color(255, 255, 255); 
+            int leftColor = scene.color(10, 20, 60); 
+            int rightColor = scene.color(10, 20, 60); 
             
             // Draw horizontal gradient
             for (int i = 0; i < w; i++) {
