@@ -221,10 +221,10 @@ public class NoiseGrid {
         int timer = 0;
 
         // Gradient colors
-        private final int gradientColor1 = wall.color(196, 5, 9);
+        private final int gradientColor1 = wall.color(214, 83, 12);
         private final int gradientColor2 = wall.color(235, 109, 23);
         private final int gradientColor3 = wall.color(235, 109, 23); 
-        private final int gradientColor4 = wall.color(196, 5, 9);
+        private final int gradientColor4 = wall.color(214, 83, 12);
 
         Tile(int x, int y, int w, int h) {
             this.x = x;
