@@ -4,70 +4,93 @@ import processing.core.PConstants;
 public class SceneOne extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
+    // Example: 0.0 = top, 0.5 = horizon, 1.0 = bottom
+    int[] colors = {
+        p.color(12, 24, 51),    // Deep navy (top)
+        p.color(32, 52, 107),   // Dark blue
+        p.color(135, 160, 180), // Light blue
+        p.color(255, 200, 120), // Orange (horizon)
+        p.color(135, 160, 180), // Light blue (reflection)
+        p.color(32, 52, 107),   // Dark blue (bottom)
+        p.color(12, 24, 51)     // Deep navy (bottom)
+    };
+    float[] stops = {0.0f, 0.25f, 0.45f, 0.5f, 0.55f, 0.75f, 1.0f};
 
     public SceneOne(PApplet p) {
         super(p);
         this.timeElapsed = 0;
         this.animationTime = (int) (frameRate() * 60 * 3);
     }
+    
+    private int getColorAtPosition(int[] colors, float[] stops, float t) {
+        for (int i = 0; i < stops.length - 1; i++) {
+            if (t >= stops[i] && t <= stops[i + 1]) {
+                float localT = PApplet.map(t, stops[i], stops[i + 1], 0, 1);
+                return p.lerpColor(colors[i], colors[i + 1], localT);
+            }
+        }
+        return colors[colors.length - 1];
+    }
 
-    private void drawSmoothGradient(float x, float y, float w, float h, int c1, int c2, boolean reversed) {
+    private float smoothstep(float t) {
+        return t * t * (3 - 2 * t);
+    }
+
+    private void drawSeamlessGradient(float x, float y, float w, float h, int[] colors, float[] stops, float globalYOffset, float totalHeight) {
         p.loadPixels();
-        
-        for (int px = (int)x; px < x + w; px++) {
-            for (int py = (int)y; py < y + h; py++) {
-                if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
-                
-                // Vertical gradient calculation
-                float t = PApplet.map(py, y, y + h, 0, 1);
-                if (reversed) t = 1 - t; // Flip the interpolation
+        int startX = Math.max((int)x, 0);
+        int endX = Math.min((int)(x + w), p.width);
+        int startY = Math.max((int)y, 0);
+        int endY = Math.min((int)(y + h), p.height);
+
+        for (int px = startX; px < endX; px++) {
+            for (int py = startY; py < endY; py++) {
+                float t = PApplet.map(py + globalYOffset, 0, totalHeight, 0, 1);
                 t = smoothstep(t);
-                
-                int gradColor = p.lerpColor(c1, c2, t);
+                int gradColor = getColorAtPosition(colors, stops, t);
                 p.pixels[py * p.width + px] = gradColor;
             }
         }
         p.updatePixels();
     }
 
-    // Smooth interpolation function
-    private float smoothstep(float t) {
-        return t * t * (3 - 2 * t);
-    }
-
-
     @Override
     public void drawWall() {
-        display(true); // Reversed gradient for wall
+        p.background(30);  // Clear background
+        
+        // RESTORED: Calculate animated dimensions
+        float rectW = p.lerp(this.width(), 0, animationProgress());
+        float rectH = this.height();
+        float x = (this.width() - rectW) / 2f;
+        float y = 0;
+        
+        // RESTORED: Use animated dimensions
+        float totalHeight = p.height * 2f;
+        drawSeamlessGradient(x, y, rectW, rectH, colors, stops, 0, totalHeight);
+        
+        update();  // ADDED: Call update to advance animation
     }
 
     @Override
     public void drawFloor() {
-        display(false); // Normal gradient for floor
-    }
-
-    private void display(boolean reversed) {
-        background(30);
-        noStroke();
-
-        float rectW = lerp(this.width(), 0, animationProgress());
+        p.background(30);  // Clear background
+        
+        // RESTORED: Calculate animated dimensions
+        float rectW = p.lerp(this.width(), 0, animationProgress());
         float rectH = this.height();
         float x = (this.width() - rectW) / 2f;
         float y = 0;
-
-        // Define base colors
-        int coolColor = p.color(174, 198, 207); //p.color(139, 157, 195);   // Cool blue-gray
-        int warmColor =  p.color(255, 183, 147); //p.color(244, 209, 174);   // Warm peach
-
-        drawSmoothGradient(x, y, rectW, rectH, warmColor, coolColor, reversed);
-
-        this.update();
+        
+        // RESTORED: Use animated dimensions
+        float totalHeight = p.height * 2f;
+        drawSeamlessGradient(x, y, rectW, rectH, colors, stops, p.height, totalHeight);
+        
+        update();  // ADDED: Call update to advance animation
     }
 
     private float easeOutSeventh(float t) {
         return 1 - (float)Math.pow(1 - t, 7);
     }
-
 
     private float animationProgress() {
         float linearProgress = timeElapsed / (float) animationTime;
@@ -78,5 +101,4 @@ public class SceneOne extends AbstractScene {
         this.timeElapsed++;
         if (this.timeElapsed >= this.animationTime) this.timeElapsed = 0;
     }
-
 }
