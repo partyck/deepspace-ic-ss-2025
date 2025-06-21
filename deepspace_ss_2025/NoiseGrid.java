@@ -221,10 +221,10 @@ public class NoiseGrid {
         int timer = 0;
 
         // Gradient colors
-        private final int gradientColor1 = wall.color(255, 66, 66);
-        private final int gradientColor2 = wall.color(255, 160, 17);
-        private final int gradientColor3 = wall.color(255, 160, 17); 
-        private final int gradientColor4 = wall.color(255, 66, 66);
+        private final int gradientColor1 = wall.color(191, 43, 33);
+        private final int gradientColor2 = wall.color(250, 47, 43);
+        private final int gradientColor3 = wall.color(250, 47, 43); 
+        private final int gradientColor4 = wall.color(191, 43, 33);
 
         Tile(int x, int y, int w, int h) {
             this.x = x;
@@ -240,8 +240,7 @@ public class NoiseGrid {
             AbstractScene scene = getScene(isWall);
             int currentY = isWall ? y : y - wallHeight;
             if (timer > 0) {
-                scene.fill(255);
-                scene.rect(x, currentY, w, h);
+                drawTimerGradient(scene, x, currentY, w, h);
                 return;
             }
             if (n > displayTreshold) {
@@ -249,6 +248,21 @@ public class NoiseGrid {
                 return;
             }
             return;
+        }
+
+        private void drawTimerGradient(AbstractScene scene, float x, float y, float w, float h) {
+            scene.noStroke();
+            
+            int leftColor = scene.color(255, 255, 255); 
+            int rightColor = scene.color(255, 255, 255); 
+            
+            // Draw horizontal gradient
+            for (int i = 0; i < w; i++) {
+                float t = PApplet.map(i, 0, w, 0, 1);
+                int gradCol = scene.lerpColor(leftColor, rightColor, t);
+                scene.fill(gradCol);
+                scene.rect(x + i, y, 1, h);
+            }
         }
 
         private void drawGradientRect(AbstractScene scene, float x, float y, float w, float h, boolean isWall) {
