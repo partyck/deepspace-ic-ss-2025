@@ -6,14 +6,17 @@ public class SceneOne extends AbstractScene {
     private final int animationTime;
     // Example: 0.0 = top, 0.5 = horizon, 1.0 = bottom
     int[] colors = {
-        p.color(12, 24, 51),    // Deep navy (top)
-        p.color(32, 52, 107),   // Dark blue
-        p.color(135, 160, 180), // Light blue
+        p.color(10, 20, 60),    // Deep navy (top)
+        p.color(135, 160, 180),   // Dark blue
+        p.color(235, 109, 23), // Light blue
         p.color(255, 200, 120), // Orange (horizon)
-        p.color(135, 160, 180), // Light blue (reflection)
-        p.color(32, 52, 107),   // Dark blue (bottom)
-        p.color(12, 24, 51)     // Deep navy (bottom)
+        p.color(235, 109, 23), // Light blue (reflection)
+        p.color(135, 160, 180),   // Dark blue (bottom)
+        p.color(10, 20, 60)     // Deep navy (bottom)
     };
+
+            // p.color(135, 160, 180), // Light blue
+
     float[] stops = {0.0f, 0.25f, 0.45f, 0.5f, 0.55f, 0.75f, 1.0f};
 
     public SceneOne(PApplet p) {
