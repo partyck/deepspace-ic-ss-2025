@@ -52,7 +52,6 @@ public class NoiseGrid {
     public void setWall(AbstractScene wall) { this.wall = wall; }
     public void setFloor(AbstractScene floor) { this.floor = floor; }
 
-
     public void init() {
         if (wall == null || floor == null) {
             return;
@@ -221,6 +220,12 @@ public class NoiseGrid {
         float n;
         int timer = 0;
 
+        // Gradient colors
+        private final int gradientColor1 = wall.color(255, 66, 66);
+        private final int gradientColor2 = wall.color(255, 160, 17);
+        private final int gradientColor3 = wall.color(255, 160, 17); 
+        private final int gradientColor4 = wall.color(255, 66, 66);
+
         Tile(int x, int y, int w, int h) {
             this.x = x;
             this.y = y;
@@ -240,12 +245,33 @@ public class NoiseGrid {
                 return;
             }
             if (n > displayTreshold) {
-                int fill = (int) (255 * Math.pow(n, 1f / 3f));
-                scene.fill(fill);
-                scene.rect(x, currentY, w, h);
+                drawGradientRect(scene, x, currentY, w, h, isWall);
                 return;
             }
             return;
+        }
+
+        private void drawGradientRect(AbstractScene scene, float x, float y, float w, float h, boolean isWall) {
+            // Removed pushStyle()/popStyle() calls - not available in AbstractScene
+            scene.noStroke();
+            
+            // Choose colors based on wall/floor
+            int c1, c2;
+            if (isWall) {
+                c1 = gradientColor1;
+                c2 = gradientColor2;
+            } else {
+                c1 = gradientColor3;
+                c2 = gradientColor4;
+            }
+            
+            // Vertical gradient
+            for (int i = 0; i < h; i++) {
+                float t = PApplet.map(i, 0, h, 0, 1);
+                int gradCol = scene.lerpColor(c1, c2, t);
+                scene.fill(gradCol);
+                scene.rect(x, y + i, w, 1);
+            }
         }
 
         void update(int prevX, int prevY, int w, int h, float noise) {
@@ -273,6 +299,5 @@ public class NoiseGrid {
                 return floor;
             }
         }
-
     }
 }
