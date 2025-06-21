@@ -9,7 +9,8 @@ import java.util.ArrayList;
 // arrow key left/right - change width of stripes (three states: 1- equal width, 2 getting unequal,3 noisy width)
 
 public class Scene07_DifferentSpeeds extends AbstractScene {
-    private float animationOffset = 0f;
+    private float animationOffsetTop = 0f;
+    private float animationOffsetBottom = 0f;
     private static float speedTop = 1.0f;
     private static float noiseOffset = 0f;
     private static float rotationAngle = 0f;
@@ -96,7 +97,9 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     }
 
     private void updateAnimationState() {
-        animationOffset = (animationOffset + speedTop * direction) % 10000;
+        animationOffsetTop = (animationOffsetTop + speedTop * direction) % 10000;
+        animationOffsetBottom = (animationOffsetBottom - speedTop * direction) % 10000;
+
         if (speedTop > 0.0f) {
             noiseOffset += 0.005 * speedTop;
         }
@@ -162,7 +165,8 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
         float baseStripeWidth = thickness;
-        float currentX = -(animationOffset % (baseStripeWidth * 2));
+        float currentOffset = (thickness == stripeThicknessTop) ? animationOffsetTop : animationOffsetBottom;
+        float currentX = -(currentOffset % (baseStripeWidth * 2));
         int stripeIndex = 0;
         int colorIndex = (rotationAngle > 0.1f) ? 1 : 0;
 
