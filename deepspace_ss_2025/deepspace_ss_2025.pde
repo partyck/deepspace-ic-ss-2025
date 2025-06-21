@@ -50,7 +50,7 @@ void setup() {
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     scenes.add(new AbstractScene[]{new Scene01Intro(this, tracker), new Scene01Intro(floor, tracker)});
     scenes.add(new AbstractScene[]{new Scene02Rectangles(this, tracker), new Scene02Rectangles(floor, tracker)});
-    scenes.add(new AbstractScene[]{new SceneCamera(this, cam), new SceneCamera(floor, cam)});
+    scenes.add(new AbstractScene[]{new SceneCamera(this, cam, tracker), new SceneCamera(floor, cam, tracker)});
     scenes.add(new AbstractScene[]{new Scene07_DifferentSpeeds(this), new Scene07_DifferentSpeeds(floor)});
     scenes.add(new AbstractScene[]{new Scene02ValerioMorning(this), new Scene02ValerioMorning(floor)});
     scenes.add(new AbstractScene[]{new SceneRave(this, tracker), new SceneRave(floor, tracker)});
@@ -62,6 +62,8 @@ void setup() {
 
 public void draw() {
     if (!initialized) {
+        push();
+        floor.push();
         nextScene();
         initialized = true;
     }
@@ -83,14 +85,15 @@ void nextScene() {
         currentSceneIndex = 0;
     }
     AbstractScene[] currentScenes = scenes.get(currentSceneIndex);
+    pop();
+    floor.pop();
+    push();
+    floor.push();
     currentSceneWall = currentScenes[0];
     currentSceneFloor = currentScenes[1];
     currentSceneWall.init();
     currentSceneFloor.init();
     floor.setScene(currentSceneFloor);
-
-
-
     System.out.println("Next scene: " + currentScenes[0].getClass().getSimpleName());
 }
 

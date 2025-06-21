@@ -11,7 +11,8 @@ public class Scene01Intro extends AbstractScene{
     float maxPush = 300;
     float baseNoiseAmount = 80;
     float lerpAmount = 0.01f;
-    float alphaFade = 1.0f;
+    float alphaFade = 3.0f;
+    float alphaFadeFloor = 20.0f;
     int personHeight = 50;
     int floorHeightInteraction = 800;
     //NEW variable
@@ -96,75 +97,59 @@ public class Scene01Intro extends AbstractScene{
 
             for (int y = 0; y < rows; y++) {
                 float foldOffset = 0;
+
+
                 if (foldCurtain) {
                     float foldFactor = constrain((float)x / cols, 0, 1);
-                    float wave = sin((y + frameCount() * 0.3f) * 0.2f + x * 0.05f) * 20;
-                    foldOffset = curtainProgress * 200 * foldFactor + wave * foldFactor;
+                    // float wave = sin((y + frameCount() * 0.3f) * 0.2f + x * 0.5f) * 20;
+                    foldOffset = curtainProgress * 200 * foldFactor ;
                 }
 
                 float ypos = y * spacing;
 
                 float n = noise(x * noiseScale, y * noiseScale, zoff);
+                // float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
                 float baseWave = map(n, 0, 1, -baseNoiseAmount, baseNoiseAmount);
-                //float influence = 0;
 
-                //for(TuioCursor cursor: tuioCursorList) {
-                //    if (cursor.getScreenY(height()) < floorHeightInteraction) {
-                //        int px = cursor.getScreenX(this.width());
-                //        int py = cursor.getScreenY(this.height());
-                //        float strengthEffect = map(py,0,height(),1f,0.1f);
+                // Add more noise in bottom area when curtain folds
+                if (foldCurtain) {
+                    float bottomFactor = map(ypos, height() * 0.5f, height(), 0, 1);
+                    bottomFactor = constrain(bottomFactor, 0, 1);
 
-                //        float effectiveX = xpos + foldOffset;
-                //        float dx = effectiveX - px;
-                //        float d = dist(effectiveX, ypos, px, height() - personHeight);
-                        
+                    float extraNoise = map(noise(x * noiseScale * 5.5f, y * noiseScale * 1.5f, zoff + 100), 0, 1, -50, 50);
+                    baseWave += extraNoise * pow(bottomFactor, 2);  // emphasize more in the bottom area
+                }
 
+             
 
-                //        //if (d < influenceRadius) {
-                //            float strength = 1 - (d / influenceRadius) ;
-                //            strength *= strength;
-                //            float direction = dx > 0 ? 1 : -1;
-                //            float direction2 = direction * sin(n);
-
-                //            if (waveMode) {
-                //                float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
-                //                direction2 += wave * 0.75;
-                //            }
-
-                //            influence = direction2 * strength * maxPush * strengthEffect;
-                //        //}
-                //    }
-                //}
                 
                 float totalInfluence = 0;
 
-for (TuioCursor cursor : tuioCursorList) {
-    int px = cursor.getScreenX(this.width());
-    int py = cursor.getScreenY(this.height());
+                for (TuioCursor cursor : tuioCursorList) {
+                    int px = cursor.getScreenX(this.width());
+                    int py = cursor.getScreenY(this.height());
 
-    float strengthEffect = map(py, 0, height(), 1f, 0.1f);
+                    float strengthEffect = map(py, 0, height(), 1f, 0.1f);
 
-    float effectiveX = xpos + foldOffset;
-    float dx = effectiveX - px;
-    float d = dist(effectiveX, ypos, px, height() - personHeight);
+                    float effectiveX = xpos + foldOffset;
+                    float dx = effectiveX - px;
+                    float d = dist(effectiveX, ypos, px, height() - personHeight);
 
-    float strength = 1 - (d / influenceRadius);
-    if (strength > 0) {
-        strength *= strength;
-        float direction = dx > 0 ? 1 : -1;
-        float direction2 = direction * sin(n);
+                    float strength = 1 - (d / influenceRadius);
+                    if (strength > 0) {
+                        strength *= strength;
+                        float direction = dx > 0 ? 1 : -1;
+                        float direction2 = direction * sin(n);
 
-        if (waveMode) {
-            float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
-            direction2 += wave * 0.75;
-        }
+                        if (waveMode) {
+                            float wave = (2.0f * abs(2 * (n * 3.0f - floor(n * 3.0f + 0.1f))) - 1);
+                            direction2 += wave * 0.75;
+                        }
 
-        totalInfluence += direction2 * strength * maxPush * strengthEffect;
-    }
+                        totalInfluence += direction2 * strength * maxPush * strengthEffect;
+            }
 }
 
-                
-                
 
                 float target = baseWave + totalInfluence;
                 offsets[x][y] = lerp(offsets[x][y], target, lerpAmount);
@@ -188,49 +173,59 @@ for (TuioCursor cursor : tuioCursorList) {
         System.out.println(frameRate());
     }
 
+
+    public void drawFadingCircle(float x, float y, float radius) {
+        int steps = 100; // More steps = smoother fade
+        for (int i = steps; i > 0; i-=2) 
+        {
+            float r = radius * i / steps;
+            // float alpha = map(i, 0, steps, 50, 1);
+            float alpha = 2;
+            p.fill(250, 250, 250, alpha); 
+            noStroke();
+            // p.blendMode(p.BLEND);
+            ellipse(x, y, r , r );
+        }
+       
+}
+
+
+
     @Override
-    //public void drawFloor() {
-    //    background(0);
-    //    fill(255);
-    //    noStroke();
-    //    rect(0, 0, width(), floorHeightInteraction);
-    //}
-//@Override
+
+
 public void drawFloor() {
-    background(0);
-    
-   
-    fill(255);
-    noStroke();
-    //rect(0, 0, width(), floorHeightInteraction);
+    // background(0);
+     p.fill(0, alphaFadeFloor);
+        p.noStroke();
+        rect(0, 0, width(), height());
 
     
     ArrayList<TuioCursor> tuioCursorList = tracker.getTuioCursorList();
-    fill(255); // White color
-    noStroke();
+
     for (TuioCursor cursor : tuioCursorList) {
         float x = cursor.getScreenX(width());
         float y = cursor.getScreenY(height());
-        float circleSize = map(y,0,height(),(height()/9),(height()/12));
-        ellipse(x, y, circleSize, circleSize);  // Bigger circles (80x80)
+        float circleSize = map(y,0,height(),(height()/5),(height()/10)); 
+        drawFadingCircle(x,y,circleSize);
     }
 }
 
 
     public void keyPressed(char key, int keyCode) {
-        if (key == 'w' || key == 'W') {
-            waveMode = !waveMode;
+        // if (key == 'w' || key == 'W') {
+        //     waveMode = !waveMode;
             
-        } 
+        // } 
 
-        if (key == 'f' || key == 'F') {
-            foldCurtain = !foldCurtain;
-            targetCurtainProgress = foldCurtain ? 1 : 0;
-        } 
+        // if (key == 'f' || key == 'F') {
+        //     foldCurtain = !foldCurtain;
+        //     targetCurtainProgress = foldCurtain ? 1 : 0;
+        // } 
 
-        if (key == 'c' || key == 'C') {
-            cloneMirrored = !cloneMirrored;
-        } 
+        // if (key == 'c' || key == 'C') {
+        //     cloneMirrored = !cloneMirrored;
+        // } 
 
         //baseNoiseAmount
         if (key == PConstants.UP) {
@@ -292,6 +287,21 @@ public void drawFloor() {
             case "/1/fader8":
                 floorHeightInteraction = floor(map(value, 0, 1, 0, 500));
                 System.out.println("    floorHeightInteraction: "+floorHeightInteraction);
+                break;
+            case "/1/fader9":
+                baseNoiseAmount = floor(map(value, 0, 1, 0, 500));
+                System.out.println("    baseNoiseAmount: "+incDecBaseNoiseAmount);
+                
+                break;
+                 case "/Curtains/toggle13":
+                foldCurtain = value == 1;
+                targetCurtainProgress = foldCurtain ? 1 : 0;
+                break;
+            case "/Curtains/toggle14":
+                cloneMirrored = value == 1;
+                break;
+            case "/Curtains/toggle15":
+                waveMode = value == 1;
                 break;
             default:
         }

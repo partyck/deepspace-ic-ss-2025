@@ -36,9 +36,11 @@ public abstract class AbstractScene {
     public void background(int gray) { p.background(gray); }
     public void background(int r, int g, int b) { p.background(r, g, b); }
     public void fill(int rgb) { p.fill(rgb); }
+    public void fill(int rgb, float alpha) { p.fill(rgb, alpha); }
     public void fill(float gray) { p.fill(gray); }
     public void fill(float gray, float alpha) { p.fill(gray, alpha); }
     public void fill(int r, int g, int b) { p.fill(r, g, b); }
+    public void fill(int r, int g, int b, int alpha) { p.fill(r, g, b, alpha); }
     public void noFill() { p.noFill(); }
     public void stroke(int gray) { p.stroke(gray); }
     public void stroke(int r, int g, int b) { p.stroke(r, g, b); }

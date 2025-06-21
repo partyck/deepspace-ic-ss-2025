@@ -235,13 +235,16 @@ public class NoiseGrid {
             AbstractScene scene = getScene(isWall);
             int currentY = isWall ? y : y - wallHeight;
             if (timer > 0) {
-                scene.fill(200);
+                scene.fill(255);
+                scene.rect(x, currentY, w, h);
+                return;
             }
             if (n > displayTreshold) {
                 int fill = (int) (255 * Math.pow(n, 1f / 3f));
                 scene.fill(fill);
+                scene.rect(x, currentY, w, h);
+                return;
             }
-            scene.rect(x, currentY, w, h);
             return;
         }
 
