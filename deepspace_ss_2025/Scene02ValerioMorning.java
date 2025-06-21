@@ -9,6 +9,7 @@ public class Scene02ValerioMorning extends AbstractScene {
     private int color3;
     private int color4;
     private int color5;
+    private int color6;
     private int timeElapsed;
     private int targetSpeed;
     private int speed;
@@ -25,6 +26,7 @@ public class Scene02ValerioMorning extends AbstractScene {
         color3 = p.color(18, 181, 163);   // Türkis
         color4 = p.color(255, 200, 100);  // Orange/yellow (horizon)
         color5 = p.color(235, 109, 23);   // orange
+        color6 = p.color(10, 20, 60);     // Deep blue (outer)
         
         timeElapsed = 0;
         speed = 10;
@@ -66,7 +68,7 @@ public class Scene02ValerioMorning extends AbstractScene {
         
         for (int i = 0; i < segments; i++) {
             float interval = (float) i / (float) segments;
-            int segColor = getFiveColorGradient(interval);
+            int segColor = getSixColorGradient(interval);
             p.fill(segColor);
             
             float angleStart = distance * i;
@@ -82,24 +84,28 @@ public class Scene02ValerioMorning extends AbstractScene {
         update();
     }
 
-    private int getFiveColorGradient(float t) {
+    private int getSixColorGradient(float t) {
         t = smoothstep(t);
-        if (t < 0.25f) {
+        if (t < 0.2f) {
             // color1 to color2
-            float localT = t / 0.25f;
+            float localT = t / 0.2f;
             return p.lerpColor(color1, color2, localT);
-        } else if (t < 0.5f) {
+        } else if (t < 0.4f) {
             // color2 to color3
-            float localT = (t - 0.25f) / 0.25f;
+            float localT = (t - 0.2f) / 0.2f;
             return p.lerpColor(color2, color3, localT);
-        } else if (t < 0.75f) {
+        } else if (t < 0.6f) {
             // color3 to color4
-            float localT = (t - 0.5f) / 0.25f;
+            float localT = (t - 0.4f) / 0.2f;
             return p.lerpColor(color3, color4, localT);
-        } else {
+        } else if (t < 0.8f) {
             // color4 to color5
-            float localT = (t - 0.75f) / 0.25f;
+            float localT = (t - 0.6f) / 0.2f;
             return p.lerpColor(color4, color5, localT);
+        } else {
+            // color5 to color6 (which equals color1)
+            float localT = (t - 0.8f) / 0.2f;
+            return p.lerpColor(color5, color6, localT);
         }
     }
 
