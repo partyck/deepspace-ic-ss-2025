@@ -45,7 +45,7 @@ public class Scene02Rectangles extends AbstractScene {
         
         // Soft, atmospheric color pairs
         int[][] colorPairs = {
-            {p.color(255, 160, 172), p.color(242, 69, 21)}, // orange red
+            {p.color(255, 160, 172), p.color(235, 109, 23)}, // pink orange
             {p.color(100, 150, 255), p.color(12, 39, 183)}, // Cool blue 100, 150, 255
             {p.color(183, 211, 172), p.color(18, 181, 163)}, // türkis
             {p.color(255, 180, 200), p.color(100, 150, 255)}, // blue 

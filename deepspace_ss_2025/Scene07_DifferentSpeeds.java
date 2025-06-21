@@ -26,6 +26,16 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private final float ROTATION_SPEED = 0.05f;
     private final float floorStripeBlockHeight = (width()/10);
 
+    private final int[][] topColors = {
+        {p.color(249, 199, 142), p.color(242, 200, 191)},  // horizontal
+        {p.color(223, 222, 196), p.color(200, 255, 200)}  //  vertical
+    };
+    
+    private final int[][] bottomColors = {
+        {p.color(222, 191, 197), p.color(235, 228, 217)}, // horizontal
+        {p.color(198, 219, 209), p.color(200, 255, 200)}  //  vertical
+    };
+
     public Scene07_DifferentSpeeds(PApplet p) {
         super(p);
         if (!isKeyRegistered) {
@@ -154,6 +164,7 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
         float baseStripeWidth = thickness;
         float currentX = -(animationOffset % (baseStripeWidth * 2));
         int stripeIndex = 0;
+        int colorIndex = (rotationAngle > 0.1f) ? 1 : 0;
 
         while (currentX < w + baseStripeWidth * 2) {
             float stripeWidth = baseStripeWidth;
@@ -172,11 +183,26 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
                 stripeWidth *= 0.8f + 0.4f * noiseVal * noiseStrength;
             }
 
-            p.fill(255);
-            p.rect(x + currentX, y, stripeWidth, h);
+            // Draw the stripe
+            if (thickness == stripeThicknessTop) {
+                drawGradientRect(x + currentX, y, stripeWidth, h, 
+                               topColors[colorIndex][0], topColors[colorIndex][1]);
+            } else {
+                drawGradientRect(x + currentX, y, stripeWidth, h, 
+                               bottomColors[colorIndex][0], bottomColors[colorIndex][1]);
+            }
 
             currentX += stripeWidth + baseStripeWidth;
             stripeIndex++;
+        }
+    }
+
+    private void drawGradientRect(float x, float y, float w, float h, int color1, int color2) {
+        for (int i = 0; i < w; i++) {
+            float t = PApplet.map(i, 0, w, 0, 1);
+            int gradCol = p.lerpColor(color1, color2, t);
+            p.stroke(gradCol);
+            p.line(x + i, y, x + i, y + h);
         }
     }
 }
