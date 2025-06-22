@@ -200,9 +200,9 @@ public class Scene02Rectangles extends AbstractScene {
         int assignedCursorId = -1;
         boolean closing = false;
         int closeFrame = 0;
-        private int color1, color2; // Gradient colors
-        private float noiseIntensity = 8f; // Very subtle noise
-        private float noiseScale = 0.012f; // Larger scale for smoother noise
+        private int color1, color2;
+        private float noiseIntensity = 8f;
+        private float noiseScale = 0.012f;
 
         SceneRect(float x, float baseY, float targetW, float targetH, int c1, int c2) {
             this.x = x; this.baseY = baseY;
@@ -257,98 +257,73 @@ public class Scene02Rectangles extends AbstractScene {
                 if (contains(cx,cy)) { assignedCursorId=c.getCursorID(); return; }
             }
         }
-        
+
         void drawSoftGradient() {
             if (w <= 0 || h <= 0) return;
-            
+
             p.loadPixels();
-            float time = p.frameCount * 0.002f; // Very slow animation
+            float time = p.frameCount * 0.002f;
             float x0 = x - w/2;
             float y0 = baseY - h;
-            
-            for (int px = (int)x0; px < x0 + w; px++) {
-                for (int py = (int)y0; py < baseY; py++) {
+
+            for (int py = (int)y0; py < baseY; py++) {
+                for (int px = (int)x0; px < x0 + w; px++) {
                     if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
-                    
-                    // Create smooth horizontal gradient
-                    float t = PApplet.map(px, x0, x0 + w, 0, 1);
-                    t = smoothstep(t); // Smoother interpolation
-                    
-                    // Blend the two colors
+                    float t = PApplet.map(py, y0, y0 + h, 0, 1);
+                    t = smoothstep(t);
                     int gradCol = p.lerpColor(color1, color2, t);
-                    
-                    // Add very subtle noise
                     float n = p.noise(px * noiseScale, py * noiseScale, time);
                     float grain = PApplet.map(n, 0, 1, -noiseIntensity, noiseIntensity);
-                    
-                    // Apply noise to color components
                     int r = PApplet.constrain((int)(p.red(gradCol) + grain), 0, 255);
                     int g = PApplet.constrain((int)(p.green(gradCol) + grain), 0, 255);
                     int b = PApplet.constrain((int)(p.blue(gradCol) + grain), 0, 255);
-                    
                     p.pixels[py * p.width + px] = p.color(r, g, b);
                 }
             }
             p.updatePixels();
         }
 
-        // Smooth interpolation function for softer gradients
         private float smoothstep(float t) {
             return t * t * (3 - 2 * t);
         }
 
         void addSoftGlow() {
-            // Create a subtle glow by drawing a slightly larger, semi-transparent version
-            p.fill(p.red(color1), p.green(color1), p.blue(color1), 30); // Very transparent
+            p.fill(p.red(color1), p.green(color1), p.blue(color1), 30);
             p.noStroke();
             p.rectMode(PConstants.CORNER);
-            float glowSize = 8f; // Small glow radius
-            p.rect(x - w/2 - glowSize, baseY - h - glowSize, 
-                w + glowSize*2, h + glowSize*2);
+            float glowSize = 8f;
+            p.rect(x - w/2 - glowSize, baseY - h - glowSize, w + glowSize*2, h + glowSize*2);
         }
 
         void drawForFloor() {
             if (closing) animateClose();
             if (w <= 0 || h <= 0) return;
-            
             float x0 = x - w/2;
-            float y0 = 0;  // Start from top
-            float rectHeight = h;  // Extend downward
-            
+            float y0 = 0;
+
             p.loadPixels();
             float time = p.frameCount * 0.002f;
-            for (int px = (int)x0; px < x0 + w; px++) {
-                for (int py = (int)y0; py < rectHeight; py++) {
+            for (int py = (int)y0; py < h; py++) {
+                for (int px = (int)x0; px < x0 + w; px++) {
                     if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
-                    
-                    // Create smooth horizontal gradient
-                    float t = PApplet.map(px, x0, x0 + w, 0, 1);
+                    float t = PApplet.map(py, y0, y0 + h, 1, 0);
                     t = smoothstep(t);
-                    
-                    // Blend the two colors
                     int gradCol = p.lerpColor(color1, color2, t);
-                    
-                    // Add very subtle noise
-                    float n = p.noise(px * noiseScale, py * noiseScale, time);
+                    float n = p.noise(px * noiseScale, (y0 + h - (py - y0)) * noiseScale, time);
                     float grain = PApplet.map(n, 0, 1, -noiseIntensity, noiseIntensity);
-                    
-                    // Apply noise to color components - THESE WERE MISSING
                     int r = PApplet.constrain((int)(p.red(gradCol) + grain), 0, 255);
                     int g = PApplet.constrain((int)(p.green(gradCol) + grain), 0, 255);
                     int b = PApplet.constrain((int)(p.blue(gradCol) + grain), 0, 255);
-                    
                     p.pixels[py * p.width + px] = p.color(r, g, b);
                 }
             }
             p.updatePixels();
-            
-            // Glow for floor - DEFINE glowSize
-            float glowSize = 8f;  // This was missing
+
+            float glowSize = 8f;
             p.fill(p.red(color1), p.green(color1), p.blue(color1), 30);
             p.noStroke();
             p.rectMode(PConstants.CORNER);
-            p.rect(x0 - glowSize, y0 - glowSize, 
-                w + glowSize*2, rectHeight + glowSize*2);
+            p.rect(x0 - glowSize, y0 - glowSize, w + glowSize*2, h + glowSize*2);
         }
 
         void draw() {
