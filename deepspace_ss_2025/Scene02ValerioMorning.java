@@ -118,7 +118,7 @@ public class Scene02ValerioMorning extends AbstractScene {
     }
 
     private void update() {
-        speed = (int) p.lerp(speed, targetSpeed, 0.4f);
+        speed = (int) PApplet.lerp(speed, targetSpeed, 0.4f);
         timeElapsed += speed;
         if (this.timeElapsed >= this.animationTime) this.timeElapsed = 0;
     }
@@ -127,7 +127,7 @@ public class Scene02ValerioMorning extends AbstractScene {
     public void oscEvent(String path, float value) {
         switch(path) {
             case "/Valerio/fader9":
-                circleWidth = p.floor(p.map(value, 0, 1, 100, width()));
+                circleWidth = PApplet.floor(PApplet.map(value, 0, 1, 100, width()));
                 System.out.println("    circleWidth: "+circleWidth);
                 break;
             case "/Valerio/toggle1":
