@@ -46,7 +46,7 @@ public class SceneRave extends AbstractScene {
 
     @Override
     public void drawWall() { 
-        int bgColor = p.color(10, 20, 60, (int)alphaFade);
+        int bgColor = p.color(10, 27, 42, (int)alphaFade);
         p.fill(bgColor);
         noStroke();
         rect(0, 0, width(), height());
@@ -55,7 +55,7 @@ public class SceneRave extends AbstractScene {
 
     @Override
     public void drawFloor() {
-        int bgColor = p.color(10, 20, 60, (int)alphaFade);
+        int bgColor = p.color(10, 27, 42, (int)alphaFade);
         p.fill(bgColor);
         noStroke();
         rect(0, 0, width(), height());

@@ -220,11 +220,15 @@ public class NoiseGrid {
         float n;
         int timer = 0;
 
-        // Gradient colors
-        private final int gradientColor1 = wall.color(214, 83, 12);
-        private final int gradientColor2 = wall.color(235, 109, 23);
-        private final int gradientColor3 = wall.color(235, 109, 23); 
-        private final int gradientColor4 = wall.color(214, 83, 12);
+        int baseColor;
+
+        // Define shared palette
+        int[] sharedColors = new int[] {
+            wall.color(242, 62, 22),     // Warm orange
+            wall.color(242, 98, 46),     // orange dark
+            wall.color(191, 86, 48),    // orange dark
+            wall.color(1, 58, 64), // turqouise
+        };
 
         Tile(int x, int y, int w, int h) {
             this.x = x;
@@ -232,6 +236,8 @@ public class NoiseGrid {
             this.w = w;
             this.h = h;
             this.n = 0;
+
+            this.baseColor = sharedColors[(int) wall.random(sharedColors.length)];
         }
 
         void display(boolean isWall) {
@@ -253,14 +259,19 @@ public class NoiseGrid {
         private void drawTimerGradient(AbstractScene scene, float x, float y, float w, float h) {
             scene.noStroke();
             
-            int leftColor = scene.color(10, 20, 60); 
-            int rightColor = scene.color(10, 20, 60); 
+            int leftColor = scene.color(10, 27, 42); 
+            int rightColor = scene.color(10, 27, 42); 
             
             // Draw horizontal gradient
             for (int i = 0; i < w; i++) {
                 float t = PApplet.map(i, 0, w, 0, 1);
                 int gradCol = scene.lerpColor(leftColor, rightColor, t);
-                scene.fill(gradCol);
+                scene.fill(
+                    (gradCol >> 16) & 0xFF,  // red
+                    (gradCol >> 8) & 0xFF,   // green
+                    gradCol & 0xFF,          // blue
+                    180 + (int)(scene.random(75))  // alpha
+                );
                 scene.rect(x + i, y, 1, h);
             }
         }
@@ -269,15 +280,8 @@ public class NoiseGrid {
             // Removed pushStyle()/popStyle() calls - not available in AbstractScene
             scene.noStroke();
             
-            // Choose colors based on wall/floor
-            int c1, c2;
-            if (isWall) {
-                c1 = gradientColor1;
-                c2 = gradientColor2;
-            } else {
-                c1 = gradientColor3;
-                c2 = gradientColor4;
-            }
+            int c1 = wall.lerpColor(wall.color(0, 0, 0), baseColor, 0.5f);
+            int c2 = baseColor;
             
             // Vertical gradient
             for (int i = 0; i < h; i++) {

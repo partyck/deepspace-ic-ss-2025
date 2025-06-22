@@ -82,8 +82,8 @@ public class Scene02Rectangles extends AbstractScene {
 
     @Override
     public void drawFloor() {
-        if (!isExtended) return;
         p.background(0);
+        if (!isExtended) return;
 
         for (int i = 0; i < rects.size(); i++) {
             SceneRect r = rects.get(i);
