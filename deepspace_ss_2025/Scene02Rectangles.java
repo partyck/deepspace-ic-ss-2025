@@ -45,19 +45,19 @@ public class Scene02Rectangles extends AbstractScene {
         
         // Soft, atmospheric color pairs
         int[][] colorPairs = {
-            {p.color(255, 160, 172), p.color(235, 109, 23)}, // pink orange
-            {p.color(100, 150, 255), p.color(12, 39, 183)}, // Cool blue 100, 150, 255
-            {p.color(183, 211, 172), p.color(18, 181, 163)}, // türkis
-            {p.color(255, 180, 200), p.color(100, 150, 255)}, // blue 
-            {p.color(200, 180, 255), p.color(97, 116, 150)}, // Lavender
-            {p.color(200, 255, 200), p.color(235, 109, 23)}, // Golden
-            {p.color(180, 220, 200), p.color(170, 111, 111)}  // Mint
+            {p.color(255, 160, 172), p.color(235, 109, 23), p.color(235, 109, 23)}, // pink orange
+            {p.color(100, 150, 255), p.color(12, 39, 183), p.color(12, 39, 183)}, // Cool blue 100, 150, 255
+            {p.color(183, 211, 172), p.color(18, 181, 163), p.color(18, 181, 163)}, // türkis
+            {p.color(255, 180, 200), p.color(100, 150, 255), p.color(100, 150, 255)}, // blue 
+            {p.color(200, 180, 255), p.color(97, 116, 150), p.color(97, 116, 150)}, // Lavender
+            {p.color(200, 255, 200), p.color(235, 109, 23), p.color(235, 109, 23)}, // Golden
+            {p.color(180, 220, 200), p.color(170, 111, 111), p.color(170, 111, 111)}  // Mint
         };
         
         for (int i = 0; i < NUM_RECTS; i++) {
             int[] colors = colorPairs[i % colorPairs.length];
             rects.add(new SceneRect(gap * (i + 1), baselineY, wallTargetW, wallTargetH, 
-                                colors[0], colors[1]));
+                                colors[0], colors[1], colors[2]));
         }
     }
 
@@ -200,14 +200,14 @@ public class Scene02Rectangles extends AbstractScene {
         int assignedCursorId = -1;
         boolean closing = false;
         int closeFrame = 0;
-        private int color1, color2;
+        private int color1, color2, color3;
         private float noiseIntensity = 8f;
         private float noiseScale = 0.012f;
 
-        SceneRect(float x, float baseY, float targetW, float targetH, int c1, int c2) {
+        SceneRect(float x, float baseY, float targetW, float targetH, int c1, int c2, int c3) {
             this.x = x; this.baseY = baseY;
             this.targetW = targetW; this.targetH = targetH;
-            this.color1 = c1; this.color2 = c2;
+            this.color1 = c1; this.color2 = c2; this.color3 = c3;
         }
 
         void setTarget(float tw, float th) { targetW = tw; targetH = th; }
@@ -271,7 +271,15 @@ public class Scene02Rectangles extends AbstractScene {
                     if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
                     float t = PApplet.map(py, y0, y0 + h, 0, 1);
                     t = smoothstep(t);
-                    int gradCol = p.lerpColor(color1, color2, t);
+                    int gradCol;
+                    float split = 0.99f;
+                    if (t < split) {
+                        float tt = t / split;
+                        gradCol = p.lerpColor(color1, color2, tt);
+                    } else {
+                        float tt = (t - split) / (1.0f - split);
+                        gradCol = p.lerpColor(color2, color3, tt);
+                    }
                     float n = p.noise(px * noiseScale, py * noiseScale, time);
                     float grain = PApplet.map(n, 0, 1, -noiseIntensity, noiseIntensity);
                     int r = PApplet.constrain((int)(p.red(gradCol) + grain), 0, 255);
@@ -308,7 +316,15 @@ public class Scene02Rectangles extends AbstractScene {
                     if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
                     float t = PApplet.map(py, y0, y0 + h, 1, 0);
                     t = smoothstep(t);
-                    int gradCol = p.lerpColor(color1, color2, t);
+                    int gradCol;
+                    float split = 0.99f; // 70% for first gradient, 30% for second
+                    if (t < split) {
+                        float tt = t / split;
+                        gradCol = p.lerpColor(color1, color2, tt);
+                    } else {
+                        float tt = (t - split) / (1.0f - split);
+                        gradCol = p.lerpColor(color2, color3, tt);
+                    }
                     float n = p.noise(px * noiseScale, (y0 + h - (py - y0)) * noiseScale, time);
                     float grain = PApplet.map(n, 0, 1, -noiseIntensity, noiseIntensity);
                     int r = PApplet.constrain((int)(p.red(gradCol) + grain), 0, 255);
