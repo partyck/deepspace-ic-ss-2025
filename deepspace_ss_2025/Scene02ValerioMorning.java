@@ -21,18 +21,16 @@ public class Scene02ValerioMorning extends AbstractScene {
     public Scene02ValerioMorning(PApplet p) {
         super(p);
         // Initialize colors after super() call
-        color1 = p.color(0, 0, 0);     // Deep blue (outer)
-        color2 = p.color(10, 20, 60);     // Deep blue
-        color3 = p.color(10, 20, 60);     // Deep blue (outer)
-        color4 = p.color(235, 109, 23);   // orange
-        color5 = p.color(10, 20, 60);     // Deep blue
-        color6 = p.color(10, 20, 60);     // Deep blue (outer)
+        color1 = p.color(235, 109, 23);    // Warm orange
+        color2 = p.color(255, 238, 195);   // Pale white-yellow
+        color3 = p.color(100, 150, 255);   // Soft blue
+        color4 = p.color(0, 0, 0);         // Deep black
         
         timeElapsed = 0;
         speed = 10;
         targetSpeed = speed;
         animationTime = 1000000;
-        segments = 300;
+        segments = 720;
         circleWidth = width();
         distance = PConstants.TWO_PI / segments;
     }
@@ -68,7 +66,7 @@ public class Scene02ValerioMorning extends AbstractScene {
         
         for (int i = 0; i < segments; i++) {
             float interval = (float) i / (float) segments;
-            int segColor = getSixColorGradient(interval);
+            int segColor = getGradientColor(interval);
             p.fill(segColor);
             
             float angleStart = distance * i;
@@ -84,28 +82,16 @@ public class Scene02ValerioMorning extends AbstractScene {
         update();
     }
 
-    private int getSixColorGradient(float t) {
+    private int getGradientColor(float t) {
         t = smoothstep(t);
-        if (t < 0.2f) {
-            // color1 to color2
-            float localT = t / 0.2f;
-            return p.lerpColor(color1, color2, localT);
-        } else if (t < 0.4f) {
-            // color2 to color3
-            float localT = (t - 0.2f) / 0.2f;
-            return p.lerpColor(color2, color3, localT);
-        } else if (t < 0.6f) {
-            // color3 to color4
-            float localT = (t - 0.4f) / 0.2f;
-            return p.lerpColor(color3, color4, localT);
-        } else if (t < 0.8f) {
-            // color4 to color5
-            float localT = (t - 0.6f) / 0.2f;
-            return p.lerpColor(color4, color5, localT);
+        if (t < 0.05f) {
+            return p.lerpColor(color1, color2, t / 0.05f); // orange to pale
+        } else if (t < 0.25f) {
+            return p.lerpColor(color2, color3, (t - 0.05f) / 0.20f); // pale to blue
+        } else if (t < 0.60f) {
+            return p.lerpColor(color3, color4, (t - 0.25f) / 0.35f); // blue to black
         } else {
-            // color5 to color6 (which equals color1)
-            float localT = (t - 0.8f) / 0.2f;
-            return p.lerpColor(color5, color6, localT);
+            return p.lerpColor(color4, color1, (t - 0.60f) / 0.40f); // black to orange
         }
     }
 
