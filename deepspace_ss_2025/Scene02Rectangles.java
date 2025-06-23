@@ -41,23 +41,36 @@ public class Scene02Rectangles extends AbstractScene {
         this.wallTargetH = (p.height / 10f) * 6f;
         this.baselineY = p.height;
 
-        gradColor1 = p.color(235, 109, 23);   // orange
-        gradColor2 = p.color(255, 238, 195);  // pale
-        gradColor3 = p.color(100, 150, 255);  // blue
+        int[] gradCols = {
+            p.color(14, 22, 23),    // Deep navy (top)
+            p.color(77, 141, 143),  // Turquoise light
+            p.color(205, 206, 200), // Light (horizon)
+            p.color(77, 141, 143),  // Turquoise light
+            p.color(77, 141, 143),  // Turquoise light
+            p.color(205, 206, 200), // Light (horizon)
+            p.color(14, 22, 23)     // Deep navy (bottom)
+            };
+            float[] stops = {
+            0.00f,  // deep navy at top
+            0.15f,  // turquoise
+            0.35f,  // horizon light
+            0.50f,  // turquoise
+            0.65f,  // turquoise
+            0.85f,  // horizon light
+            1.00f   // deep navy at bottom
+            };
 
         fullGrad = p.createGraphics(p.width, p.height);
         fullGrad.beginDraw();
         for (int y = 0; y < p.height; y++) {
-            float t = PApplet.map(y, 0, p.height, 0, 1);
-            t = t*t*(3 - 2*t);               // smoothstep
-            int col;
-            float split = 0.35f;             // tweak how much is orange→pale vs. pale→blue
-            if (t < split) {
-                col = fullGrad.lerpColor(gradColor1, gradColor2, t/split);
-            } else {
-                col = fullGrad.lerpColor(gradColor2, gradColor3, (t-split)/(1-split));
+            float t = (float)y / (p.height - 1);    // 0 at top → 1 at bottom
+            int i = 0;
+            while (i < stops.length - 1 && t > stops[i + 1]) {
+                i++;
             }
-            fullGrad.stroke(col);
+            float localT = PApplet.map(t, stops[i], stops[i + 1], 0, 1);
+            int c = fullGrad.lerpColor(gradCols[i], gradCols[i + 1], localT);
+            fullGrad.stroke(c);
             fullGrad.line(0, y, p.width, y);
         }
         fullGrad.endDraw();
