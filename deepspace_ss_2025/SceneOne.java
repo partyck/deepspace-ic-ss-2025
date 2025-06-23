@@ -8,9 +8,9 @@ public class SceneOne extends AbstractScene {
     int[] colors = {
         p.color(14,22,23),          // Deep navy (top) 0.0f
         p.color(77,141,143),        // turquoise light 0.25f
-        p.color(205, 206, 200),     // light (horizon) 0.45f
+        p.color(255, 238, 195),     // light (horizon) 0.45f
         p.color(135, 160, 180),     // Deep navy (horizon) 0.5f
-        p.color(205, 206, 200),     // light (horizon) 0.55f
+        p.color(255, 238, 195),     // light (horizon) 0.55f
         p.color(77,141,143),        // turquoise light 0.75f
         p.color(14,22,23)           // Deep navy (bottom) 1.0f
     };

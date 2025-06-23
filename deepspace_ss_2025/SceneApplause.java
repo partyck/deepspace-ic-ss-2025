@@ -3,11 +3,11 @@ import processing.core.PConstants;
 
 public class SceneApplause extends AbstractScene {
     int[] colors = {
-        p.color(0, 0, 0),          // Deep navy (top) 0.0f
-        p.color(235, 109, 23),        // orange 0.25f
-        p.color(255, 160, 172),     // pink orange (horizon) 0.5f
-        p.color(235, 109, 23),        // orange 0.75f
-        p.color(0, 0, 0)           // Deep navy (bottom) 1.0f
+        p.color(0, 0, 0),          
+        p.color(77,141,143),        
+        p.color(255, 238, 195),     // Pale white-yellow 0.5f
+        p.color(77,141,143),        // turquoise 0.75f
+        p.color(0, 0, 0)   
     };
 
     float[] stops = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
