@@ -48,7 +48,7 @@ public class Scene02Rectangles extends AbstractScene {
             p.color(77, 141, 143),  // Turquoise light
             p.color(77, 141, 143),  // Turquoise light
             p.color(205, 206, 200), // Light (horizon)
-            p.color(170, 111, 111)   // rosa (bottom)
+            p.color(205, 206, 200)   // no rosa (bottom)
             };
         float[] stops = {
             0.00f,  // deep navy at top
