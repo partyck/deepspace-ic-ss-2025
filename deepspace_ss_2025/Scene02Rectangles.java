@@ -50,7 +50,7 @@ public class Scene02Rectangles extends AbstractScene {
             p.color(205, 206, 200), // Light (horizon)
             p.color(170, 111, 111)   // rosa (bottom)
             };
-            float[] stops = {
+        float[] stops = {
             0.00f,  // deep navy at top
             0.15f,  // turquoise
             0.35f,  // horizon light
@@ -58,7 +58,7 @@ public class Scene02Rectangles extends AbstractScene {
             0.65f,  // turquoise
             0.87f,  // horizon light
             1.00f   // deep navy at bottom
-            };
+        };
 
         fullGrad = p.createGraphics(p.width, p.height);
         fullGrad.beginDraw();
