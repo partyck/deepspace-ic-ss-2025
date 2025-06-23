@@ -1,6 +1,8 @@
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PVector;
+import processing.core.PGraphics;
+import processing.core.PImage;
 import TUIO.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +17,9 @@ public class Scene02Rectangles extends AbstractScene {
     private boolean isClosing = false;
     private boolean showTrace = false;
     private boolean hideExceptSecond = false;
+    private PGraphics fullGrad;
+    private PGraphics fullGradFlipped;
+    private int gradColor1, gradColor2, gradColor3;
 
     private static final int NUM_RECTS = 7;
     private static final float ANIM_DURATION_FRMS = 120f;
@@ -35,6 +40,37 @@ public class Scene02Rectangles extends AbstractScene {
         this.wallTargetW = p.width / 10f;
         this.wallTargetH = (p.height / 10f) * 6f;
         this.baselineY = p.height;
+
+        gradColor1 = p.color(235, 109, 23);   // orange
+        gradColor2 = p.color(255, 238, 195);  // pale
+        gradColor3 = p.color(100, 150, 255);  // blue
+
+        fullGrad = p.createGraphics(p.width, p.height);
+        fullGrad.beginDraw();
+        for (int y = 0; y < p.height; y++) {
+            float t = PApplet.map(y, 0, p.height, 0, 1);
+            t = t*t*(3 - 2*t);               // smoothstep
+            int col;
+            float split = 0.35f;             // tweak how much is orange→pale vs. pale→blue
+            if (t < split) {
+                col = fullGrad.lerpColor(gradColor1, gradColor2, t/split);
+            } else {
+                col = fullGrad.lerpColor(gradColor2, gradColor3, (t-split)/(1-split));
+            }
+            fullGrad.stroke(col);
+            fullGrad.line(0, y, p.width, y);
+        }
+        fullGrad.endDraw();
+
+        fullGradFlipped = p.createGraphics(p.width, p.height);
+        fullGradFlipped.beginDraw();
+        fullGradFlipped.pushMatrix();
+        // scale y by -1, then shift up by height
+        fullGradFlipped.scale(1, -1);
+        fullGradFlipped.image(fullGrad, 0, -p.height);
+        fullGradFlipped.popMatrix();
+        fullGradFlipped.endDraw();
+
         initRectangles();
         traces = new HashMap<>();
     }
@@ -259,36 +295,46 @@ public class Scene02Rectangles extends AbstractScene {
         }
 
         void drawSoftGradient() {
-            if (w <= 0 || h <= 0) return;
+            float x0 = x - w/2, y0 = baseY - h;
+            PImage slice = fullGrad.get(
+                (int)x0,         // srcX
+                (int)y0,         // srcY
+                (int)w,          // srcWidth
+                (int)h           // srcHeight
+            );
+            p.image(slice,     // draws the slice at...
+                    x0, y0,    // destX, destY
+                    w,  h      // destWidth, destHeight
+            );
+            addSoftGlow();
+        }
 
-            p.loadPixels();
-            float time = p.frameCount * 0.002f;
+        void drawFloorGradient() {
             float x0 = x - w/2;
-            float y0 = baseY - h;
+            float y0 = 0;  // floor bars start at the top
 
-            for (int py = (int)y0; py < baseY; py++) {
-                for (int px = (int)x0; px < x0 + w; px++) {
-                    if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
-                    float t = PApplet.map(py, y0, y0 + h, 0, 1);
-                    t = smoothstep(t);
-                    int gradCol;
-                    float split = 0.99f;
-                    if (t < split) {
-                        float tt = t / split;
-                        gradCol = p.lerpColor(color1, color2, tt);
-                    } else {
-                        float tt = (t - split) / (1.0f - split);
-                        gradCol = p.lerpColor(color2, color3, tt);
-                    }
-                    float n = p.noise(px * noiseScale, py * noiseScale, time);
-                    float grain = PApplet.map(n, 0, 1, -noiseIntensity, noiseIntensity);
-                    int r = PApplet.constrain((int)(p.red(gradCol) + grain), 0, 255);
-                    int g = PApplet.constrain((int)(p.green(gradCol) + grain), 0, 255);
-                    int b = PApplet.constrain((int)(p.blue(gradCol) + grain), 0, 255);
-                    p.pixels[py * p.width + px] = p.color(r, g, b);
-                }
-            }
-            p.updatePixels();
+            PImage slice = fullGradFlipped.get(
+                (int)x0,       // srcX
+                0,             // srcY at very TOP
+                (int)w,        // srcW
+                (int)h         // srcH
+            );
+
+            p.image(slice,
+                    x0, y0,  // destX, destY
+                    w,  h    // destW, destH
+            );
+
+            float glowSize = 8f;
+            p.fill(p.red(color1), p.green(color1), p.blue(color1), 30);
+            p.noStroke();
+            p.rectMode(PConstants.CORNER);
+            p.rect(
+            x0 - glowSize,
+            y0 - glowSize,
+            w + glowSize*2,
+            h + glowSize*2
+            );
         }
 
         private float smoothstep(float t) {
@@ -306,40 +352,7 @@ public class Scene02Rectangles extends AbstractScene {
         void drawForFloor() {
             if (closing) animateClose();
             if (w <= 0 || h <= 0) return;
-            float x0 = x - w/2;
-            float y0 = 0;
-
-            p.loadPixels();
-            float time = p.frameCount * 0.002f;
-            for (int py = (int)y0; py < h; py++) {
-                for (int px = (int)x0; px < x0 + w; px++) {
-                    if (px < 0 || px >= p.width || py < 0 || py >= p.height) continue;
-                    float t = PApplet.map(py, y0, y0 + h, 1, 0);
-                    t = smoothstep(t);
-                    int gradCol;
-                    float split = 0.99f; // 70% for first gradient, 30% for second
-                    if (t < split) {
-                        float tt = t / split;
-                        gradCol = p.lerpColor(color1, color2, tt);
-                    } else {
-                        float tt = (t - split) / (1.0f - split);
-                        gradCol = p.lerpColor(color2, color3, tt);
-                    }
-                    float n = p.noise(px * noiseScale, (y0 + h - (py - y0)) * noiseScale, time);
-                    float grain = PApplet.map(n, 0, 1, -noiseIntensity, noiseIntensity);
-                    int r = PApplet.constrain((int)(p.red(gradCol) + grain), 0, 255);
-                    int g = PApplet.constrain((int)(p.green(gradCol) + grain), 0, 255);
-                    int b = PApplet.constrain((int)(p.blue(gradCol) + grain), 0, 255);
-                    p.pixels[py * p.width + px] = p.color(r, g, b);
-                }
-            }
-            p.updatePixels();
-
-            float glowSize = 8f;
-            p.fill(p.red(color1), p.green(color1), p.blue(color1), 30);
-            p.noStroke();
-            p.rectMode(PConstants.CORNER);
-            p.rect(x0 - glowSize, y0 - glowSize, w + glowSize*2, h + glowSize*2);
+            drawFloorGradient();
         }
 
         void draw() {
