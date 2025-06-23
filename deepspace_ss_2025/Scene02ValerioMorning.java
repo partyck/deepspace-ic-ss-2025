@@ -21,9 +21,9 @@ public class Scene02ValerioMorning extends AbstractScene {
     public Scene02ValerioMorning(PApplet p) {
         super(p);
         // Initialize colors after super() call
-        color1 = p.color(235, 109, 23);    // Warm orange
+        color1 = p.color(77,141,143);    // Warm orange
         color2 = p.color(255, 238, 195);   // Pale white-yellow
-        color3 = p.color(100, 150, 255);   // Soft blue
+        color3 = p.color(77, 141, 143);   // Soft blue
         color4 = p.color(0, 0, 0);         // Deep black
         
         timeElapsed = 0;
