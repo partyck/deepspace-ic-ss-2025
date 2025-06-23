@@ -15,6 +15,7 @@ import TUIO.*;
 public class SceneRave extends AbstractScene {
     private TuioClient tracker;
     private int noiseDetail = 8;
+
     private ArrayList<Dancer> dancers;
     private ArrayList<Dancer> hull;
 
@@ -45,9 +46,8 @@ public class SceneRave extends AbstractScene {
     }
 
     @Override
-    public void drawWall() { 
-        int bgColor = p.color(10, 27, 42, (int)alphaFade);
-        p.fill(bgColor);
+    public void drawWall() {
+        fill(0, alphaFade);
         noStroke();
         rect(0, 0, width(), height());
         grid.displayWall();
@@ -55,8 +55,7 @@ public class SceneRave extends AbstractScene {
 
     @Override
     public void drawFloor() {
-        int bgColor = p.color(10, 27, 42, (int)alphaFade);
-        p.fill(bgColor);
+        fill(0, alphaFade);
         noStroke();
         rect(0, 0, width(), height());
         updateDancers();
@@ -69,10 +68,10 @@ public class SceneRave extends AbstractScene {
         grid.update();
         grid.displayFloor();
 
-        int orangeColor = p.color(249, 165, 67, (int)alphaFade); // #F9A543 with alpha
-        p.fill(orangeColor);
-        for (Dancer dancer : dancers) {
-            p.rect(dancer.x, dancer.y, width()/20, height()/20);
+        stroke(255, 0, 0);
+        strokeWeight(6);
+        for (Dancer p : dancers) {
+            point(p.x, p.y);
         }
     }
 

@@ -52,6 +52,7 @@ public class NoiseGrid {
     public void setWall(AbstractScene wall) { this.wall = wall; }
     public void setFloor(AbstractScene floor) { this.floor = floor; }
 
+
     public void init() {
         if (wall == null || floor == null) {
             return;
@@ -220,24 +221,12 @@ public class NoiseGrid {
         float n;
         int timer = 0;
 
-        int baseColor;
-
-        // Define shared palette
-        int[] sharedColors = new int[] {
-            wall.color(242, 62, 22),     // Warm orange
-            wall.color(242, 98, 46),     // orange dark
-            wall.color(191, 86, 48),    // orange dark
-            wall.color(1, 58, 64), // turqouise
-        };
-
         Tile(int x, int y, int w, int h) {
             this.x = x;
             this.y = y;
             this.w = w;
             this.h = h;
             this.n = 0;
-
-            this.baseColor = sharedColors[(int) wall.random(sharedColors.length)];
         }
 
         void display(boolean isWall) {
@@ -246,50 +235,17 @@ public class NoiseGrid {
             AbstractScene scene = getScene(isWall);
             int currentY = isWall ? y : y - wallHeight;
             if (timer > 0) {
-                drawTimerGradient(scene, x, currentY, w, h);
+                scene.fill(255);
+                scene.rect(x, currentY, w, h);
                 return;
             }
             if (n > displayTreshold) {
-                drawGradientRect(scene, x, currentY, w, h, isWall);
+                int fill = (int) (255 * Math.pow(n, 1f / 3f));
+                scene.fill(fill);
+                scene.rect(x, currentY, w, h);
                 return;
             }
             return;
-        }
-
-        private void drawTimerGradient(AbstractScene scene, float x, float y, float w, float h) {
-            scene.noStroke();
-            
-            int leftColor = scene.color(10, 27, 42); 
-            int rightColor = scene.color(10, 27, 42); 
-            
-            // Draw horizontal gradient
-            for (int i = 0; i < w; i++) {
-                float t = PApplet.map(i, 0, w, 0, 1);
-                int gradCol = scene.lerpColor(leftColor, rightColor, t);
-                scene.fill(
-                    (gradCol >> 16) & 0xFF,  // red
-                    (gradCol >> 8) & 0xFF,   // green
-                    gradCol & 0xFF,          // blue
-                    180 + (int)(scene.random(75))  // alpha
-                );
-                scene.rect(x + i, y, 1, h);
-            }
-        }
-
-        private void drawGradientRect(AbstractScene scene, float x, float y, float w, float h, boolean isWall) {
-            // Removed pushStyle()/popStyle() calls - not available in AbstractScene
-            scene.noStroke();
-            
-            int c1 = wall.lerpColor(wall.color(0, 0, 0), baseColor, 0.5f);
-            int c2 = baseColor;
-            
-            // Vertical gradient
-            for (int i = 0; i < h; i++) {
-                float t = PApplet.map(i, 0, h, 0, 1);
-                int gradCol = scene.lerpColor(c1, c2, t);
-                scene.fill(gradCol);
-                scene.rect(x, y + i, w, 1);
-            }
         }
 
         void update(int prevX, int prevY, int w, int h, float noise) {
@@ -317,5 +273,6 @@ public class NoiseGrid {
                 return floor;
             }
         }
+
     }
 }
