@@ -28,13 +28,13 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private final float floorStripeBlockHeight = (width()/10);
 
     private final int[][] topColors = {
-        {p.color(191, 143, 143), p.color(209, 180, 161)},  // top stripe gradient
-        {p.color(209, 180, 161), p.color(191, 143, 143)}   // mirror vertically
+        {p.color(239,229,190,255), p.color(202,209,180,255)},  // top stripe gradient
+        {p.color(202,209,180,255), p.color(239,229,190,255)}   // mirror vertically
     };
 
     private final int[][] bottomColors = {
-        {p.color(209, 180, 161), p.color(205, 206, 200)}, // bottom stripe gradient
-        {p.color(205, 206, 200), p.color(209, 180, 161)}  // mirror vertically
+        {p.color(80,143,144,255), p.color(165,189,169,255)}, // bottom stripe gradient
+        {p.color(165,189,169,255), p.color(80,143,144,255)}  // mirror vertically
     };
 
     public Scene07_DifferentSpeeds(PApplet p) { 
