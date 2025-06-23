@@ -14,7 +14,6 @@ public class Scene01Intro extends AbstractScene{
     float alphaFade = 3.0f;
     float alphaFadeFloor = 20.0f;
     int personHeight = 50;
-    int floorHeightInteraction = 800;
     //NEW variable
     // curtain
     boolean foldCurtain = false;
@@ -53,7 +52,6 @@ public class Scene01Intro extends AbstractScene{
         int x = 30;
         int y = 30;
         int gap = 50;
-        floorHeightInteraction = height();
     }
 
    
@@ -201,7 +199,6 @@ public class Scene01Intro extends AbstractScene{
                      endShape();
                 }
         }
-        System.out.println(frameRate());
     }
 
 
@@ -294,17 +291,14 @@ public void drawFloor() {
                 updateGrid();
                 System.out.println("    spacing: "+spacing);
                 break;
-
             case "/1/fader2":
                 influenceRadius = map(value, 0, 1, 0, 500);
                 System.out.println("    influenceRadius: "+influenceRadius);
                 break;
-
             case "/1/fader3":
                 maxPush = map(value, 0, 1, 50, 600);
                 System.out.println("    maxPush: "+maxPush);
                 break;
-
             case "/1/fader4":
                 baseNoiseAmount = map(value, 0, 1, 0, 100);
                 System.out.println("    baseNoiseAmount: "+baseNoiseAmount);
@@ -322,11 +316,10 @@ public void drawFloor() {
                 System.out.println("    personHeight: "+personHeight);
                 break;
             case "/1/fader8":
-                noiseScale = map(value, 0, 1, 0, 10);
+                noiseScale = map(value, 0, 1, 0.5f, 3);
                 System.out.println("    noiseScale: "+noiseScale);
                 break;
-            
-                 case "/Curtains/toggle13":
+            case "/Curtains/toggle13":
                 foldCurtain = value == 1;
                 targetCurtainProgress = foldCurtain ? 1 : 0;
                 break;
