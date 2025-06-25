@@ -9,7 +9,8 @@ import java.util.ArrayList;
 // arrow key left/right - change width of stripes (three states: 1- equal width, 2 getting unequal,3 noisy width)
 
 public class Scene07_DifferentSpeeds extends AbstractScene {
-    private float animationOffset = 0f;
+    private float animationOffsetTop = 0f;
+    private float animationOffsetBottom = 0f;
     private static float speedTop = 1.0f;
     private static float noiseOffset = 0f;
     private static float rotationAngle = 0f;
@@ -26,7 +27,17 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     private final float ROTATION_SPEED = 0.05f;
     private final float floorStripeBlockHeight = (width()/10);
 
-    public Scene07_DifferentSpeeds(PApplet p) {
+    private final int[][] topColors = {
+        {p.color(239,229,190,255), p.color(202,209,180,255)},  // top stripe gradient
+        {p.color(202,209,180,255), p.color(239,229,190,255)}   // mirror vertically
+    };
+
+    private final int[][] bottomColors = {
+        {p.color(80,143,144,255), p.color(165,189,169,255)}, // bottom stripe gradient
+        {p.color(165,189,169,255), p.color(80,143,144,255)}  // mirror vertically
+    };
+
+    public Scene07_DifferentSpeeds(PApplet p) { 
         super(p);
         if (!isKeyRegistered) {
             p.registerMethod("keyEvent", this);
@@ -86,7 +97,9 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
     }
 
     private void updateAnimationState() {
-        animationOffset = (animationOffset + speedTop * direction) % 10000;
+        animationOffsetTop = (animationOffsetTop + speedTop * direction) % 10000;
+        animationOffsetBottom = (animationOffsetBottom - speedTop * direction) % 10000;
+
         if (speedTop > 0.0f) {
             noiseOffset += 0.005 * speedTop;
         }
@@ -152,8 +165,10 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
 
     private void drawStripes(float x, float y, float w, float h, int thickness, float speed) {
         float baseStripeWidth = thickness;
-        float currentX = -(animationOffset % (baseStripeWidth * 2));
+        float currentOffset = (thickness == stripeThicknessTop) ? animationOffsetTop : animationOffsetBottom;
+        float currentX = -(currentOffset % (baseStripeWidth * 2));
         int stripeIndex = 0;
+        int colorIndex = (rotationAngle > 0.1f) ? 1 : 0;
 
         while (currentX < w + baseStripeWidth * 2) {
             float stripeWidth = baseStripeWidth;
@@ -172,11 +187,26 @@ public class Scene07_DifferentSpeeds extends AbstractScene {
                 stripeWidth *= 0.8f + 0.4f * noiseVal * noiseStrength;
             }
 
-            p.fill(255);
-            p.rect(x + currentX, y, stripeWidth, h);
+            // Draw the stripe
+            if (thickness == stripeThicknessTop) {
+                drawGradientRect(x + currentX, y, stripeWidth, h, 
+                               topColors[colorIndex][0], topColors[colorIndex][1]);
+            } else {
+                drawGradientRect(x + currentX, y, stripeWidth, h, 
+                               bottomColors[colorIndex][0], bottomColors[colorIndex][1]);
+            }
 
             currentX += stripeWidth + baseStripeWidth;
             stripeIndex++;
+        }
+    }
+
+    private void drawGradientRect(float x, float y, float w, float h, int color1, int color2) {
+        for (int i = 0; i < w; i++) {
+            float t = PApplet.map(i, 0, w, 0, 1);
+            int gradCol = p.lerpColor(color1, color2, t);
+            p.stroke(gradCol);
+            p.line(x + i, y, x + i, y + h);
         }
     }
 }

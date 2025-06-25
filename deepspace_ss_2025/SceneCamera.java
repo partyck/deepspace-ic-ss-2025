@@ -36,10 +36,10 @@ public class SceneCamera extends AbstractScene {
         super(p);
         this.tracker = tracker;
         colors = new int[]{
-            color(63, 0, 255),
-            color(11, 56, 158),
-            color(35, 41, 122),
-            color(0, 71, 171)
+            color(77,141,143),
+            color(10,159,153),
+            color(54,98,100),
+            color(10,159,153)
         };
         dancers = new ArrayList<>();
         windowWidth =  (int) (width() * 0.01);

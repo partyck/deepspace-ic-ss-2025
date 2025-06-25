@@ -1,11 +1,15 @@
 import java.util.ArrayList;
-
 import processing.core.*;
 import TUIO.*;
 
 public class Scene02ValerioMorning extends AbstractScene {
-    private final int color1;
-    private final int color2;
+    // Five colors for gradient
+    private int color1;
+    private int color2; 
+    private int color3;
+    private int color4;
+    private int color5;
+    private int color6;
     private int timeElapsed;
     private int targetSpeed;
     private int speed;
@@ -16,26 +20,30 @@ public class Scene02ValerioMorning extends AbstractScene {
 
     public Scene02ValerioMorning(PApplet p) {
         super(p);
-        color1 = color(255, 255, 255);
-        color2 = color(0, 0, 0);
+        // Initialize colors after super() call
+        color1 = p.color(77,141,143);    // Warm orange
+        color2 = p.color(255, 238, 195);   // Pale white-yellow
+        color3 = p.color(77, 141, 143);   // Soft blue
+        color4 = p.color(0, 0, 0);         // Deep black
+        
         timeElapsed = 0;
         speed = 10;
         targetSpeed = speed;
         animationTime = 1000000;
-        segments = 300;
+        segments = 720;
         circleWidth = width();
         distance = PConstants.TWO_PI / segments;
     }
 
     @Override
     public void init() {
-        rectMode(PConstants.CORNER);
-        translate(0, 0);
+        p.rectMode(PConstants.CORNER);
+        p.translate(0, 0);
     }
 
     @Override
     public void drawWall() {
-        background(0);
+        p.background(0);  // Simple black background
         float centerX = width() * 0.5f;
         float centerY = height();
         display(centerX, centerY);
@@ -43,34 +51,52 @@ public class Scene02ValerioMorning extends AbstractScene {
 
     @Override
     public void drawFloor() {
-        background(0);
+        p.background(0);  // Simple black background
         float centerX = width() * 0.5f;
         float centerY = 0;
         display(centerX, centerY);
     }
 
     public void display(float centerX, float centerY) {
-        // float circleWidth = width() - (width() * speed / 30000f);
+        p.noStroke();
 
-        noStroke();
-        float offSet = segments * animationProgress();
-
-        pushMatrix();
-        translate(centerX, centerY);
-        rotate(PConstants.TWO_PI * animationProgress());
-        for (int i = 0; i < segments; i++ ) {
+        p.pushMatrix();
+        p.translate(centerX, centerY);
+        p.rotate(PConstants.TWO_PI * animationProgress());
+        
+        for (int i = 0; i < segments; i++) {
             float interval = (float) i / (float) segments;
-            fill(lerpColor(color1, color2, interval));
+            int segColor = getGradientColor(interval);
+            p.fill(segColor);
+            
             float angleStart = distance * i;
             float angleEnd = distance * (i + 1) + 0.01f;
-            arc(0, 0, circleWidth, circleWidth,  angleStart, angleEnd);
+            p.arc(0, 0, circleWidth, circleWidth, angleStart, angleEnd);
         }
-        popMatrix();
+        p.popMatrix();
 
-        fill(0);
-        circle(centerX, centerY, width() * 0.1f);
+        // Black center circle
+        p.fill(0);
+        p.circle(centerX, centerY, width() * 0.1f);
 
         update();
+    }
+
+    private int getGradientColor(float t) {
+        t = smoothstep(t);
+        if (t < 0.05f) {
+            return p.lerpColor(color1, color2, t / 0.05f); // orange to pale
+        } else if (t < 0.25f) {
+            return p.lerpColor(color2, color3, (t - 0.05f) / 0.20f); // pale to blue
+        } else if (t < 0.60f) {
+            return p.lerpColor(color3, color4, (t - 0.25f) / 0.35f); // blue to black
+        } else {
+            return p.lerpColor(color4, color1, (t - 0.60f) / 0.40f); // black to orange
+        }
+    }
+
+    private float smoothstep(float t) {
+        return t * t * (3 - 2 * t);
     }
 
     private float animationProgress() {
@@ -78,7 +104,7 @@ public class Scene02ValerioMorning extends AbstractScene {
     }
 
     private void update() {
-        speed = (int) lerp(speed, targetSpeed, 0.4f);
+        speed = (int) PApplet.lerp(speed, targetSpeed, 0.4f);
         timeElapsed += speed;
         if (this.timeElapsed >= this.animationTime) this.timeElapsed = 0;
     }
@@ -87,8 +113,7 @@ public class Scene02ValerioMorning extends AbstractScene {
     public void oscEvent(String path, float value) {
         switch(path) {
             case "/Valerio/fader9":
-                circleWidth = floor(map(value, 0, 1, 100, width()));
-                // speed = floor(map(value, 0, 1, 100, 10000));
+                circleWidth = PApplet.floor(PApplet.map(value, 0, 1, 100, width()));
                 System.out.println("    circleWidth: "+circleWidth);
                 break;
             case "/Valerio/toggle1":
@@ -102,8 +127,7 @@ public class Scene02ValerioMorning extends AbstractScene {
         }
     }
 
-    // inner classes
-
+    // Inner classes remain the same
     private class Dancer {
         float x;
         float y;
@@ -120,11 +144,8 @@ public class Scene02ValerioMorning extends AbstractScene {
         }
 
         void update(TuioCursor cursor) {
-            // x = cursor.getScreenX(Constants.WIDTH) - width() / 2f;
-            // y = cursor.getScreenY(Constants.FLOOR_HEIGHT) - height() / 2f;
             x = cursor.getScreenX(width());
             y = cursor.getScreenY(height());
         }
     }
-
 }
