@@ -54,6 +54,7 @@ void setup() {
     scenes.add(new AbstractScene[]{new Scene07_DifferentSpeeds(this), new Scene07_DifferentSpeeds(floor)});
     scenes.add(new AbstractScene[]{new Scene02ValerioMorning(this), new Scene02ValerioMorning(floor)});
     scenes.add(new AbstractScene[]{new SceneRave(this, tracker), new SceneRave(floor, tracker)});
+    scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     scenes.add(new AbstractScene[]{new SceneOne(this), new SceneOne(floor)});
     scenes.add(new AbstractScene[]{new Blackout(this), new Blackout(floor)});
     scenes.add(new AbstractScene[]{new SceneApplause(this), new SceneApplause(floor)});
