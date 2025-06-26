@@ -81,6 +81,8 @@ public abstract class AbstractScene {
     public void set(int x, int y, PImage img) { p.set(x, y, img); }
     public PGraphics createGraphics(int x, int y) { return p.createGraphics(x, y); }
     public PGraphics createGraphics(int x, int y, String render) { return p.createGraphics(x, y, render); }
+    public void loadPixels() {p.loadPixels();}
+    public void updatePixels() {p.updatePixels();}
 
 
     // ---- Input and time ----
