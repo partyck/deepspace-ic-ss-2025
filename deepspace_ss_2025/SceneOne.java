@@ -5,31 +5,25 @@ public class SceneOne extends AbstractScene {
     private int timeElapsed;
     private final int animationTime;
     // Example: 0.0 = top, 0.5 = horizon, 1.0 = bottom
-    int[] colorsWall = {
+    int[] colors = {
         p.color(14,22,23),          // Deep navy (top) 0.0f
         p.color(77,141,143),        // turquoise light 0.25f
         p.color(255, 238, 195),     // light (horizon) 0.45f
-        p.color(135, 160, 180),     // Deep navy (horizon) 0.5f
-    };
-    int[] colorsFloor = {
         p.color(135, 160, 180),     // Deep navy (horizon) 0.5f
         p.color(255, 238, 195),     // light (horizon) 0.55f
         p.color(77,141,143),        // turquoise light 0.75f
         p.color(14,22,23)           // Deep navy (bottom) 1.0f
     };
 
-    // float[] stopsW = {0.0f, 0.15f, 0.45f, 0.5f};
-    // float[] stopsF = {1f, 0.55f, 0.85f, 1.0f};
-    float[] stopsW = {0.0f, 0.3f, 0.9f, 1.2f};
-    float[] stopsF = {-0.2f, 0.1f, 0.7f, 1.0f};
+    float[] stops = {0.0f, 0.15f, 0.45f, 0.5f, 0.55f, 0.85f, 1.0f};
 
     public SceneOne(PApplet p) {
         super(p);
         this.timeElapsed = 0;
-        this.animationTime = (int) (frameRate() * 60 * 1);
+        this.animationTime = (int) (frameRate() * 60 * 3);
     }
     
-    public void drawSeamlessGradient(PApplet p, float x, float y, float w, float h, int[] colors, float[] stops) {
+    public void drawSeamlessGradient(PApplet p, float x, float y, float w, float h, int[] colors, float[] stops, float globalYOffset, float totalHeight) {
         p.loadPixels();
         int startX = Math.max((int)x, 0);
         int endX = Math.min((int)(x + w), p.width);
@@ -38,7 +32,7 @@ public class SceneOne extends AbstractScene {
 
         for (int px = startX; px < endX; px++) {
             for (int py = startY; py < endY; py++) {
-                float t = PApplet.map(py, 0, height(), 0, 1);
+                float t = PApplet.map(py + globalYOffset, 0, totalHeight, 0, 1);
                 t = t * t * (3 - 2 * t); // Smoothstep
                 int gradColor = getColorAtPosition(p, colors, stops, t);
                 p.pixels[py * p.width + px] = gradColor;
@@ -66,7 +60,10 @@ public class SceneOne extends AbstractScene {
         float x = (this.width() - rectW) / 2f;
         float y = 0;
 
-        drawSeamlessGradient(p, x, y, rectW, rectH, colorsWall, stopsW);
+        float totalHeight = p.height * 2f;
+        float offsetY = 0; // ← set this explicitly for wall
+
+        drawSeamlessGradient(p, x, y, rectW, rectH, colors, stops, offsetY, totalHeight);
 
         update();
     }
@@ -80,12 +77,12 @@ public class SceneOne extends AbstractScene {
         float x = (this.width() - rectW) / 2f;
         float y = 0;
 
-        // rect(x, y, rectW, rectH);
+        float totalHeight = p.height * 2f;
+        float offsetY = p.height; // ← shift for mirrored floor
 
-        drawSeamlessGradient(p, x, y, rectW, rectH, colorsFloor, stopsF);
+        drawSeamlessGradient(p, x, y, rectW, rectH, colors, stops, offsetY, totalHeight);
 
         update();
-        System.out.println(animationTime +" elapsed: "+this.timeElapsed + "; "+ (float) (timeElapsed / (float) animationTime) + " rect w: " + rectW);
     }
 
     private float easeOutSeventh(float t) {
@@ -99,6 +96,6 @@ public class SceneOne extends AbstractScene {
 
     private void update() {
         this.timeElapsed++;
-        // if (this.timeElapsed >= this.animationTime) ;
+        if (this.timeElapsed >= this.animationTime) this.timeElapsed = 0;
     }
 }
