@@ -21,6 +21,10 @@ public class Scene02Rectangles extends AbstractScene {
     private PGraphics fullGradFlipped;
     private int gradColor1, gradColor2, gradColor3;
 
+    boolean fading = false;
+    float fadeStartTime;
+    float fadeDuration = 10000;
+
     private static final int NUM_RECTS = 7;
     private static final float ANIM_DURATION_FRMS = 120f;
     // faster deformation (~10 seconds at 60 FPS)
@@ -121,6 +125,15 @@ public class Scene02Rectangles extends AbstractScene {
         }
         p.noStroke(); p.fill(255);
         if (hideExceptSecond) {
+            for (SceneRect r : rects) {
+                r.draw();
+            }
+            float elapsed = millis() - fadeStartTime;
+            float a = map(elapsed, 0, fadeDuration, 0, 255);
+            a = constrain(a, 0, 255);
+            noStroke();
+            fill(0, a);
+            rect(0, 0, p.width, p.height);
             rects.get(1).draw(); // Only draw the second rectangle
         } else {
             for (SceneRect r : rects) r.draw();
@@ -142,6 +155,15 @@ public class Scene02Rectangles extends AbstractScene {
         }
 
         if (hideExceptSecond) {
+            for (SceneRect r : rects) {
+                r.draw();
+            }
+            float elapsed = millis() - fadeStartTime;
+            float a = map(elapsed, 0, fadeDuration, 0, 255);
+            a = constrain(a, 0, 255);
+            noStroke();
+            fill(0, a);
+            rect(0, 0, p.width, p.height);
             rects.get(1).drawForFloor();
         } else {
             for (SceneRect r : rects) r.drawForFloor();
@@ -198,7 +220,10 @@ public class Scene02Rectangles extends AbstractScene {
                 showTrace = value == 1;
                 if (!showTrace) traces.clear();
                 break;
-            case "/rect/push38": hideExceptSecond = true; break;
+            case "/rect/push38": 
+                hideExceptSecond = true;
+                fading = true;
+                fadeStartTime  = millis();
         }
     }
 
@@ -222,7 +247,11 @@ public class Scene02Rectangles extends AbstractScene {
             case 'f': isFollow = true; break;
             case 'c': for (SceneRect r : rects) r.close(); break;
             case 'p': showTrace = !showTrace; if (!showTrace) traces.clear(); break;
-            case 'h': hideExceptSecond = true; break;
+            case 'h': 
+                hideExceptSecond = true;
+                fading = true;
+                fadeStartTime = millis();
+                break;
         }
     }
 
