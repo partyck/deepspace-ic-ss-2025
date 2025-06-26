@@ -25,7 +25,7 @@ public class NoiseGrid {
     static float timeOffsetFill = 0f;
     static float noiseScaleFill = 1f;
 
-    float displayTreshold = 0.6f;
+    float displayTreshold = 0.65f;
 
     int tileTimer;
 
@@ -65,8 +65,8 @@ public class NoiseGrid {
         affectDistance = width * 0.2f;
         tileTimer = (int) wall.frameRate() * 1;
 
-        int xLines = 20;
-        int yLines = 20;
+        int xLines = 40;
+        int yLines = 40;
         xs =  new int[xLines];
         ys =  new int[yLines];
         for(int i = 0; i < xLines; i++) {

@@ -74,56 +74,7 @@ public class SceneRave extends AbstractScene {
             point(p.x, p.y);
         }
     }
-
-    @Override
-    public void midiIn(int slider, int value) {
-        switch(slider) {
-            case 0:
-                NoiseGrid.speed = value / 127f;
-                System.out.println("    grid.speed: "+NoiseGrid.speed);
-                break;
-            case 1:
-                NoiseGrid.noiseScale = value / 127f;
-                System.out.println("    grid.noiseScale: "+NoiseGrid.noiseScale);
-                break;
-            case 2:
-                NoiseGrid.speedFill = value / 127f;
-                System.out.println("    grid.speedFill: "+NoiseGrid.speedFill);
-                break;
-            case 3:
-                NoiseGrid.noiseScaleFill = value / 127f;
-                System.out.println("    grid.noiseScaleFill: "+NoiseGrid.noiseScaleFill);
-                break;
-            case 4:
-                noiseDetail = floor(map(value, 0, 127, 1, 8));
-                noiseDetail(noiseDetail);
-                System.out.println("    noiseDetail: "+noiseDetail);
-                break;
-            case 5:
-                NoiseGrid.noiseLinesForceStrength = value / 127f;
-                System.out.println("    grid.noiseLinesForceStrength: "+NoiseGrid.noiseLinesForceStrength);
-                break;
-            case 6:
-                alphaFade = 255 * (value / 127f);
-                System.out.println("    alphaFade: "+alphaFade);
-                break;
-            case 7:
-                grid.displayTreshold = 1 - (value / 127f);
-                System.out.println("    displayTreshold: "+grid.displayTreshold);
-                break;
-            case 64:
-                grid.linesOn = value == 127;
-                System.out.println("    linesOn: "+grid.linesOn + " value: "+value);
-                break;
-            case 48:
-                grid.tilesOn = value == 127;
-                System.out.println("    tilesOn: "+grid.tilesOn + " value: "+value);
-                break;
-            default:
-                System.out.println("    default: "+value);
-        }
-    }
-
+    
     @Override
     public void oscEvent(String path, float value) {
         switch(path) {
