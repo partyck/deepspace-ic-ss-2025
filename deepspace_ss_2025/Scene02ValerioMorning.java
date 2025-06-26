@@ -11,8 +11,10 @@ public class Scene02ValerioMorning extends AbstractScene {
     private int color5;
     private int color6;
     private int timeElapsed;
-    private int targetSpeed;
     private int speed;
+    private int acceleration;
+    private final float topAcc = 100;
+    private final float topSpeed = 150000;
     private int animationTime;
     private int segments;
     private int circleWidth;
@@ -28,10 +30,10 @@ public class Scene02ValerioMorning extends AbstractScene {
         
         timeElapsed = 0;
         speed = 10;
-        targetSpeed = speed;
+        acceleration = 1;
         animationTime = 1000000;
         segments = 720;
-        circleWidth = width();
+        circleWidth = (int) (width() * 0.9f);
         distance = PConstants.TWO_PI / segments;
     }
 
@@ -104,7 +106,8 @@ public class Scene02ValerioMorning extends AbstractScene {
     }
 
     private void update() {
-        speed = (int) PApplet.lerp(speed, targetSpeed, 0.4f);
+        circleWidth = (int) map(speed, 10, topSpeed, width() * 0.9f, width() * 0.1f);
+        speed += acceleration;
         timeElapsed += speed;
         if (this.timeElapsed >= this.animationTime) this.timeElapsed = 0;
     }
@@ -116,13 +119,13 @@ public class Scene02ValerioMorning extends AbstractScene {
                 circleWidth = PApplet.floor(PApplet.map(value, 0, 1, 100, width()));
                 System.out.println("    circleWidth: "+circleWidth);
                 break;
-            case "/Valerio/toggle1":
-                targetSpeed = targetSpeed * 2;
-                System.out.println("    targetSpeed: " + targetSpeed + " speed: " + speed + " value: "+value);
+            case "/Valerio/fader46":
+                acceleration = (int) (topAcc * 0.7f * value);
+                System.out.println("    acceleration: "+acceleration + " speed: " + speed);
                 break;
-            case "/Valerio/toggle2":
-                targetSpeed = targetSpeed / 2;
-                System.out.println("    targetSpeed: " + targetSpeed + " speed: " + speed + " value: "+value);
+            case "/Valerio/fader45":
+                acceleration = (int) (topAcc * 0.7f + topAcc * value);
+                System.out.println("    acceleration: "+acceleration + " speed: " + speed);
                 break;
         }
     }
