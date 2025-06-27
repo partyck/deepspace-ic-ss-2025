@@ -156,7 +156,7 @@ public class Scene02Rectangles extends AbstractScene {
 
         if (hideExceptSecond) {
             for (SceneRect r : rects) {
-                r.draw();
+                r.drawForFloor();
             }
             float elapsed = millis() - fadeStartTime;
             float a = map(elapsed, 0, fadeDuration, 0, 255);
