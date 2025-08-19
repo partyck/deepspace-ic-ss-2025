@@ -7,7 +7,7 @@ public class Scene01Intro extends AbstractScene{
     int cols, rows;
 
     int spacing = 75;
-    float influenceRadius = 400;
+    float influenceRadius = 0;
     float maxPush = 300;
     float baseNoiseAmount = 80;
     float lerpAmount = 0.01f;
@@ -244,10 +244,10 @@ public void drawFloor() {
 
 
     public void keyPressed(char key, int keyCode) {
-        // if (key == 'w' || key == 'W') {
-        //     waveMode = !waveMode;
+        if (key == 'w' || key == 'W') {
+            waveMode = !waveMode;
             
-        // } 
+        } 
 
         if (key == 'f' || key == 'F') {
             foldCurtain = !foldCurtain;
@@ -258,22 +258,22 @@ public void drawFloor() {
              cloneMirrored = !cloneMirrored;
          } 
 
-        // //baseNoiseAmount
-        //  if (key == PConstants.UP) {
-        //      baseNoiseAmount += incDecBaseNoiseAmount;
-        //  }
+        //baseNoiseAmount
+         if (key == PConstants.UP) {
+             baseNoiseAmount += incDecBaseNoiseAmount;
+         }
         
-        // if (keyCode == PConstants.DOWN) {
-        //     baseNoiseAmount = Math.max(0, baseNoiseAmount - incDecBaseNoiseAmount);
-        // } 
+        if (keyCode == PConstants.DOWN) {
+            baseNoiseAmount = Math.max(0, baseNoiseAmount - incDecBaseNoiseAmount);
+        } 
 
-      //influenceRadius
-        // if (keyCode == PConstants.RIGHT) {
-        //     influenceRadius += incDecInfluenceAmount;
-        // }
-        // if (keyCode == PConstants.LEFT) {
-        //     influenceRadius = Math.max(0, influenceRadius - incDecInfluenceAmount);
-        // } 
+        //influenceRadius
+        if (keyCode == PConstants.RIGHT) {
+            influenceRadius += incDecInfluenceAmount;
+        }
+        if (keyCode == PConstants.LEFT) {
+            influenceRadius = Math.max(0, influenceRadius - incDecInfluenceAmount);
+        } 
 
         //noise frequency
         if (p.key == 'z' || p.key == 'Z') {
@@ -287,13 +287,17 @@ public void drawFloor() {
     public void oscEvent(String path, float value) {
         switch(path) {
             case "/1/fader1":
-                spacing = floor(map(value, 0, 1, 5, 100));
+                spacing = floor(map(value, 0, 1, 50, 100));
                 updateGrid();
                 System.out.println("    spacing: "+spacing);
                 break;
             case "/1/fader2":
-                influenceRadius = map(value, 0, 1, 0, 500);
+                influenceRadius = map(value, 0, 1, 0, 1000);
                 System.out.println("    influenceRadius: "+influenceRadius);
+                break;
+            case "/1/fader7":
+                personHeight = floor(map(value, 0, 1, 0, 1000));
+                System.out.println("    personHeight: "+personHeight);
                 break;
             case "/1/fader3":
                 maxPush = map(value, 0, 1, 50, 600);
@@ -311,10 +315,7 @@ public void drawFloor() {
                 alphaFade = map(value, 0, 1, 0, 50);
                 System.out.println("    alphaFade: "+alphaFade);
                 break;
-            case "/1/fader7":
-                personHeight = floor(map(value, 0, 1, 0, 500));
-                System.out.println("    personHeight: "+personHeight);
-                break;
+            
             case "/1/fader8":
                 noiseScale = map(value, 0, 1, 0.5f, 3);
                 System.out.println("    noiseScale: "+noiseScale);
