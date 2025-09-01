@@ -96,6 +96,7 @@ public class Scene02Rectangles extends AbstractScene {
         fullGradFlipped.endDraw();
 
         initRectangles();
+        rects.get(1).setFollowEnabled(false);
         traces = new HashMap<>();
     }
 
@@ -129,7 +130,7 @@ public class Scene02Rectangles extends AbstractScene {
             SceneRect r = rects.get(idx);
             r.animateIn();
             r.animateDeform();
-            if (isFollow && idx != ACTIVE[1]) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+            if (isFollow) r.updateFollowFloor(tracker.getTuioCursorList(), p.width, p.height);
         }
         p.noStroke(); p.fill(255);
         if (hideExceptSecond) {
@@ -140,7 +141,7 @@ public class Scene02Rectangles extends AbstractScene {
             noStroke();
             fill(0, a);
             rect(0, 0, p.width, p.height);
-            activeRect(0).draw();
+            rects.get(1).draw();
         } else {
             for (int idx : ACTIVE) rects.get(idx).draw();
         }
@@ -157,7 +158,7 @@ public class Scene02Rectangles extends AbstractScene {
             SceneRect r = rects.get(idx);
             r.animateIn();
             r.animateDeform();
-            if (isFollow && idx != ACTIVE[1]) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+            if (isFollow) r.updateFollowFloor(tracker.getTuioCursorList(), p.width, p.height);
         }
 
         if (hideExceptSecond) {
@@ -168,7 +169,7 @@ public class Scene02Rectangles extends AbstractScene {
             noStroke();
             fill(0, a);
             rect(0, 0, p.width, p.height);
-            activeRect(0).drawForFloor();
+            rects.get(1).drawForFloor();
         } else {
             for (int idx : ACTIVE) rects.get(idx).drawForFloor();
         }
@@ -194,7 +195,13 @@ public class Scene02Rectangles extends AbstractScene {
                 boolean insideAny = false;
                 for (int idx : ACTIVE) {
                     SceneRect r = rects.get(idx);
-                    if (r.contains(v.x, mirrored ? p.height - v.y : v.y)) { insideAny = true; break; }
+                    boolean inside = mirrored
+                        // On the wall: your list stored mirrored Y, so convert back for the wall check
+                        ? r.contains(v.x, p.height - v.y)
+                        // On the floor: full-height X-only hit
+                        : r.containsFloorXOnly(v.x); 
+                        // If you prefer a band instead of full-height, use: r.containsFloorBand(v.x, v.y)
+                    if (inside) { insideAny = true; break; }
                 }
                 p.fill(insideAny ? 0 : 255);
                 p.noStroke();
@@ -287,6 +294,7 @@ public class Scene02Rectangles extends AbstractScene {
         private int color1, color2, color3;
         private float noiseIntensity = 8f;
         private float noiseScale = 0.012f;
+        boolean canFollow = true;
 
         SceneRect(float x, float baseY, float targetW, float targetH, int c1, int c2, int c3) {
             this.x = x; this.baseY = baseY;
@@ -323,17 +331,33 @@ public class Scene02Rectangles extends AbstractScene {
             w = PApplet.lerp(targetW,0,eased);
             h = PApplet.lerp(targetH,0,eased);
         }
+        
+        void setFollowEnabled(boolean enabled) {
+            canFollow = enabled;
+            if (!enabled) assignedCursorId = -1;
+        }
+        float left()  { return x - w/2; }
+        float right() { return x + w/2; }
+
+        boolean containsWall(float px, float py) {
+        float top = baseY - h, bottom = baseY;
+            return px >= left() && px <= right() && py >= top && py <= bottom;
+        }
+
+        boolean containsFloorXOnly(float px) {
+            return px >= left() && px <= right();
+        }
         boolean contains(float px,float py) {
             float left = x-w/2, right=x+w/2;
             float top = baseY-h, bottom=baseY;
             return px>=left&&px<=right&&py>=top&&py<=bottom;
         }
         void updateFollow(ArrayList<TuioCursor> cursors,int sw,int sh) {
+            if (!canFollow) return;
             if (assignedCursorId>=0) {
                 for (TuioCursor c: cursors) {
                     if (c.getCursorID()==assignedCursorId) {
                         x=c.getScreenX(sw);
-                        baseY=c.getScreenY(sh)+h/2;
                         return;
                     }
                 }
@@ -342,6 +366,23 @@ public class Scene02Rectangles extends AbstractScene {
             for (TuioCursor c: cursors) {
                 float cx=c.getScreenX(sw), cy=c.getScreenY(sh);
                 if (contains(cx,cy)) { assignedCursorId=c.getCursorID(); return; }
+            }
+        }
+
+        void updateFollowFloor(ArrayList<TuioCursor> cursors, int sw, int sh) {
+            if (!canFollow) return;
+            if (assignedCursorId >= 0) {
+                for (TuioCursor c : cursors) {
+                    if (c.getCursorID() == assignedCursorId) {
+                        x = c.getScreenX(sw);
+                        return;
+                    }
+                }
+                assignedCursorId = -1;
+            }
+            for (TuioCursor c : cursors) {
+                float cx = c.getScreenX(sw);
+                if (containsFloorXOnly(cx)) { assignedCursorId = c.getCursorID(); return; }
             }
         }
 
