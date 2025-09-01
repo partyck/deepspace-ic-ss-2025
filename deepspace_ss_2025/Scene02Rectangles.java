@@ -23,9 +23,16 @@ public class Scene02Rectangles extends AbstractScene {
 
     boolean fading = false;
     float fadeStartTime;
-    float fadeDuration = 10000;
+    float fadeDuration = 5000;
 
     private static final int NUM_RECTS = 7;
+    private static final int[] ACTIVE = {3, 2, 4, 1};
+
+    private SceneRect activeRect(int i) {  // helper to avoid the int[] vs int mistake
+        return rects.get(ACTIVE[i]);
+    }
+
+    // private static final int NUM_RECTS = 4;
     private static final float ANIM_DURATION_FRMS = 120f;
     // faster deformation (~10 seconds at 60 FPS)
     private static final float DEFORM_DURATION_FRMS = 600f;
@@ -109,6 +116,7 @@ public class Scene02Rectangles extends AbstractScene {
         
         for (int i = 0; i < NUM_RECTS; i++) {
             int[] colors = colorPairs[i % colorPairs.length];
+            // update x position first one
             rects.add(new SceneRect(gap * (i + 1), baselineY, wallTargetW, wallTargetH, 
                                 colors[0], colors[1], colors[2]));
         }
@@ -117,26 +125,24 @@ public class Scene02Rectangles extends AbstractScene {
     @Override
     public void drawWall() {
         p.background(0);
-        for (int i = 0; i < rects.size(); i++) {
-            SceneRect r = rects.get(i);
+        for (int idx : ACTIVE) {
+            SceneRect r = rects.get(idx);
             r.animateIn();
             r.animateDeform();
-            if (isFollow && i != 1) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+            if (isFollow && idx != ACTIVE[1]) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
         }
         p.noStroke(); p.fill(255);
         if (hideExceptSecond) {
-            for (SceneRect r : rects) {
-                r.draw();
-            }
+            for (int idx : ACTIVE) rects.get(idx).draw();
             float elapsed = millis() - fadeStartTime;
             float a = map(elapsed, 0, fadeDuration, 0, 255);
             a = constrain(a, 0, 255);
             noStroke();
             fill(0, a);
             rect(0, 0, p.width, p.height);
-            rects.get(1).draw(); // Only draw the second rectangle
+            activeRect(0).draw();
         } else {
-            for (SceneRect r : rects) r.draw();
+            for (int idx : ACTIVE) rects.get(idx).draw();
         }
 
         if (showTrace) drawTraces(tracker.getTuioCursorList(), true);
@@ -147,26 +153,24 @@ public class Scene02Rectangles extends AbstractScene {
         p.background(0);
         if (!isExtended) return;
 
-        for (int i = 0; i < rects.size(); i++) {
-            SceneRect r = rects.get(i);
+        for (int idx : ACTIVE) {
+            SceneRect r = rects.get(idx);
             r.animateIn();
             r.animateDeform();
-            if (isFollow && i != 1) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
+            if (isFollow && idx != ACTIVE[1]) r.updateFollow(tracker.getTuioCursorList(), p.width, p.height);
         }
 
         if (hideExceptSecond) {
-            for (SceneRect r : rects) {
-                r.drawForFloor();
-            }
+            for (int idx : ACTIVE) rects.get(idx).drawForFloor();
             float elapsed = millis() - fadeStartTime;
             float a = map(elapsed, 0, fadeDuration, 0, 255);
             a = constrain(a, 0, 255);
             noStroke();
             fill(0, a);
             rect(0, 0, p.width, p.height);
-            rects.get(1).drawForFloor();
+            activeRect(0).drawForFloor();
         } else {
-            for (SceneRect r : rects) r.drawForFloor();
+            for (int idx : ACTIVE) rects.get(idx).drawForFloor();
         }
 
         if (showTrace) drawTraces(tracker.getTuioCursorList(), false);
@@ -188,8 +192,9 @@ public class Scene02Rectangles extends AbstractScene {
         for (ArrayList<PVector> list : traces.values()) {
             for (PVector v : list) {
                 boolean insideAny = false;
-                for (SceneRect r : rects) {
-                    if (r.contains(v.x, mirrored ? p.height-v.y : v.y)) { insideAny = true; break; }
+                for (int idx : ACTIVE) {
+                    SceneRect r = rects.get(idx);
+                    if (r.contains(v.x, mirrored ? p.height - v.y : v.y)) { insideAny = true; break; }
                 }
                 p.fill(insideAny ? 0 : 255);
                 p.noStroke();
@@ -205,14 +210,14 @@ public class Scene02Rectangles extends AbstractScene {
             case "/rect/push24": isExtended = true; for (SceneRect r : rects) r.startIn(); break;
             case "/rect/push26":
                 // assign new targets
-                rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
+                // rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
                 rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.2f);
                 rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
                 rects.get(3).setTarget(wallTargetW * 0.6f, wallTargetH * 1.5f);
                 rects.get(4).setTarget(wallTargetW * 1.2f, wallTargetH * 0.7f);
-                rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
-                rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
-                for (SceneRect r : rects) r.startDeform();
+                // rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
+                // rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
+                for (int idx : ACTIVE) rects.get(idx).startDeform();
                 break;
             case "/rect/push32": isFollow = true; break;
             // case "/rect/c": for (SceneRect r : rects) r.close(); break;
@@ -232,20 +237,20 @@ public class Scene02Rectangles extends AbstractScene {
         char k = Character.toLowerCase(key);
         switch (k) {
             case 'a': triggerNextAnimStage(); break;
-            case 't': isExtended = true; for (SceneRect r : rects) r.startIn(); break;
+            case 't': isExtended = true; for (int idx : ACTIVE) rects.get(idx).startIn(); break;
             case 'd':
                 // assign new targets
-                rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
+                // rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
                 rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.2f);
                 rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
                 rects.get(3).setTarget(wallTargetW * 0.6f, wallTargetH * 1.5f);
                 rects.get(4).setTarget(wallTargetW * 1.2f, wallTargetH * 0.7f);
-                rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
-                rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
-                for (SceneRect r : rects) r.startDeform();
+                // rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
+                // rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
+                for (int idx : ACTIVE) rects.get(idx).startDeform();
                 break;
             case 'f': isFollow = true; break;
-            case 'c': for (SceneRect r : rects) r.close(); break;
+            case 'c': for (int idx : ACTIVE) rects.get(idx).close(); break;
             case 'p': showTrace = !showTrace; if (!showTrace) traces.clear(); break;
             case 'h': 
                 hideExceptSecond = true;
@@ -258,10 +263,10 @@ public class Scene02Rectangles extends AbstractScene {
     private void triggerNextAnimStage() {
         int center = NUM_RECTS / 2;
         switch (animStage) {
-            case 0: rects.get(center).startIn(); break;
-            case 1: rects.get(center-1).startIn(); rects.get(center+1).startIn(); break;
-            case 2: rects.get(center-2).startIn(); rects.get(center+2).startIn(); break;
-            case 3: rects.get(center-3).startIn(); rects.get(center+3).startIn(); break;
+            case 0: activeRect(0).startIn(); break;
+            case 1: activeRect(1).startIn(); activeRect(2).startIn(); break;
+            case 2: activeRect(3).startIn(); break;
+            default: return;
         }
         animStage++;
     }
