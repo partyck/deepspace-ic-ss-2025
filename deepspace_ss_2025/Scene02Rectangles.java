@@ -211,9 +211,9 @@ public class Scene02Rectangles extends AbstractScene {
             case "/rect/push26":
                 // assign new targets
                 // rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
-                rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.2f);
+                rects.get(1).setTargetShift(wallTargetW * 1.3f, wallTargetH * 0.2f, wallTargetW * -0.3f);
                 rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
-                rects.get(3).setTarget(wallTargetW * 0.6f, wallTargetH * 1.5f);
+                rects.get(3).setTarget(wallTargetW * 0.5f, wallTargetH * 1.5f);
                 rects.get(4).setTarget(wallTargetW * 1.2f, wallTargetH * 0.7f);
                 // rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
                 // rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
@@ -241,9 +241,9 @@ public class Scene02Rectangles extends AbstractScene {
             case 'd':
                 // assign new targets
                 // rects.get(0).setTarget(wallTargetW * 0.4f, wallTargetH * 1.0f);
-                rects.get(1).setTarget(wallTargetW * 1.5f, wallTargetH * 0.2f);
+                rects.get(1).setTargetShift(wallTargetW * 1.3f, wallTargetH * 0.2f, wallTargetW * -0.3f);
                 rects.get(2).setTarget(wallTargetW * 0.8f, wallTargetH * 0.6f);
-                rects.get(3).setTarget(wallTargetW * 0.6f, wallTargetH * 1.5f);
+                rects.get(3).setTarget(wallTargetW * 0.5f, wallTargetH * 1.5f);
                 rects.get(4).setTarget(wallTargetW * 1.2f, wallTargetH * 0.7f);
                 // rects.get(5).setTarget(wallTargetW * 0.7f, wallTargetH * 1.2f);
                 // rects.get(6).setTarget(wallTargetW * 1.0f, wallTargetH * 0.9f);
@@ -278,6 +278,7 @@ public class Scene02Rectangles extends AbstractScene {
         boolean animInDone = false;
         int animStartFrame = -1;
         float startW, startH;
+        float targetX, targetY;
         boolean isDeforming = false;
         int deformStartFrame = -1;
         int assignedCursorId = -1;
@@ -291,9 +292,11 @@ public class Scene02Rectangles extends AbstractScene {
             this.x = x; this.baseY = baseY;
             this.targetW = targetW; this.targetH = targetH;
             this.color1 = c1; this.color2 = c2; this.color3 = c3;
+            this.targetX = x;
         }
 
-        void setTarget(float tw, float th) { targetW = tw; targetH = th; }
+        void setTarget(float tw, float th) { targetW = tw; targetH = th; targetX = x; }
+        void setTargetShift(float tw, float th, float dx) {targetW = tw; targetH = th; targetX = x + dx; };
         void startIn() { if (!animInDone) animStartFrame = p.frameCount; }
         void animateIn() {
             if (animStartFrame<0) return;
@@ -310,6 +313,7 @@ public class Scene02Rectangles extends AbstractScene {
             float eased = PApplet.sin(prog*PConstants.HALF_PI);
             w = PApplet.lerp(startW,targetW,eased);
             h = PApplet.lerp(startH,targetH,eased);
+            x = PApplet.lerp(x,targetX,eased);
             if (prog>=1) isDeforming=false;
         }
         void close() { closing=true; closeFrame=p.frameCount; }
