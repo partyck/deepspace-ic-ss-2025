@@ -1,5 +1,7 @@
 /deepspace_ss_2025/macos-aarch64
 /deepspace_ss_2025/windows-amd64
+/deepspace_ss_2025/ars_roomNo0
+/deepspace_ss_2025/ars_roomNo0-windows-amd64
 /deepspace_ss_2025/*.zip
 /deepspace_ss_2025/libraries/video
 /deepspace_ss_2025/libraries/oscP5
